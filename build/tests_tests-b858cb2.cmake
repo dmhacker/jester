@@ -1,1 +1,0 @@
-set( tests_TESTS)

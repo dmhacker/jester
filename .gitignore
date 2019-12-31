@@ -1,0 +1,11 @@
+.DS_Store
+mason_packages
+build
+*.profdata
+*.profraw
+.toolchain
+.mason
+local.env
+.ycm_extra_conf.py
+compile_commands.json
+.clangd*
