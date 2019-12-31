@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/dmhacker/projects/jester/build",
+  "command": "/usr/bin/c++   -I/home/dmhacker/projects/jester/include   -std=c++11   -std=gnu++11 -o CMakeFiles/jester.dir/src/main.cpp.o -c /home/dmhacker/projects/jester/src/main.cpp",
+  "file": "/home/dmhacker/projects/jester/src/main.cpp"
+},
+{
+  "directory": "/home/dmhacker/projects/jester/build",
+  "command": "/usr/bin/c++   -I/home/dmhacker/projects/jester/include -I/home/dmhacker/projects/jester/test_include   -std=c++11   -std=gnu++11 -o CMakeFiles/tests.dir/test/main.cpp.o -c /home/dmhacker/projects/jester/test/main.cpp",
+  "file": "/home/dmhacker/projects/jester/test/main.cpp"
+}
+]

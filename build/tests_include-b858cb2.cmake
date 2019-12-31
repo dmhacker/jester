@@ -1,0 +1,5 @@
+if(EXISTS "/home/dmhacker/projects/jester/build/tests_tests-b858cb2.cmake")
+  include("/home/dmhacker/projects/jester/build/tests_tests-b858cb2.cmake")
+else()
+  add_test(tests_NOT_BUILT-b858cb2 tests_NOT_BUILT-b858cb2)
+endif()
