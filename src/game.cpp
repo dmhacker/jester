@@ -37,13 +37,14 @@ void Game::reset()
         d_attackOrder.push_back(pid);
     }
     d_winOrder.clear();
+    d_seen.clear();
     d_discards.clear();
 }
 
 void Game::nextTurn()
 {
-    auto aid = getAttackerId();
-    auto did = getDefenderId();
+    auto aid = attackerId();
+    auto did = defenderId();
     auto& attacker = d_players[aid];
     auto& defender = d_players[did];
     auto& attack_hand = d_hands[aid];
@@ -166,8 +167,8 @@ void Game::nextTurn()
 
 bool Game::validateAttack(const AttackSequence& attack, bool firstAttack) const
 {
-    auto aid = getAttackerId();
-    auto did = getDefenderId();
+    auto aid = attackerId();
+    auto did = defenderId();
     auto& attack_hand = d_hands[aid];
     auto& defense_hand = d_hands[did];
     if (d_currentAttack.size() + attack.size() > 6
@@ -206,7 +207,7 @@ bool Game::validateDefense(const DefenseSequence& defense) const
     if (defense.empty()) {
         return true;
     }
-    auto did = getDefenderId();
+    auto did = defenderId();
     auto& defense_hand = d_hands[did];
     for (auto& card : defense) {
         if (defense_hand.find(card) == defense_hand.end()) {
@@ -216,8 +217,8 @@ bool Game::validateDefense(const DefenseSequence& defense) const
     for (size_t i = 0; i < defense.size(); i++) {
         auto& defending = defense[i];
         auto& attacking = d_currentAttack[i + d_currentDefense.size()];
-        if (defending.suit() == getTrumpSuit()) {
-            if (attacking.suit() == getTrumpSuit()
+        if (defending.suit() == trumpSuit()) {
+            if (attacking.suit() == trumpSuit()
                 && attacking.rank() >= defending.rank()) {
                 return false;
             }
@@ -233,7 +234,7 @@ bool Game::validateDefense(const DefenseSequence& defense) const
 
 void Game::play()
 {
-    while (!isFinished()) {
+    while (!finished()) {
         nextTurn();
     }
 }
@@ -242,6 +243,34 @@ GameView::GameView(const Game& game, size_t pid)
     : d_game(game)
     , d_pid(pid)
 {
+}
+
+Hand GameView::visibleHand(size_t pid) const
+{
+    Hand hand;
+    auto& seen = d_game.seenCards();
+    for (auto& card : d_game.hand(pid)) {
+        if (d_pid == pid || seen.find(card) != seen.end()) {
+            hand.insert(card);
+        }
+    }
+    return hand;
+}
+
+size_t GameView::hiddenHandSize(size_t pid) const {
+    if (d_pid == pid) {
+        return handSize(pid);
+    }
+    else {
+        size_t cnt = 0;
+        auto& seen = d_game.seenCards();
+        for (auto& card : d_game.hand(pid)) {
+            if (seen.find(card) == seen.end()) {
+                cnt++;
+            }
+        }
+        return cnt;
+    }
 }
 
 }

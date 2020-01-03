@@ -1,6 +1,6 @@
 #include "card.hpp"
 
-namespace jester{
+namespace jester {
 
 Card::Card()
     : d_rank(1)

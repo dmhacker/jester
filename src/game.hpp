@@ -27,28 +27,22 @@ private:
 public:
     Game(const std::vector<std::shared_ptr<Player>>& players);
 
-    // Public methods used to advance gameplay 
+    // Public methods used to advance gameplay
     void reset();
     void nextTurn();
     void play();
 
     // Private information (protected by the game view)
-    const Hand& getHand(size_t pid) const;
+    const Hand& hand(size_t pid) const;
 
     // Public information (available to all players)
-    bool isFinished() const;
-    const std::vector<size_t>& getWinOrder() const;
-    const std::unordered_set<Card>& getDiscardedCards() const;
-    const std::unordered_set<Card>& getSeenCards() const;
-    Suit getTrumpSuit() const;
-    size_t getAttackerId() const;
-    size_t getDefenderId() const;
-
-    // Methods used to change game state (dangerous)
-    void setAttackOrder(const std::deque<size_t>& order);
-    void setHands(const std::vector<Hand>& hands);
-    void setDeck(const Deck& deck);
-    void setTrumpCard(const Card& card);
+    bool finished() const;
+    const std::vector<size_t>& winOrder() const;
+    const std::unordered_set<Card>& discardedCards() const;
+    const std::unordered_set<Card>& seenCards() const;
+    Suit trumpSuit() const;
+    size_t attackerId() const;
+    size_t defenderId() const;
 
 private:
     bool validateAttack(const AttackSequence& attack, bool firstAttack) const;
@@ -64,80 +58,102 @@ public:
     GameView(const Game& game, size_t pid);
 
     // Information relative to the owning player
-    size_t getPlayerId() const;
-    const Hand& getHand() const;
-    const Hand& getVisibleHand(size_t pid) const;
-    size_t getHandSize(size_t pid) const;
-    size_t getHiddenHandSize(size_t pid) const;
+    size_t playerId() const;
+    const Hand& hand() const;
+    Hand visibleHand(size_t pid) const;
+    size_t handSize(size_t pid) const;
+    size_t hiddenHandSize(size_t pid) const;
 
     // Information available to all players about the game
-    bool isFinished() const;
-    const std::vector<size_t>& getWinOrder() const;
-    const std::unordered_set<Card>& getDiscardedCards() const;
-    const std::unordered_set<Card>& getSeenCards() const;
-    Suit getTrumpSuit() const;
-    size_t getAttackerId() const;
-    size_t getDefenderId() const;
+    bool finished() const;
+    const std::vector<size_t>& winOrder() const;
+    const std::unordered_set<Card>& discardedCards() const;
+    const std::unordered_set<Card>& seenCards() const;
+    Suit trumpSuit() const;
+    size_t attackerId() const;
+    size_t defenderId() const;
 };
 
-inline bool Game::isFinished() const
+inline bool Game::finished() const
 {
     return d_winOrder.size() == d_players.size();
 }
 
-inline const std::vector<size_t>& Game::getWinOrder() const
+inline const std::vector<size_t>& Game::winOrder() const
 {
     return d_winOrder;
 }
 
-inline const Hand& Game::getHand(size_t pid) const
+inline const Hand& Game::hand(size_t pid) const
 {
     return d_hands[pid];
 }
 
-inline const std::unordered_set<Card>& Game::getDiscardedCards() const
+inline const std::unordered_set<Card>& Game::discardedCards() const
 {
     return d_discards;
 }
 
-inline const std::unordered_set<Card>& Game::getSeenCards() const
+inline const std::unordered_set<Card>& Game::seenCards() const
 {
     return d_seen;
 }
 
-inline size_t Game::getAttackerId() const
+inline size_t Game::attackerId() const
 {
     return d_attackOrder[0];
 }
 
-inline size_t Game::getDefenderId() const
+inline size_t Game::defenderId() const
 {
     return d_attackOrder[1];
 }
 
-inline Suit Game::getTrumpSuit() const
+inline Suit Game::trumpSuit() const
 {
     return d_trump.suit();
 }
 
-inline void Game::setAttackOrder(const std::deque<size_t>& order)
+inline size_t GameView::playerId() const
 {
-    d_attackOrder = order;
+    return d_pid;
 }
 
-inline void Game::setHands(const std::vector<Hand>& hands)
+inline const Hand& GameView::hand() const
 {
-    d_hands = hands;
+    return d_game.hand(d_pid);
 }
 
-inline void Game::setDeck(const Deck& deck)
-{
-    d_deck = deck;
+inline size_t GameView::handSize(size_t pid) const {
+    return d_game.hand(pid).size();
 }
 
-inline void Game::setTrumpCard(const Card& card)
-{
-    d_trump = card;
+inline bool GameView::finished() const {
+    return d_game.finished();
+}
+
+inline const std::vector<size_t>& GameView::winOrder() const {
+    return d_game.winOrder();
+}
+
+inline const std::unordered_set<Card>& GameView::discardedCards() const {
+    return d_game.discardedCards();
+}
+
+inline const std::unordered_set<Card>& GameView::seenCards() const {
+    return d_game.seenCards();
+}
+
+inline Suit GameView::trumpSuit() const {
+    return d_game.trumpSuit();
+}
+
+inline size_t GameView::attackerId() const {
+    return d_game.attackerId();
+}
+
+inline size_t GameView::defenderId() const {
+    return d_game.defenderId();
 }
 
 }
