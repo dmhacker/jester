@@ -58,7 +58,6 @@ void Game::nextTurn()
         do {
             attack = attacker->attack(d_views[aid], firstAttack);
         } while (!validateAttack(attack, firstAttack));
-        d_currentAttack.insert(d_currentAttack.end(), attack.begin(), attack.end());
 
         // If the attacker played nothing, then the attack is over
         if (attack.empty()) {
@@ -66,8 +65,10 @@ void Game::nextTurn()
         }
         // Attacker played a valid attack
         else {
+            d_currentAttack.insert(d_currentAttack.end(), attack.begin(), attack.end());
             for (auto& card : attack) {
                 attack_hand.erase(card);
+                d_seen.insert(card);
             }
             if (attack_hand.empty()) {
                 break;
@@ -78,7 +79,6 @@ void Game::nextTurn()
         do {
             defense = defender->defend(d_views[did]);
         } while (!validateDefense(defense));
-        d_currentDefense.insert(d_currentDefense.end(), defense.begin(), defense.end());
 
         // If the defender plays nothing, then defense is over
         if (defense.empty()) {
@@ -86,8 +86,10 @@ void Game::nextTurn()
         }
         // Defender plays a valid defense against the attack
         else {
+            d_currentDefense.insert(d_currentDefense.end(), defense.begin(), defense.end());
             for (auto& card : defense) {
                 defense_hand.erase(card);
+                d_seen.insert(card);
             }
             if (defense_hand.empty()) {
                 break;
@@ -227,6 +229,13 @@ bool Game::validateDefense(const DefenseSequence& defense) const
         }
     }
     return true;
+}
+
+void Game::play()
+{
+    while (!isFinished()) {
+        nextTurn();
+    }
 }
 
 GameView::GameView(const Game& game, size_t pid)

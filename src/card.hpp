@@ -21,41 +21,35 @@ class Card {
 private:
     size_t d_rank;
     Suit d_suit;
-
 public:
-    Card()
-        : d_rank(1)
-        , d_suit(Suit::hearts)
-    {
-    }
+    Card();
+    Card(size_t cardrank, Suit cardsuit);
 
-    Card(size_t cardrank, Suit cardsuit)
-        : d_rank(cardrank)
-        , d_suit(cardsuit)
-    {
-    }
-
-    size_t rank() const
-    {
-        return d_rank;
-    }
-
-    Suit suit() const
-    {
-        return d_suit;
-    }
-
-    bool operator==(const Card& card) const
-    {
-        return d_rank == card.d_rank && d_suit == card.d_suit;
-    }
+    size_t rank() const;
+    Suit suit() const;
+    bool operator==(const Card& card) const;
 };
 
 using Deck = std::deque<Card>;
 using Hand = std::unordered_set<Card>;
 using AttackSequence = std::vector<Card>;
 using DefenseSequence = std::vector<Card>;
-using DiscardPile = std::unordered_set<Card>;
+
+inline size_t Card::rank() const
+{
+    return d_rank;
+}
+
+inline Suit Card::suit() const
+{
+    return d_suit;
+}
+
+inline bool Card::operator==(const Card& card) const
+{
+    return d_rank == card.d_rank && d_suit == card.d_suit;
+}
+
 }
 
 namespace std {
