@@ -8,11 +8,11 @@ using namespace jester;
 
 int main() {
     std::vector<std::shared_ptr<Player>> players;
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 3; i++) {
         players.push_back(std::make_shared<RandomPlayer>());
     }
     Game root(players);
-    for (size_t g = 0; g < 10; g++) {
+    for (size_t g = 0; g < 3; g++) {
         Game game(root);
         game.play();
         std::cout << "Win order:";
