@@ -8,15 +8,17 @@ using namespace jester;
 
 int main() {
     std::vector<std::shared_ptr<Player>> players;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 6; i++) {
         players.push_back(std::make_shared<RandomPlayer>());
     }
-    Game game(players);
-    game.reset();
-    game.play();
-    std::cout << "Win order:" << std::endl;
-    for (auto & pidx : game.winOrder()) {
-        std::cout << " " << pidx;
+    Game root(players);
+    for (size_t g = 0; g < 10; g++) {
+        Game game(root);
+        game.play();
+        std::cout << "Win order:";
+        for (auto & pidx : game.winOrder()) {
+            std::cout << " " << pidx;
+        }
+        std::cout << std::endl;
     }
-    std::cout << std::endl;
 }

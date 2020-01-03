@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 namespace jester {
 
@@ -14,6 +15,23 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players)
         d_views.push_back(GameView(*this, pid));
     }
     reset();
+}
+
+Game::Game(const Game& game)
+    : d_players(game.d_players)
+    , d_hands(game.d_hands)
+    , d_deck(game.d_deck)
+    , d_discards(game.d_discards)
+    , d_seen(game.d_seen)
+    , d_trump(game.d_trump)
+    , d_currentAttack(game.d_currentAttack)
+    , d_currentDefense(game.d_currentDefense)
+    , d_winOrder(game.d_winOrder)
+    , d_attackOrder(game.d_attackOrder)
+{
+    for (size_t pid = 0; pid < d_players.size(); pid++) {
+        d_views.push_back(GameView(*this, pid));
+    }
 }
 
 void Game::reset()
@@ -38,7 +56,9 @@ void Game::reset()
     }
     d_winOrder.clear();
     d_seen.clear();
+    d_seen.insert(d_trump);
     d_discards.clear();
+    std::cerr << "Trump suit is " << to_string(trumpSuit()) << "." << std::endl;
 }
 
 void Game::nextTurn()
@@ -62,11 +82,13 @@ void Game::nextTurn()
 
         // If the attacker played nothing, then the attack is over
         if (attack == nullptr) {
+            std::cerr << "Attacker " << aid << " did not play anything." << std::endl;
             break;
         }
         // Attacker played a valid attack
         else {
             Card attack_card = *attack;
+            std::cerr << "Attacker " << aid << " played " << attack_card << "." << std::endl;
             d_currentAttack.push_back(attack_card);
             attack_hand.erase(attack_card);
             d_seen.insert(attack_card);
@@ -82,11 +104,13 @@ void Game::nextTurn()
 
         // If the defender plays nothing, then defense is over
         if (defense == nullptr) {
+            std::cerr << "Defender " << did << " did not play anything." << std::endl;
             break;
         }
         // Defender plays a valid defense against the attack
         else {
             Card defense_card = *defense;
+            std::cerr << "Defender " << did << " played " << defense_card << "." << std::endl;
             d_currentDefense.push_back(defense_card);
             defense_hand.erase(defense_card);
             d_seen.insert(defense_card);
@@ -173,9 +197,8 @@ bool Game::validateAttack(const std::shared_ptr<Card>& attack, bool firstAttack)
         return false;
     }
     if (attack == nullptr) {
-        return !firstAttack; 
-    }
-    else {
+        return !firstAttack;
+    } else {
         auto attacking = *attack;
         if (attack_hand.find(attacking) == attack_hand.end()) {
             return false;
@@ -247,11 +270,11 @@ Hand GameView::visibleHand(size_t pid) const
     return hand;
 }
 
-size_t GameView::hiddenHandSize(size_t pid) const {
+size_t GameView::hiddenHandSize(size_t pid) const
+{
     if (d_pid == pid) {
         return handSize(pid);
-    }
-    else {
+    } else {
         size_t cnt = 0;
         auto& seen = d_game.seenCards();
         for (auto& card : d_game.hand(pid)) {

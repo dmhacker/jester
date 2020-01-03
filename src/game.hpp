@@ -26,6 +26,7 @@ private:
 
 public:
     Game(const std::vector<std::shared_ptr<Player>>& players);
+    Game(const Game& game);
 
     // Public methods used to advance gameplay
     void reset();

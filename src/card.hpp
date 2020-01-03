@@ -16,24 +16,29 @@ enum Suit {
     spades = 2,
     clubs = 3
 };
+using Rank = size_t;
 
 class Card {
 private:
-    size_t d_rank;
+    Rank d_rank;
     Suit d_suit;
+
 public:
     Card();
-    Card(size_t cardrank, Suit cardsuit);
+    Card(Rank _rank, Suit _suit);
 
-    size_t rank() const;
+    Rank rank() const;
     Suit suit() const;
     bool operator==(const Card& card) const;
+
+private:
+    friend std::ostream & operator<<(std::ostream &os, const Card& card);
 };
 
 using Deck = std::deque<Card>;
 using Hand = std::unordered_set<Card>;
 
-inline size_t Card::rank() const
+inline Rank Card::rank() const
 {
     return d_rank;
 }
@@ -47,6 +52,9 @@ inline bool Card::operator==(const Card& card) const
 {
     return d_rank == card.d_rank && d_suit == card.d_suit;
 }
+
+std::string to_string(Rank rank);
+std::string to_string(Suit rank);
 
 }
 
