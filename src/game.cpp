@@ -16,7 +16,8 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players)
     reset();
 }
 
-void Game::reset() {
+void Game::reset()
+{
     for (size_t rank = 6; rank <= 14; rank++) {
         d_deck.push_back(Card(rank, Suit::hearts));
         d_deck.push_back(Card(rank, Suit::diamonds));
@@ -52,11 +53,7 @@ void Game::nextTurn()
     d_currentDefense.clear();
     bool firstAttack = true;
 
-    // TODO: Fix so that hands are replenished if there are still cards in the deck
-
-    while (!attack_hand.empty() && !defense_hand.empty() 
-            && d_currentAttack.size() == d_currentDefense.size()
-            && d_currentAttack.size() < std::min(6ul, defense_hand.size())) {
+    while (d_currentAttack.size() < 6) {
         AttackSequence attack;
         do {
             attack = attacker->attack(d_views[aid], firstAttack);
@@ -69,18 +66,11 @@ void Game::nextTurn()
         }
         // Attacker played a valid attack
         else {
-            // Attacking cards are removed from the attacker's hand
             for (auto& card : attack) {
                 attack_hand.erase(card);
             }
-            // If the attacker has no more cards, then they have finished
-            // the game and cannot continue the attack on the next turn
             if (attack_hand.empty()) {
-                d_winOrder.push_back(aid);
-                if (d_winOrder.size() + 1 == d_players.size()) {
-                    d_winOrder.push_back(did);
-                    return;
-                }
+                break;
             }
         }
 
@@ -96,22 +86,26 @@ void Game::nextTurn()
         }
         // Defender plays a valid defense against the attack
         else {
-            // Defensive cards are removed from the defender's hands
             for (auto& card : defense) {
                 defense_hand.erase(card);
             }
-            // If the defender has no more cards, then they have finished
-            // the game and the attacker cannot attack them anymore
             if (defense_hand.empty()) {
-                d_winOrder.push_back(did);
-                if (d_winOrder.size() + 1 == d_players.size()) {
-                    d_winOrder.push_back(aid);
-                    return;
-                }
+                break;
             }
         }
 
         firstAttack = false;
+    }
+
+    // Attacker can win regardless of the defense played
+    bool attackerWon = false;
+    if (attack_hand.empty() && d_deck.empty()) {
+        d_winOrder.push_back(aid);
+        attackerWon = true;
+        if (d_winOrder.size() + 1 == d_players.size()) {
+            d_winOrder.push_back(did);
+            return;
+        }
     }
 
     if (d_currentAttack.size() == d_currentDefense.size()) {
@@ -122,13 +116,22 @@ void Game::nextTurn()
         for (auto& card : d_currentDefense) {
             d_discards.insert(card);
         }
-        // Attacker sent to the back of the line
-        // Defender is the new attacker
+        // Defender can only win if they play a successful defense
+        bool defenderWon = false;
+        if (defense_hand.empty() && d_deck.empty()) {
+            d_winOrder.push_back(did);
+            defenderWon = true;
+            if (d_winOrder.size() + 1 == d_players.size()) {
+                d_winOrder.push_back(aid);
+                return;
+            }
+        }
+        // Attacker sent to the back of the line, defender is the new attacker
         d_attackOrder.pop_front();
-        if (!attack_hand.empty()) {
+        if (!attackerWon) {
             d_attackOrder.push_back(aid);
         }
-        if (defense_hand.empty()) {
+        if (defenderWon) {
             d_attackOrder.pop_front();
         }
     } else {
@@ -142,10 +145,20 @@ void Game::nextTurn()
         // Attacker and defender are both sent to the back
         d_attackOrder.pop_front();
         d_attackOrder.pop_front();
-        if (!attack_hand.empty()) {
+        if (!attackerWon) {
             d_attackOrder.push_back(aid);
         }
         d_attackOrder.push_back(did);
+    }
+
+    // Replenish attacker and defender hands if we can
+    while (!d_deck.empty() && attack_hand.size() < 6) {
+        attack_hand.insert(d_deck.front());
+        d_deck.pop_front();
+    }
+    while (!d_deck.empty() && defense_hand.size() < 6) {
+        defense_hand.insert(d_deck.front());
+        d_deck.pop_front();
     }
 }
 
@@ -155,27 +168,29 @@ bool Game::validateAttack(const AttackSequence& attack, bool firstAttack) const
     auto did = getDefenderId();
     auto& attack_hand = d_hands[aid];
     auto& defense_hand = d_hands[did];
-    if (d_currentAttack.size() + attack.size() > 6 
-            || attack.size() > defense_hand.size()) {
+    if (d_currentAttack.size() + attack.size() > 6
+        || attack.size() > defense_hand.size()) {
         return false;
     }
-    for (auto & card : attack) {
+    for (auto& card : attack) {
         if (attack_hand.find(card) == attack_hand.end()) {
             return false;
         }
     }
     if (firstAttack) {
-        return attack_hand.size() >= 1;    
-    }
-    else {
+        return attack_hand.size() >= 1;
+    } else {
+        if (attack_hand.empty()) {
+            return true;
+        }
         std::unordered_set<size_t> valid_ranks;
-        for (auto & card : d_currentAttack) {
+        for (auto& card : d_currentAttack) {
             valid_ranks.insert(card.rank());
         }
-        for (auto & card : d_currentDefense) {
+        for (auto& card : d_currentDefense) {
             valid_ranks.insert(card.rank());
         }
-        for (auto & card : attack) {
+        for (auto& card : attack) {
             if (valid_ranks.find(card.rank()) == valid_ranks.end()) {
                 return false;
             }
@@ -191,15 +206,32 @@ bool Game::validateDefense(const DefenseSequence& defense) const
     }
     auto did = getDefenderId();
     auto& defense_hand = d_hands[did];
-    for (auto & card : defense) {
+    for (auto& card : defense) {
         if (defense_hand.find(card) == defense_hand.end()) {
             return false;
         }
     }
-    // TODO: Make sure defense cards match up with attacking cards 
+    for (size_t i = 0; i < defense.size(); i++) {
+        auto& defending = defense[i];
+        auto& attacking = d_currentAttack[i + d_currentDefense.size()];
+        if (defending.suit() == getTrumpSuit()) {
+            if (attacking.suit() == getTrumpSuit()
+                && attacking.rank() >= defending.rank()) {
+                return false;
+            }
+        } else {
+            if (attacking.suit() != defending.suit()
+                || attacking.rank() >= defending.rank()) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
-GameView::GameView(const Game& game, size_t pid) : d_game(game), d_pid(pid)
+GameView::GameView(const Game& game, size_t pid)
+    : d_game(game)
+    , d_pid(pid)
 {
 }
 
