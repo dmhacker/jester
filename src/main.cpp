@@ -2,13 +2,15 @@
 
 #include "player.hpp"
 #include "random_player.hpp"
+#include "minimal_player.hpp"
 #include "game.hpp"
 
 using namespace jester;
 
 int main() {
     std::vector<std::shared_ptr<Player>> players;
-    for (int i = 0; i < 3; i++) {
+    players.push_back(std::make_shared<MinimalPlayer>());
+    for (int i = 0; i < 4; i++) {
         players.push_back(std::make_shared<RandomPlayer>());
     }
     Game root(players);

@@ -1,5 +1,5 @@
-#ifndef JESTER_RANDOM_PLAYER_HPP
-#define JESTER_RANDOM_PLAYER_HPP
+#ifndef JESTER_MINIMAL_PLAYER_HPP
+#define JESTER_MINIMAL_PLAYER_HPP
 
 #include <random>
 
@@ -8,18 +8,15 @@
 
 namespace jester {
 
-class RandomPlayer : public Player {
+class MinimalPlayer : public Player {
 private:
     std::random_device d_dev;
     std::mt19937 d_rng;
 
 public:
-    RandomPlayer();
+    MinimalPlayer();
     std::shared_ptr<Card> attack(const GameView& view, bool firstAttack);
     std::shared_ptr<Card> defend(const GameView & view);
-
-private:
-    std::shared_ptr<Card> randomCard(const std::vector<Card> & cards);
 };
 
 }

@@ -1,7 +1,5 @@
 #include "random_player.hpp"
 
-#include <cassert>
-
 namespace jester {
 
 RandomPlayer::RandomPlayer()
@@ -38,7 +36,6 @@ std::shared_ptr<Card> RandomPlayer::attack(const GameView& view, bool firstAttac
 
 std::shared_ptr<Card> RandomPlayer::defend(const GameView& view)
 {
-    assert(view.currentAttack().size() == view.currentDefense().size() + 1);
     auto& hand = view.hand();
     auto attacking = view.currentAttack().back();
     std::vector<Card> defenses;
