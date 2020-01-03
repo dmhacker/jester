@@ -19,8 +19,8 @@ private:
     std::unordered_set<Card> d_discards;
     std::unordered_set<Card> d_seen;
     Card d_trump;
-    AttackSequence d_currentAttack;
-    DefenseSequence d_currentDefense;
+    std::vector<Card> d_currentAttack;
+    std::vector<Card> d_currentDefense;
     std::vector<size_t> d_winOrder;
     std::deque<size_t> d_attackOrder;
 
@@ -40,13 +40,15 @@ public:
     const std::vector<size_t>& winOrder() const;
     const std::unordered_set<Card>& discardedCards() const;
     const std::unordered_set<Card>& seenCards() const;
+    const std::vector<Card>& currentAttack() const;
+    const std::vector<Card>& currentDefense() const;
     Suit trumpSuit() const;
     size_t attackerId() const;
     size_t defenderId() const;
 
 private:
-    bool validateAttack(const AttackSequence& attack, bool firstAttack) const;
-    bool validateDefense(const DefenseSequence& defense) const;
+    bool validateAttack(const std::shared_ptr<Card>& attack, bool firstAttack) const;
+    bool validateDefense(const std::shared_ptr<Card>& defense) const;
 };
 
 class GameView {
@@ -69,6 +71,8 @@ public:
     const std::vector<size_t>& winOrder() const;
     const std::unordered_set<Card>& discardedCards() const;
     const std::unordered_set<Card>& seenCards() const;
+    const std::vector<Card>& currentAttack() const;
+    const std::vector<Card>& currentDefense() const;
     Suit trumpSuit() const;
     size_t attackerId() const;
     size_t defenderId() const;
@@ -99,6 +103,16 @@ inline const std::unordered_set<Card>& Game::seenCards() const
     return d_seen;
 }
 
+inline const std::vector<Card>& Game::currentAttack() const
+{
+    return d_currentAttack;
+}
+
+inline const std::vector<Card>& Game::currentDefense() const
+{
+    return d_currentDefense;
+}
+
 inline size_t Game::attackerId() const
 {
     return d_attackOrder[0];
@@ -124,35 +138,53 @@ inline const Hand& GameView::hand() const
     return d_game.hand(d_pid);
 }
 
-inline size_t GameView::handSize(size_t pid) const {
+inline size_t GameView::handSize(size_t pid) const
+{
     return d_game.hand(pid).size();
 }
 
-inline bool GameView::finished() const {
+inline bool GameView::finished() const
+{
     return d_game.finished();
 }
 
-inline const std::vector<size_t>& GameView::winOrder() const {
+inline const std::vector<size_t>& GameView::winOrder() const
+{
     return d_game.winOrder();
 }
 
-inline const std::unordered_set<Card>& GameView::discardedCards() const {
+inline const std::unordered_set<Card>& GameView::discardedCards() const
+{
     return d_game.discardedCards();
 }
 
-inline const std::unordered_set<Card>& GameView::seenCards() const {
+inline const std::unordered_set<Card>& GameView::seenCards() const
+{
     return d_game.seenCards();
 }
 
-inline Suit GameView::trumpSuit() const {
+inline const std::vector<Card>& GameView::currentAttack() const
+{
+    return d_game.currentAttack();
+}
+
+inline const std::vector<Card>& GameView::currentDefense() const
+{
+    return d_game.currentDefense();
+}
+
+inline Suit GameView::trumpSuit() const
+{
     return d_game.trumpSuit();
 }
 
-inline size_t GameView::attackerId() const {
+inline size_t GameView::attackerId() const
+{
     return d_game.attackerId();
 }
 
-inline size_t GameView::defenderId() const {
+inline size_t GameView::defenderId() const
+{
     return d_game.defenderId();
 }
 

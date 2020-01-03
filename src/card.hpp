@@ -32,8 +32,6 @@ public:
 
 using Deck = std::deque<Card>;
 using Hand = std::unordered_set<Card>;
-using AttackSequence = std::vector<Card>;
-using DefenseSequence = std::vector<Card>;
 
 inline size_t Card::rank() const
 {

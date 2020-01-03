@@ -55,43 +55,41 @@ void Game::nextTurn()
     bool firstAttack = true;
 
     while (d_currentAttack.size() < 6) {
-        AttackSequence attack;
+        std::shared_ptr<Card> attack;
         do {
             attack = attacker->attack(d_views[aid], firstAttack);
         } while (!validateAttack(attack, firstAttack));
 
         // If the attacker played nothing, then the attack is over
-        if (attack.empty()) {
+        if (attack == nullptr) {
             break;
         }
         // Attacker played a valid attack
         else {
-            d_currentAttack.insert(d_currentAttack.end(), attack.begin(), attack.end());
-            for (auto& card : attack) {
-                attack_hand.erase(card);
-                d_seen.insert(card);
-            }
+            Card attack_card = *attack;
+            d_currentAttack.push_back(attack_card);
+            attack_hand.erase(attack_card);
+            d_seen.insert(attack_card);
             if (attack_hand.empty()) {
                 break;
             }
         }
 
-        DefenseSequence defense;
+        std::shared_ptr<Card> defense;
         do {
             defense = defender->defend(d_views[did]);
         } while (!validateDefense(defense));
 
         // If the defender plays nothing, then defense is over
-        if (defense.empty()) {
+        if (defense == nullptr) {
             break;
         }
         // Defender plays a valid defense against the attack
         else {
-            d_currentDefense.insert(d_currentDefense.end(), defense.begin(), defense.end());
-            for (auto& card : defense) {
-                defense_hand.erase(card);
-                d_seen.insert(card);
-            }
+            Card defense_card = *defense;
+            d_currentDefense.push_back(defense_card);
+            defense_hand.erase(defense_card);
+            d_seen.insert(defense_card);
             if (defense_hand.empty()) {
                 break;
             }
@@ -165,36 +163,32 @@ void Game::nextTurn()
     }
 }
 
-bool Game::validateAttack(const AttackSequence& attack, bool firstAttack) const
+bool Game::validateAttack(const std::shared_ptr<Card>& attack, bool firstAttack) const
 {
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
     auto& defense_hand = d_hands[did];
-    if (d_currentAttack.size() + attack.size() > 6
-        || attack.size() > defense_hand.size()) {
+    if (d_currentAttack.size() >= 6 || defense_hand.size() < 1) {
         return false;
     }
-    for (auto& card : attack) {
-        if (attack_hand.find(card) == attack_hand.end()) {
+    if (attack == nullptr) {
+        return !firstAttack; 
+    }
+    else {
+        auto attacking = *attack;
+        if (attack_hand.find(attacking) == attack_hand.end()) {
             return false;
         }
-    }
-    if (firstAttack) {
-        return attack_hand.size() >= 1;
-    } else {
-        if (attack_hand.empty()) {
-            return true;
-        }
-        std::unordered_set<size_t> valid_ranks;
-        for (auto& card : d_currentAttack) {
-            valid_ranks.insert(card.rank());
-        }
-        for (auto& card : d_currentDefense) {
-            valid_ranks.insert(card.rank());
-        }
-        for (auto& card : attack) {
-            if (valid_ranks.find(card.rank()) == valid_ranks.end()) {
+        if (!firstAttack) {
+            std::unordered_set<size_t> valid_ranks;
+            for (auto& card : d_currentAttack) {
+                valid_ranks.insert(card.rank());
+            }
+            for (auto& card : d_currentDefense) {
+                valid_ranks.insert(card.rank());
+            }
+            if (valid_ranks.find(attacking.rank()) == valid_ranks.end()) {
                 return false;
             }
         }
@@ -202,31 +196,27 @@ bool Game::validateAttack(const AttackSequence& attack, bool firstAttack) const
     }
 }
 
-bool Game::validateDefense(const DefenseSequence& defense) const
+bool Game::validateDefense(const std::shared_ptr<Card>& defense) const
 {
-    if (defense.empty()) {
+    if (defense == nullptr) {
         return true;
     }
     auto did = defenderId();
     auto& defense_hand = d_hands[did];
-    for (auto& card : defense) {
-        if (defense_hand.find(card) == defense_hand.end()) {
+    auto defending = *defense;
+    if (defense_hand.find(defending) == defense_hand.end()) {
+        return false;
+    }
+    auto& attacking = d_currentAttack.back();
+    if (defending.suit() == trumpSuit()) {
+        if (attacking.suit() == trumpSuit()
+            && attacking.rank() >= defending.rank()) {
             return false;
         }
-    }
-    for (size_t i = 0; i < defense.size(); i++) {
-        auto& defending = defense[i];
-        auto& attacking = d_currentAttack[i + d_currentDefense.size()];
-        if (defending.suit() == trumpSuit()) {
-            if (attacking.suit() == trumpSuit()
-                && attacking.rank() >= defending.rank()) {
-                return false;
-            }
-        } else {
-            if (attacking.suit() != defending.suit()
-                || attacking.rank() >= defending.rank()) {
-                return false;
-            }
+    } else {
+        if (attacking.suit() != defending.suit()
+            || attacking.rank() >= defending.rank()) {
+            return false;
         }
     }
     return true;
