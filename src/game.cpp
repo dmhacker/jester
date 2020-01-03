@@ -11,9 +11,7 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players)
     , d_hands(players.size())
 {
     assert(players.size() >= 2 && players.size() <= 6);
-    for (size_t pid = 0; pid < players.size(); pid++) {
-        d_views.push_back(GameView(*this, pid));
-    }
+    setupViews();
     reset();
 }
 
@@ -29,9 +27,7 @@ Game::Game(const Game& game)
     , d_winOrder(game.d_winOrder)
     , d_attackOrder(game.d_attackOrder)
 {
-    for (size_t pid = 0; pid < d_players.size(); pid++) {
-        d_views.push_back(GameView(*this, pid));
-    }
+    setupViews();
 }
 
 void Game::reset()
@@ -245,13 +241,6 @@ bool Game::validateDefense(const std::shared_ptr<Card>& defense) const
     return true;
 }
 
-void Game::play()
-{
-    while (!finished()) {
-        nextTurn();
-    }
-}
-
 GameView::GameView(const Game& game, size_t pid)
     : d_game(game)
     , d_pid(pid)
@@ -285,5 +274,6 @@ size_t GameView::hiddenHandSize(size_t pid) const
         return cnt;
     }
 }
+
 
 }

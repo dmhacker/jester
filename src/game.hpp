@@ -50,6 +50,7 @@ public:
 private:
     bool validateAttack(const std::shared_ptr<Card>& attack, bool firstAttack) const;
     bool validateDefense(const std::shared_ptr<Card>& defense) const;
+    void setupViews();
 };
 
 class GameView {
@@ -127,6 +128,20 @@ inline size_t Game::defenderId() const
 inline Suit Game::trumpSuit() const
 {
     return d_trump.suit();
+}
+
+inline void Game::setupViews()
+{
+    for (size_t pid = 0; pid < d_players.size(); pid++) {
+        d_views.push_back(GameView(*this, pid));
+    }
+}
+
+inline void Game::play()
+{
+    while (!finished()) {
+        nextTurn();
+    }
 }
 
 inline size_t GameView::playerId() const
