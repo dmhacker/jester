@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "rules/player.hpp"
-#include "rules/game.hpp"
+#include "durak/player.hpp"
+#include "durak/game.hpp"
 #include "players/random_player.hpp"
 #include "players/minimal_player.hpp"
 
