@@ -1,4 +1,6 @@
 #include "game.hpp"
+#include "game_view.hpp"
+#include "player.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -65,6 +67,9 @@ Game::Game(const Game& game)
     , d_attackOrder(game.d_attackOrder)
 {
     setupViews();
+}
+
+Game::~Game() {
 }
 
 void Game::reset()
@@ -290,37 +295,10 @@ void Game::replenishHand(Hand& hand, size_t max_count)
     }
 }
 
-GameView::GameView(const Game& game, size_t pid)
-    : d_game(game)
-    , d_pid(pid)
+void Game::setupViews()
 {
-}
-
-Hand GameView::visibleHand(size_t pid) const
-{
-    Hand hand;
-    auto& hidden = d_game.hiddenCards();
-    for (auto& card : d_game.hand(pid)) {
-        if (d_pid == pid || hidden.find(card) == hidden.end()) {
-            hand.insert(card);
-        }
-    }
-    return hand;
-}
-
-size_t GameView::hiddenHandSize(size_t pid) const
-{
-    if (d_pid == pid) {
-        return 0;
-    } else {
-        size_t cnt = 0;
-        auto& hidden = d_game.hiddenCards();
-        for (auto& card : d_game.hand(pid)) {
-            if (hidden.find(card) != hidden.end()) {
-                cnt++;
-            }
-        }
-        return cnt;
+    for (size_t pid = 0; pid < d_players.size(); pid++) {
+        d_views.push_back(GameView(*this, pid));
     }
 }
 

@@ -4,7 +4,6 @@
 #include <random>
 
 #include "../rules/player.hpp"
-#include "../rules/game.hpp"
 
 namespace jester {
 

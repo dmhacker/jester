@@ -1,10 +1,10 @@
 #ifndef JESTER_PLAYER_HPP
 #define JESTER_PLAYER_HPP
 
-#include <memory>
 #include <chrono>
 
 #include "card.hpp"
+#include "game_view.hpp"
 
 namespace jester {
 

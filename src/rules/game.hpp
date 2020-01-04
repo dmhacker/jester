@@ -4,14 +4,10 @@
 #include <memory>
 
 #include "card.hpp"
-#include "player.hpp"
 
 namespace jester {
 
-using Deck = std::deque<Card>;
-using Hand = std::unordered_set<Card>;
-using CardPile = std::unordered_set<Card>;
-using CardSequence = std::vector<Card>;
+class Player;
 
 class GameView;
 
@@ -32,6 +28,7 @@ public:
     Game(const std::vector<std::shared_ptr<Player>>& players);
     Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& view);
     Game(const Game& game);
+    ~Game();
 
     // Public methods used to advance gameplay
     void reset();
@@ -63,36 +60,6 @@ private:
     void finishGoodDefense();
     void finishBadDefense();
     void replenishHand(Hand& hand, size_t max_count);
-};
-
-class GameView {
-private:
-    const Game& d_game;
-    size_t d_pid;
-
-public:
-    GameView(const Game& game, size_t pid);
-
-    // Information relative to the owning player
-    size_t playerId() const;
-    const Hand& hand() const;
-    Hand visibleHand(size_t pid) const;
-    size_t handSize(size_t pid) const;
-    size_t hiddenHandSize(size_t pid) const;
-
-    // Information available to all players about the game
-    bool finished() const;
-    size_t playerCount() const;
-    size_t deckSize() const;
-    const std::vector<size_t>& winOrder() const;
-    const std::deque<size_t>& attackOrder() const;
-    const CardPile& hiddenCards() const;
-    const CardSequence& currentAttack() const;
-    const CardSequence& currentDefense() const;
-    const Card& trumpCard() const;
-    Suit trumpSuit() const;
-    size_t attackerId() const;
-    size_t defenderId() const;
 };
 
 inline bool Game::finished() const
@@ -160,93 +127,11 @@ inline Suit Game::trumpSuit() const
     return d_trump.suit();
 }
 
-inline void Game::setupViews()
-{
-    for (size_t pid = 0; pid < d_players.size(); pid++) {
-        d_views.push_back(GameView(*this, pid));
-    }
-}
-
 inline void Game::play()
 {
     while (!finished()) {
         playAction(nextAction());
     }
-}
-
-inline size_t GameView::playerId() const
-{
-    return d_pid;
-}
-
-inline const Hand& GameView::hand() const
-{
-    return d_game.hand(d_pid);
-}
-
-inline size_t GameView::handSize(size_t pid) const
-{
-    return d_game.hand(pid).size();
-}
-
-inline bool GameView::finished() const
-{
-    return d_game.finished();
-}
-
-inline size_t GameView::deckSize() const
-{
-    return d_game.deckSize();
-}
-
-inline size_t GameView::playerCount() const 
-{
-    return d_game.playerCount();
-}
-
-inline const std::vector<size_t>& GameView::winOrder() const
-{
-    return d_game.winOrder();
-}
-
-inline const std::deque<size_t>& GameView::attackOrder() const
-{
-    return d_game.attackOrder();
-}
-
-inline const CardPile& GameView::hiddenCards() const
-{
-    return d_game.hiddenCards();
-}
-
-inline const CardSequence& GameView::currentAttack() const
-{
-    return d_game.currentAttack();
-}
-
-inline const CardSequence& GameView::currentDefense() const
-{
-    return d_game.currentDefense();
-}
-
-inline const Card& GameView::trumpCard() const
-{
-    return d_game.trumpCard();
-}
-
-inline Suit GameView::trumpSuit() const
-{
-    return d_game.trumpSuit();
-}
-
-inline size_t GameView::attackerId() const
-{
-    return d_game.attackerId();
-}
-
-inline size_t GameView::defenderId() const
-{
-    return d_game.defenderId();
 }
 
 }
