@@ -15,8 +15,8 @@ private:
 
 public:
     MinimalPlayer();
-    Action attack(const GameView& view);
-    Action defend(const GameView & view);
+    Action attack(const GameView& view, std::chrono::milliseconds time_limit);
+    Action defend(const GameView & view, std::chrono::milliseconds time_limit);
 };
 
 }

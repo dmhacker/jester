@@ -65,7 +65,7 @@ Action Game::nextAction() {
     if (d_currentAttack.size() == d_currentDefense.size()) {
         Action attack;
         do {
-            attack = attacker->attack(d_views[aid]);
+            attack = attacker->attack(d_views[aid], std::chrono::milliseconds(3000));
         } while (!validateAttack(attack));
         if (attack.empty()) {
             std::cerr << "Attacker " << aid << " passes on his turn." << std::endl;
@@ -78,7 +78,7 @@ Action Game::nextAction() {
     else {
         Action defense;
         do {
-            defense = defender->defend(d_views[did]);
+            defense = defender->defend(d_views[did], std::chrono::milliseconds(3000));
         } while (!validateDefense(defense));
         if (defense.empty()) {
             std::cerr << "Defender " << did << " gives up on his defense." << std::endl;

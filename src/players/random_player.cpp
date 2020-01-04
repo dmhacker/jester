@@ -7,7 +7,7 @@ RandomPlayer::RandomPlayer()
 {
 }
 
-Action RandomPlayer::attack(const GameView& view)
+Action RandomPlayer::attack(const GameView& view, std::chrono::milliseconds time_limit)
 {
     auto& hand = view.hand();
     if (view.currentAttack().empty()) {
@@ -34,7 +34,7 @@ Action RandomPlayer::attack(const GameView& view)
     }
 }
 
-Action RandomPlayer::defend(const GameView& view)
+Action RandomPlayer::defend(const GameView& view, std::chrono::milliseconds time_limit)
 {
     auto& hand = view.hand();
     auto attacking = view.currentAttack().back();

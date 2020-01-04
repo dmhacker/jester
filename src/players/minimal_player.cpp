@@ -7,7 +7,7 @@ MinimalPlayer::MinimalPlayer()
 {
 }
 
-Action MinimalPlayer::attack(const GameView& view)
+Action MinimalPlayer::attack(const GameView& view, std::chrono::milliseconds time_limit)
 {
     auto& hand = view.hand();
     if (view.currentAttack().empty()) {
@@ -21,7 +21,7 @@ Action MinimalPlayer::attack(const GameView& view)
     }
 }
 
-Action MinimalPlayer::defend(const GameView& view)
+Action MinimalPlayer::defend(const GameView& view, std::chrono::milliseconds time_limit)
 {
     return Action(); 
 }
