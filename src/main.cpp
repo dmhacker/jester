@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include "player.hpp"
-#include "random_player.hpp"
-#include "minimal_player.hpp"
-#include "game.hpp"
+#include "rules/player.hpp"
+#include "rules/game.hpp"
+#include "players/random_player.hpp"
+#include "players/minimal_player.hpp"
 
 using namespace jester;
 

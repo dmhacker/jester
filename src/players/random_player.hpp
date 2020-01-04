@@ -3,8 +3,8 @@
 
 #include <random>
 
-#include "player.hpp"
-#include "game.hpp"
+#include "../rules/player.hpp"
+#include "../rules/game.hpp"
 
 namespace jester {
 

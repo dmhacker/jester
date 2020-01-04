@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file(GLOB sources 
-    "src/*.cpp"
+    "src/**/*.cpp"
 )
 add_executable(jester "src/main.cpp" ${sources})
 target_include_directories(jester PRIVATE "include")
