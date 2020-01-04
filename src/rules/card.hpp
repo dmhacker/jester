@@ -36,9 +36,6 @@ private:
     friend std::ostream& operator<<(std::ostream& os, const Card& card);
 };
 
-using Deck = std::deque<Card>;
-using Hand = std::unordered_set<Card>;
-
 class Action {
 private:
     std::shared_ptr<Card> d_card;

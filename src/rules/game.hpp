@@ -8,6 +8,11 @@
 
 namespace jester {
 
+using Deck = std::deque<Card>;
+using Hand = std::unordered_set<Card>;
+using CardPile = std::unordered_set<Card>;
+using CardSequence = std::vector<Card>;
+
 class GameView;
 
 class Game {
@@ -16,11 +21,10 @@ private:
     std::vector<GameView> d_views;
     std::vector<Hand> d_hands;
     Deck d_deck;
-    std::unordered_set<Card> d_discards;
-    std::unordered_set<Card> d_seen;
+    CardPile d_hidden;
     Card d_trump;
-    std::vector<Card> d_currentAttack;
-    std::vector<Card> d_currentDefense;
+    CardSequence d_currentAttack;
+    CardSequence d_currentDefense;
     std::vector<size_t> d_winOrder;
     std::deque<size_t> d_attackOrder;
 
@@ -44,10 +48,9 @@ public:
     size_t deckSize() const;
     const std::vector<size_t>& winOrder() const;
     const std::deque<size_t>& attackOrder() const;
-    const std::unordered_set<Card>& discardedCards() const;
-    const std::unordered_set<Card>& seenCards() const;
-    const std::vector<Card>& currentAttack() const;
-    const std::vector<Card>& currentDefense() const;
+    const CardPile& hiddenCards() const;
+    const CardSequence& currentAttack() const;
+    const CardSequence& currentDefense() const;
     const Card& trumpCard() const;
     Suit trumpSuit() const;
     size_t attackerId() const;
@@ -83,10 +86,9 @@ public:
     size_t deckSize() const;
     const std::vector<size_t>& winOrder() const;
     const std::deque<size_t>& attackOrder() const;
-    const std::unordered_set<Card>& discardedCards() const;
-    const std::unordered_set<Card>& seenCards() const;
-    const std::vector<Card>& currentAttack() const;
-    const std::vector<Card>& currentDefense() const;
+    const CardPile& hiddenCards() const;
+    const CardSequence& currentAttack() const;
+    const CardSequence& currentDefense() const;
     const Card& trumpCard() const;
     Suit trumpSuit() const;
     size_t attackerId() const;
@@ -123,22 +125,17 @@ inline const Hand& Game::hand(size_t pid) const
     return d_hands[pid];
 }
 
-inline const std::unordered_set<Card>& Game::discardedCards() const
+inline const CardPile& Game::hiddenCards() const
 {
-    return d_discards;
+    return d_hidden;
 }
 
-inline const std::unordered_set<Card>& Game::seenCards() const
-{
-    return d_seen;
-}
-
-inline const std::vector<Card>& Game::currentAttack() const
+inline const CardSequence& Game::currentAttack() const
 {
     return d_currentAttack;
 }
 
-inline const std::vector<Card>& Game::currentDefense() const
+inline const CardSequence& Game::currentDefense() const
 {
     return d_currentDefense;
 }
@@ -217,22 +214,17 @@ inline const std::deque<size_t>& GameView::attackOrder() const
     return d_game.attackOrder();
 }
 
-inline const std::unordered_set<Card>& GameView::discardedCards() const
+inline const CardPile& GameView::hiddenCards() const
 {
-    return d_game.discardedCards();
+    return d_game.hiddenCards();
 }
 
-inline const std::unordered_set<Card>& GameView::seenCards() const
-{
-    return d_game.seenCards();
-}
-
-inline const std::vector<Card>& GameView::currentAttack() const
+inline const CardSequence& GameView::currentAttack() const
 {
     return d_game.currentAttack();
 }
 
-inline const std::vector<Card>& GameView::currentDefense() const
+inline const CardSequence& GameView::currentDefense() const
 {
     return d_game.currentDefense();
 }
