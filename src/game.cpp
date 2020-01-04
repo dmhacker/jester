@@ -10,7 +10,7 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players)
     : d_players(players)
     , d_hands(players.size())
 {
-    assert(players.size() >= 2 && players.size() <= 6);
+    assert(players.size() >= 2);
     setupViews();
     reset();
 }
@@ -57,133 +57,143 @@ void Game::reset()
     std::cerr << "Trump suit is " << to_string(trumpSuit()) << "." << std::endl;
 }
 
-void Game::nextTurn()
-{
+Action Game::nextAction() {
     auto aid = attackerId();
     auto did = defenderId();
     auto& attacker = d_players[aid];
     auto& defender = d_players[did];
-    auto& attack_hand = d_hands[aid];
-    auto& defense_hand = d_hands[did];
-
-    d_currentAttack.clear();
-    d_currentDefense.clear();
-    bool firstAttack = true;
-
-    while (d_currentAttack.size() < 6) {
-        std::shared_ptr<Card> attack;
+    if (d_currentAttack.size() == d_currentDefense.size()) {
+        Action attack;
         do {
-            attack = attacker->attack(d_views[aid], firstAttack);
-        } while (!validateAttack(attack, firstAttack));
-
-        // If the attacker played nothing, then the attack is over
-        if (attack == nullptr) {
-            std::cerr << "Attacker " << aid << " did not play anything." << std::endl;
-            break;
+            attack = attacker->attack(d_views[aid]);
+        } while (!validateAttack(attack));
+        if (attack.empty()) {
+            std::cerr << "Attacker " << aid << " passes on his turn." << std::endl;
         }
-        // Attacker played a valid attack
         else {
-            Card attack_card = *attack;
-            std::cerr << "Attacker " << aid << " played " << attack_card << "." << std::endl;
-            d_currentAttack.push_back(attack_card);
-            attack_hand.erase(attack_card);
-            d_seen.insert(attack_card);
-            if (attack_hand.empty()) {
-                break;
-            }
+            std::cerr << "Attacker " << aid << " plays " << attack.card() << "." << std::endl;
         }
-
-        std::shared_ptr<Card> defense;
+        return attack;
+    }
+    else {
+        Action defense;
         do {
             defense = defender->defend(d_views[did]);
         } while (!validateDefense(defense));
-
-        // If the defender plays nothing, then defense is over
-        if (defense == nullptr) {
-            std::cerr << "Defender " << did << " did not play anything." << std::endl;
-            break;
+        if (defense.empty()) {
+            std::cerr << "Defender " << did << " gives up on his defense." << std::endl;
         }
-        // Defender plays a valid defense against the attack
         else {
-            Card defense_card = *defense;
-            std::cerr << "Defender " << did << " played " << defense_card << "." << std::endl;
-            d_currentDefense.push_back(defense_card);
-            defense_hand.erase(defense_card);
-            d_seen.insert(defense_card);
-            if (defense_hand.empty()) {
-                break;
-            }
+            std::cerr << "Defender " << did << " plays " << defense.card() << "." << std::endl;
         }
-
-        firstAttack = false;
-    }
-
-    // Attacker can win regardless of the defense played
-    bool attackerWon = false;
-    if (attack_hand.empty() && d_deck.empty()) {
-        d_winOrder.push_back(aid);
-        attackerWon = true;
-        if (d_winOrder.size() + 1 == d_players.size()) {
-            d_winOrder.push_back(did);
-            return;
-        }
-    }
-
-    if (d_currentAttack.size() == d_currentDefense.size()) {
-        // Defense was successful, cards are discarded
-        for (auto& card : d_currentAttack) {
-            d_discards.insert(card);
-        }
-        for (auto& card : d_currentDefense) {
-            d_discards.insert(card);
-        }
-        // Defender can only win if they play a successful defense
-        bool defenderWon = false;
-        if (defense_hand.empty() && d_deck.empty()) {
-            d_winOrder.push_back(did);
-            defenderWon = true;
-            if (d_winOrder.size() + 1 == d_players.size()) {
-                d_winOrder.push_back(aid);
-                return;
-            }
-        }
-        // Attacker sent to the back of the line, defender is the new attacker
-        d_attackOrder.pop_front();
-        if (!attackerWon) {
-            d_attackOrder.push_back(aid);
-        }
-        if (defenderWon) {
-            d_attackOrder.pop_front();
-        }
-    } else {
-        // Defense was unsuccessful, all cards go the defender
-        for (auto& card : d_currentAttack) {
-            defense_hand.insert(card);
-        }
-        for (auto& card : d_currentDefense) {
-            defense_hand.insert(card);
-        }
-        // Attacker and defender are both sent to the back
-        d_attackOrder.pop_front();
-        d_attackOrder.pop_front();
-        if (!attackerWon) {
-            d_attackOrder.push_back(aid);
-        }
-        d_attackOrder.push_back(did);
-    }
-
-    // Replenish attacker and defender hands if we can
-    while (!d_deck.empty() && attack_hand.size() < 6) {
-        attack_hand.insert(d_deck.front());
-        d_deck.pop_front();
-    }
-    while (!d_deck.empty() && defense_hand.size() < 6) {
-        defense_hand.insert(d_deck.front());
-        d_deck.pop_front();
+        return defense;
     }
 }
 
-bool Game::validateAttack(const std::shared_ptr<Card>& attack, bool firstAttack) const
+void Game::playAction(const Action& action)
+{
+    auto aid = attackerId();
+    auto did = defenderId();
+    auto& attack_hand = d_hands[aid];
+    auto& defense_hand = d_hands[did];
+
+    if (d_currentAttack.size() == d_currentDefense.size()) {
+        if (action.empty()) {
+            assert(d_currentAttack.size() > 0); 
+            finishGoodDefense();
+        }
+        else {
+            auto& attack_card = action.card();
+            d_currentAttack.push_back(attack_card);
+            d_seen.insert(attack_card);
+            attack_hand.erase(attack_card);
+            // End condition 1: defender is the losing player
+            if (attack_hand.empty() && d_deck.empty() && d_winOrder.size() + 2 == d_players.size()) {
+                d_winOrder.push_back(aid);
+                d_winOrder.push_back(did); 
+                d_attackOrder.clear();
+                std::cerr << "Player " << aid << " has finished the game!" << std::endl;
+                std::cerr << "Player " << did << " has finished the game!" << std::endl;
+            }
+        }
+    } else {
+        if (action.empty()) {
+            finishBadDefense();     
+        }
+        else {
+            auto& defense_card = action.card();
+            d_currentDefense.push_back(defense_card);
+            d_seen.insert(defense_card);
+            defense_hand.erase(defense_card);
+            if (defense_hand.empty() || d_currentAttack.size() == 6) {
+                finishGoodDefense();
+            }
+        }
+    }
+}
+
+void Game::finishGoodDefense() {
+    auto aid = attackerId();
+    auto did = defenderId();
+    auto& attack_hand = d_hands[aid];
+    auto& defense_hand = d_hands[did];
+    // All attacking and defending cards are discarded
+    d_discards.insert(d_currentAttack.begin(), d_currentAttack.end());
+    d_discards.insert(d_currentDefense.begin(), d_currentDefense.end());
+    d_currentAttack.clear();
+    d_currentDefense.clear();
+    // Attacker and defender hands are replenished
+    replenishHand(attack_hand, 6);
+    replenishHand(defense_hand, 6);
+    // Win and attack orders are updated
+    d_attackOrder.pop_front();
+    if (attack_hand.empty()) {
+        d_winOrder.push_back(aid);
+        std::cerr << "Player " << aid << " has finished the game!" << std::endl;
+    }
+    else {
+        d_attackOrder.push_back(aid);
+    }
+    if (defense_hand.empty()) {
+        d_attackOrder.pop_front();
+        d_winOrder.push_back(did);
+        std::cerr << "Player " << did << " has finished the game!" << std::endl;
+        // End condition 2: attacker is the losing player
+        if (d_winOrder.size() + 1 == d_players.size()) {
+            d_winOrder.push_back(aid);
+            d_attackOrder.clear();
+            std::cerr << "Player " << aid << " has finished the game!" << std::endl;
+        }
+    }
+}
+
+void Game::finishBadDefense() {
+    auto aid = attackerId();
+    auto did = defenderId();
+    auto& attack_hand = d_hands[aid];
+    auto& defense_hand = d_hands[did];
+    // All attacking and defending cards go the defender
+    defense_hand.insert(d_currentAttack.begin(), d_currentAttack.end());
+    defense_hand.insert(d_currentDefense.begin(), d_currentDefense.end());
+    d_currentAttack.clear();
+    d_currentDefense.clear();
+    // Attacker and defender hands are replenished
+    replenishHand(attack_hand, 6);
+    replenishHand(defense_hand, 6);
+    // Win and attack orders are updated
+    d_attackOrder.pop_front();
+    d_attackOrder.pop_front();
+    if (attack_hand.empty()) {
+        d_winOrder.push_back(aid);
+        std::cerr << "Player " << aid << " has finished the game!" << std::endl;
+    }
+    else {
+        d_attackOrder.push_back(aid);
+    }
+    d_attackOrder.push_back(did);
+}
+
+bool Game::validateAttack(const Action& attack) const
 {
     auto aid = attackerId();
     auto did = defenderId();
@@ -192,14 +202,14 @@ bool Game::validateAttack(const std::shared_ptr<Card>& attack, bool firstAttack)
     if (d_currentAttack.size() >= 6 || defense_hand.size() < 1) {
         return false;
     }
-    if (attack == nullptr) {
-        return !firstAttack;
+    if (attack.empty()) {
+        return !d_currentAttack.empty();
     } else {
-        auto attacking = *attack;
+        auto& attacking = attack.card();
         if (attack_hand.find(attacking) == attack_hand.end()) {
             return false;
         }
-        if (!firstAttack) {
+        if (!d_currentAttack.empty()) {
             std::unordered_set<size_t> valid_ranks;
             for (auto& card : d_currentAttack) {
                 valid_ranks.insert(card.rank());
@@ -215,14 +225,14 @@ bool Game::validateAttack(const std::shared_ptr<Card>& attack, bool firstAttack)
     }
 }
 
-bool Game::validateDefense(const std::shared_ptr<Card>& defense) const
+bool Game::validateDefense(const Action& defense) const
 {
-    if (defense == nullptr) {
+    if (defense.empty()) {
         return true;
     }
     auto did = defenderId();
     auto& defense_hand = d_hands[did];
-    auto defending = *defense;
+    auto& defending = defense.card();
     if (defense_hand.find(defending) == defense_hand.end()) {
         return false;
     }
@@ -239,6 +249,13 @@ bool Game::validateDefense(const std::shared_ptr<Card>& defense) const
         }
     }
     return true;
+}
+
+void Game::replenishHand(Hand& hand, size_t max_count) {
+    while (!d_deck.empty() && hand.size() < max_count) {
+        hand.insert(d_deck.front());
+        d_deck.pop_front();
+    }
 }
 
 GameView::GameView(const Game& game, size_t pid)
@@ -274,6 +291,5 @@ size_t GameView::hiddenHandSize(size_t pid) const
         return cnt;
     }
 }
-
 
 }

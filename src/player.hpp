@@ -11,8 +11,8 @@ class GameView;
 
 class Player {
 public:
-    virtual std::shared_ptr<Card> attack(const GameView& view, bool firstAttack) = 0;
-    virtual std::shared_ptr<Card> defend(const GameView & view) = 0;
+    virtual Action attack(const GameView& view) = 0;
+    virtual Action defend(const GameView & view) = 0;
 };
 }
 

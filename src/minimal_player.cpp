@@ -7,23 +7,23 @@ MinimalPlayer::MinimalPlayer()
 {
 }
 
-std::shared_ptr<Card> MinimalPlayer::attack(const GameView& view, bool firstAttack)
+Action MinimalPlayer::attack(const GameView& view)
 {
     auto& hand = view.hand();
-    if (firstAttack) {
+    if (view.currentAttack().empty()) {
         std::uniform_int_distribution<std::mt19937::result_type> dist(0, hand.size() - 1);
         size_t idx = dist(d_rng);
         auto it = hand.begin();
         std::advance(it, idx);
-        return std::make_shared<Card>(*it);
+        return Action(*it);
     } else {
-        return nullptr; 
+        return Action(); 
     }
 }
 
-std::shared_ptr<Card> MinimalPlayer::defend(const GameView& view)
+Action MinimalPlayer::defend(const GameView& view)
 {
-    return nullptr; 
+    return Action(); 
 }
 
 }

@@ -9,12 +9,12 @@ using namespace jester;
 
 int main() {
     std::vector<std::shared_ptr<Player>> players;
+    players.push_back(std::make_shared<RandomPlayer>());
     players.push_back(std::make_shared<MinimalPlayer>());
-    for (int i = 0; i < 4; i++) {
-        players.push_back(std::make_shared<RandomPlayer>());
-    }
+    players.push_back(std::make_shared<RandomPlayer>());
+    players.push_back(std::make_shared<RandomPlayer>());
     Game root(players);
-    for (size_t g = 0; g < 3; g++) {
+    for (size_t g = 0; g < 2; g++) {
         Game game(root);
         game.play();
         std::cout << "Win order:";

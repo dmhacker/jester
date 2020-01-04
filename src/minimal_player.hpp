@@ -15,8 +15,8 @@ private:
 
 public:
     MinimalPlayer();
-    std::shared_ptr<Card> attack(const GameView& view, bool firstAttack);
-    std::shared_ptr<Card> defend(const GameView & view);
+    Action attack(const GameView& view);
+    Action defend(const GameView & view);
 };
 
 }

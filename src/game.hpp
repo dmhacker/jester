@@ -30,7 +30,8 @@ public:
 
     // Public methods used to advance gameplay
     void reset();
-    void nextTurn();
+    Action nextAction();
+    void playAction(const Action& action);
     void play();
 
     // Private information (protected by the game view)
@@ -48,9 +49,12 @@ public:
     size_t defenderId() const;
 
 private:
-    bool validateAttack(const std::shared_ptr<Card>& attack, bool firstAttack) const;
-    bool validateDefense(const std::shared_ptr<Card>& defense) const;
+    bool validateAttack(const Action& attack) const;
+    bool validateDefense(const Action& defense) const;
     void setupViews();
+    void finishGoodDefense();
+    void finishBadDefense();
+    void replenishHand(Hand& hand, size_t max_count);
 };
 
 class GameView {
@@ -140,7 +144,7 @@ inline void Game::setupViews()
 inline void Game::play()
 {
     while (!finished()) {
-        nextTurn();
+        playAction(nextAction());
     }
 }
 

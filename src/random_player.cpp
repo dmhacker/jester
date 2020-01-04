@@ -7,15 +7,15 @@ RandomPlayer::RandomPlayer()
 {
 }
 
-std::shared_ptr<Card> RandomPlayer::attack(const GameView& view, bool firstAttack)
+Action RandomPlayer::attack(const GameView& view)
 {
     auto& hand = view.hand();
-    if (firstAttack) {
+    if (view.currentAttack().empty()) {
         std::uniform_int_distribution<std::mt19937::result_type> dist(0, hand.size() - 1);
         size_t idx = dist(d_rng);
         auto it = hand.begin();
         std::advance(it, idx);
-        return std::make_shared<Card>(*it);
+        return Action(*it);
     } else {
         std::unordered_set<size_t> valid_ranks;
         for (auto& card : view.currentAttack()) {
@@ -34,7 +34,7 @@ std::shared_ptr<Card> RandomPlayer::attack(const GameView& view, bool firstAttac
     }
 }
 
-std::shared_ptr<Card> RandomPlayer::defend(const GameView& view)
+Action RandomPlayer::defend(const GameView& view)
 {
     auto& hand = view.hand();
     auto attacking = view.currentAttack().back();
@@ -53,14 +53,14 @@ std::shared_ptr<Card> RandomPlayer::defend(const GameView& view)
     return randomCard(defenses);
 }
 
-std::shared_ptr<Card> RandomPlayer::randomCard(const std::vector<Card>& cards)
+Action RandomPlayer::randomCard(const std::vector<Card>& cards)
 {
     std::uniform_int_distribution<std::mt19937::result_type> dist(0, cards.size());
     size_t idx = dist(d_rng);
     if (idx < cards.size()) {
-        return std::make_shared<Card>(cards[idx]);
+        return Action(cards[idx]);
     }
-    return nullptr;
+    return Action();
 }
 
 }

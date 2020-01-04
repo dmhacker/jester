@@ -15,11 +15,11 @@ private:
 
 public:
     RandomPlayer();
-    std::shared_ptr<Card> attack(const GameView& view, bool firstAttack);
-    std::shared_ptr<Card> defend(const GameView & view);
+    Action attack(const GameView& view);
+    Action defend(const GameView & view);
 
 private:
-    std::shared_ptr<Card> randomCard(const std::vector<Card> & cards);
+    Action randomCard(const std::vector<Card> & cards);
 };
 
 }

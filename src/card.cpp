@@ -53,4 +53,14 @@ std::ostream& operator<<(std::ostream& os, const Card& card)
     return os << to_string(card.d_rank) << to_string(card.d_suit);
 }
 
+Action::Action()
+    : d_card(nullptr)
+{
+}
+
+Action::Action(const Card & _card)
+    : d_card(std::make_shared<Card>(_card))
+{
+}
+
 }
