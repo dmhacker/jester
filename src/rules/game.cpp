@@ -15,6 +15,49 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players)
     reset();
 }
 
+Game::Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& view)
+    : d_players(players)
+    , d_hands(players.size())
+    , d_discards(view.discardedCards())
+    , d_seen(view.seenCards())
+    , d_trump(view.trumpCard())
+    , d_currentAttack(view.currentAttack())
+    , d_currentDefense(view.currentDefense())
+    , d_winOrder(view.winOrder())
+    , d_attackOrder(view.attackOrder())
+{
+    assert(players.size() == view.playerCount());
+    setupViews();
+
+    std::unordered_set<Card> available_cards;
+    for (size_t rank = 6; rank <= 14; rank++) {
+        available_cards.insert(Card(rank, Suit::hearts));
+        available_cards.insert(Card(rank, Suit::diamonds));
+        available_cards.insert(Card(rank, Suit::spades));
+        available_cards.insert(Card(rank, Suit::clubs));
+    }
+    available_cards.erase(d_seen.begin(), d_seen.end());
+    for (size_t pid = 0; pid < players.size(); pid++) {
+        auto const& visible = view.visibleHand(pid);
+        d_hands[pid].insert(visible.begin(), visible.end());
+    }
+    std::vector<Card> hidden_cards;
+    hidden_cards.insert(hidden_cards.end(), available_cards.begin(), available_cards.end());
+    std::random_shuffle(hidden_cards.begin(), hidden_cards.end());
+    size_t hidden_idx = 0;
+    for (size_t pid = 0; pid < players.size(); pid++) {
+        auto& hand = d_hands[pid];
+        for (size_t i = 0; i < view.hiddenHandSize(pid); i++) {
+            hand.insert(hidden_cards[hidden_idx++]);
+        }
+    }
+    if (view.deckSize() > 0) {
+        d_deck.insert(d_deck.end(), hidden_cards.begin() + hidden_idx, hidden_cards.end());
+        d_deck.push_back(d_trump);
+    }
+    assert(d_deck.size() == view.deckSize());
+}
+
 Game::Game(const Game& game)
     : d_players(game.d_players)
     , d_hands(game.d_hands)
@@ -57,7 +100,8 @@ void Game::reset()
     std::cerr << "Trump suit is " << to_string(trumpSuit()) << "." << std::endl;
 }
 
-Action Game::nextAction() {
+Action Game::nextAction()
+{
     auto aid = attackerId();
     auto did = defenderId();
     auto& attacker = d_players[aid];
@@ -69,21 +113,18 @@ Action Game::nextAction() {
         } while (!validateAttack(attack));
         if (attack.empty()) {
             std::cerr << "Attacker " << aid << " passes on his turn." << std::endl;
-        }
-        else {
+        } else {
             std::cerr << "Attacker " << aid << " plays " << attack.card() << "." << std::endl;
         }
         return attack;
-    }
-    else {
+    } else {
         Action defense;
         do {
             defense = defender->defend(d_views[did], std::chrono::milliseconds(3000));
         } while (!validateDefense(defense));
         if (defense.empty()) {
             std::cerr << "Defender " << did << " gives up on his defense." << std::endl;
-        }
-        else {
+        } else {
             std::cerr << "Defender " << did << " plays " << defense.card() << "." << std::endl;
         }
         return defense;
@@ -99,10 +140,9 @@ void Game::playAction(const Action& action)
 
     if (d_currentAttack.size() == d_currentDefense.size()) {
         if (action.empty()) {
-            assert(d_currentAttack.size() > 0); 
+            assert(d_currentAttack.size() > 0);
             finishGoodDefense();
-        }
-        else {
+        } else {
             auto& attack_card = action.card();
             d_currentAttack.push_back(attack_card);
             d_seen.insert(attack_card);
@@ -110,7 +150,7 @@ void Game::playAction(const Action& action)
             // End condition 1: defender is the losing player
             if (attack_hand.empty() && d_deck.empty() && d_winOrder.size() + 2 == d_players.size()) {
                 d_winOrder.push_back(aid);
-                d_winOrder.push_back(did); 
+                d_winOrder.push_back(did);
                 d_attackOrder.clear();
                 std::cerr << "Player " << aid << " has finished the game!" << std::endl;
                 std::cerr << "Player " << did << " has finished the game!" << std::endl;
@@ -118,21 +158,21 @@ void Game::playAction(const Action& action)
         }
     } else {
         if (action.empty()) {
-            finishBadDefense();     
-        }
-        else {
+            finishBadDefense();
+        } else {
             auto& defense_card = action.card();
             d_currentDefense.push_back(defense_card);
             d_seen.insert(defense_card);
             defense_hand.erase(defense_card);
-            if (defense_hand.empty() || d_currentAttack.size() == 6) {
+            if (defense_hand.empty() || attack_hand.empty() || d_currentAttack.size() == 6) {
                 finishGoodDefense();
             }
         }
     }
 }
 
-void Game::finishGoodDefense() {
+void Game::finishGoodDefense()
+{
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
@@ -150,8 +190,7 @@ void Game::finishGoodDefense() {
     if (attack_hand.empty()) {
         d_winOrder.push_back(aid);
         std::cerr << "Player " << aid << " has finished the game!" << std::endl;
-    }
-    else {
+    } else {
         d_attackOrder.push_back(aid);
     }
     if (defense_hand.empty()) {
@@ -167,7 +206,8 @@ void Game::finishGoodDefense() {
     }
 }
 
-void Game::finishBadDefense() {
+void Game::finishBadDefense()
+{
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
@@ -186,8 +226,7 @@ void Game::finishBadDefense() {
     if (attack_hand.empty()) {
         d_winOrder.push_back(aid);
         std::cerr << "Player " << aid << " has finished the game!" << std::endl;
-    }
-    else {
+    } else {
         d_attackOrder.push_back(aid);
     }
     d_attackOrder.push_back(did);
@@ -251,7 +290,8 @@ bool Game::validateDefense(const Action& defense) const
     return true;
 }
 
-void Game::replenishHand(Hand& hand, size_t max_count) {
+void Game::replenishHand(Hand& hand, size_t max_count)
+{
     while (!d_deck.empty() && hand.size() < max_count) {
         hand.insert(d_deck.front());
         d_deck.pop_front();
@@ -279,7 +319,7 @@ Hand GameView::visibleHand(size_t pid) const
 size_t GameView::hiddenHandSize(size_t pid) const
 {
     if (d_pid == pid) {
-        return handSize(pid);
+        return 0;
     } else {
         size_t cnt = 0;
         auto& seen = d_game.seenCards();
