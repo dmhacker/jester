@@ -46,10 +46,9 @@ Work-in-progress options are:
 
 * Determinized UCT — A player implementing Monte Carlo tree
 search with explicit determinzations. That is, the player will
-attempt to fill in the incomplete game information it has with
-several potential determinizations and then use statistics from
-that to choose an overall best move.
-* MO-ISMCTS — A player implementing [information-set Monte Carlo
+fill in incomplete game information with several potential 
+determinizations and then run MCTS on each state.
+* ISMCTS — A player implementing [information-set Monte Carlo
 tree search](http://eprints.whiterose.ac.uk/75048/1/CowlingPowleyWhitehouse2012.pdf), most likely the multi-observer variant.
 * Smart — The smart player will follow a pre-defined strategy. The
 smart player will try to perform prudent actions, such as saving
