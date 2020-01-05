@@ -33,7 +33,7 @@ There is no GUI, although that may be added later.
 jester's game-playing algorithm of choice is 
 [Monte Carlo tree search](https://en.wikipedia.org/wiki/Monte_Carlo_tree_search), 
 specifically variants such as determinized UCT and 
-multi-observer information-set MCTS that have been adapted
+information-set MCTS that have been adapted
 for games with imperfect information. 
 
 In short, jester implements the following options for players:
@@ -54,13 +54,13 @@ search with explicit determinzations. That is, the player will
 attempt to fill in the incomplete game information it has with
 several potential determinizations and then use statistics from
 that to choose an overall best move.
-* ISMCTS — A player implementing [information-set Monte Carlo
+* MO-ISMCTS — A player implementing [information-set Monte Carlo
 tree search](http://eprints.whiterose.ac.uk/75048/1/CowlingPowleyWhitehouse2012.pdf), most likely the multi-observer variant.
-* Smart — A smart player will follow a pre-defined strategy. The
+* Smart — The smart player will follow a pre-defined strategy. The
 smart player will try to perform prudent actions, such as saving
 trump and high cards for later and attacking with low cards 
 early and midgame.
-* Human — A human player will interface with the console and
+* Human — The human player will interface with the console and
 will be controlled through stdin.
 
 In the future, we will consider adding:
