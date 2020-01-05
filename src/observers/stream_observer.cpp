@@ -44,7 +44,7 @@ namespace {
     {
         std::cout << "The game state is now: " << std::endl;
         for (size_t pid = 0; pid < game.playerCount(); pid++) {
-            std::cout << "  H" << pid << " -- "
+            std::cout << "  P" << pid << " -- "
                       << stringifyIterable(game.hand(pid)) 
                       << std::endl;
         }
