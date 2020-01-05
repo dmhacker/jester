@@ -8,9 +8,7 @@
 namespace jester {
 
 class Player;
-
 class GameView;
-
 class Observer;
 
 class Game {

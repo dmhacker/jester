@@ -1,11 +1,11 @@
-#ifndef JESTER_STREAM_OBSERVER_HPP
-#define JESTER_STREAM_OBSERVER_HPP
+#ifndef JESTER_OMNISCIENT_OBSERVER_HPP
+#define JESTER_OMNISCIENT_OBSERVER_HPP
 
 #include "observer.hpp"
 
 namespace jester {
 
-class StreamObserver : public Observer {
+class OmniscientObserver : public Observer {
 public:
     void onGameStart(const Game& game);
     void onPostAttack(const Game& game, const Action& action);

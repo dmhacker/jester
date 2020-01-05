@@ -1,4 +1,4 @@
-#include "stream_observer.hpp"
+#include "omniscient_observer.hpp"
 
 #include <cassert>
 #include <iostream>
@@ -45,7 +45,7 @@ namespace {
         std::cout << "The game state is now: " << std::endl;
         for (size_t pid = 0; pid < game.playerCount(); pid++) {
             std::cout << "  P" << pid << " -- "
-                      << stringifyIterable(game.hand(pid)) 
+                      << stringifyIterable(game.hand(pid))
                       << std::endl;
         }
         std::cout << "  DK -- "
@@ -54,7 +54,7 @@ namespace {
     }
 }
 
-void StreamObserver::onGameStart(const Game& game)
+void OmniscientObserver::onGameStart(const Game& game)
 {
     printBarrier<false>();
     std::cout << "A new game is beginning!" << std::endl;
@@ -67,7 +67,7 @@ void StreamObserver::onGameStart(const Game& game)
     printBarrier<true>();
 }
 
-void StreamObserver::onPostAttack(const Game& game, const Action& action)
+void OmniscientObserver::onPostAttack(const Game& game, const Action& action)
 {
     auto pid = game.attackerId();
     if (action.empty()) {
@@ -80,7 +80,7 @@ void StreamObserver::onPostAttack(const Game& game, const Action& action)
     }
 }
 
-void StreamObserver::onPostDefend(const Game& game, const Action& action)
+void OmniscientObserver::onPostDefend(const Game& game, const Action& action)
 {
     auto pid = game.defenderId();
     if (action.empty()) {
@@ -92,13 +92,13 @@ void StreamObserver::onPostDefend(const Game& game, const Action& action)
     }
 }
 
-void StreamObserver::onTurnEnd(const Game& game, bool defense_success)
+void OmniscientObserver::onTurnEnd(const Game& game, bool defense_success)
 {
     printGameState(game);
     printBarrier<true>();
 }
 
-void StreamObserver::onPlayerWin(const Game& game, size_t player_id, size_t win_position)
+void OmniscientObserver::onPlayerWin(const Game& game, size_t player_id, size_t win_position)
 {
     std::stringstream ss;
     ss << "Finished game in " << win_position;
@@ -112,7 +112,7 @@ void StreamObserver::onPlayerWin(const Game& game, size_t player_id, size_t win_
     printPlayerLine(player_id, ss.str());
 }
 
-void StreamObserver::onGameEnd(const Game& game)
+void OmniscientObserver::onGameEnd(const Game& game)
 {
     printBarrier<true>();
     std::cout
