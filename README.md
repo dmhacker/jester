@@ -21,7 +21,7 @@ rank (e.g. they cannot pass the buck).
 * Only one card can be played at a time. 
 
 All gameplay is currently conducted through the console. 
-There is no GUI, although that may be added later.
+There are no plans to add a GUI.
 
 ## Strategic Choices
 
