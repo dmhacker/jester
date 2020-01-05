@@ -1,5 +1,4 @@
 #include "random_player.hpp"
-#include <iostream>
 
 namespace jester {
 
@@ -31,7 +30,7 @@ Action RandomPlayer::attack(const GameView& view, std::chrono::milliseconds time
                 attacks.push_back(card);
             }
         }
-        return randomCard(attacks);
+        return randomAction(attacks);
     }
 }
 
@@ -53,18 +52,18 @@ Action RandomPlayer::defend(const GameView& view, std::chrono::milliseconds time
             }
         }
     }
-    return randomCard(defenses);
+    return randomAction(defenses);
 }
 
-Action RandomPlayer::randomCard(const std::vector<Card>& cards)
+Action RandomPlayer::randomAction(const std::vector<Card>& cards)
 {
     std::uniform_int_distribution<std::mt19937::result_type> dist(0, cards.size());
     size_t idx = dist(d_rng);
-    if (idx < cards.size()) {
-        std::cerr << cards[idx] << std::endl;
-        return Action(cards[idx]);
+    // It is possible that we can pick an empty action even with cards available
+    if (idx == cards.size()) {
+        return Action();
     }
-    return Action();
+    return Action(cards[idx]);
 }
 
 }

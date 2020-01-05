@@ -8,17 +8,16 @@
 namespace jester {
 
 class RandomPlayer : public Player {
-private:
+protected:
     std::random_device d_dev;
     std::mt19937 d_rng;
 
 public:
     RandomPlayer();
     Action attack(const GameView& view, std::chrono::milliseconds time_limit);
-    Action defend(const GameView & view, std::chrono::milliseconds time_limit);
-
+    Action defend(const GameView& view, std::chrono::milliseconds time_limit);
 private:
-    Action randomCard(const std::vector<Card> & cards);
+    virtual Action randomAction(const std::vector<Card>& choices);
 };
 
 }
