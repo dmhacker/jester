@@ -53,8 +53,8 @@ using Hand = std::unordered_set<Card>;
 using CardPile = std::unordered_set<Card>;
 using CardSequence = std::vector<Card>;
 
-std::string to_string(Rank rank);
-std::string to_string(Suit rank);
+std::string toString(Rank rank);
+std::string toString(Suit rank);
 
 inline Rank Card::rank() const
 {

@@ -3,7 +3,7 @@
 
 #include <random>
 
-#include "../durak/player.hpp"
+#include "player.hpp"
 
 namespace jester {
 

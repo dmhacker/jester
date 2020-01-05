@@ -14,7 +14,7 @@ Card::Card(size_t _rank, Suit _suit)
 {
 }
 
-std::string to_string(Rank rank)
+std::string toString(Rank rank)
 {
     if (rank == 11) {
         return "J";
@@ -29,7 +29,7 @@ std::string to_string(Rank rank)
     }
 }
 
-std::string to_string(Suit suit)
+std::string toString(Suit suit)
 {
     switch (suit) {
     case Suit::hearts: {
@@ -50,7 +50,7 @@ std::string to_string(Suit suit)
 
 std::ostream& operator<<(std::ostream& os, const Card& card)
 {
-    return os << to_string(card.d_rank) << to_string(card.d_suit);
+    return os << toString(card.d_rank) << toString(card.d_suit);
 }
 
 Action::Action()

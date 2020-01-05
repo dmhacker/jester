@@ -57,7 +57,7 @@ bool GameView::finished() const
 
 size_t GameView::deckSize() const
 {
-    return d_game.deckSize();
+    return d_game.deck().size();
 }
 
 size_t GameView::playerCount() const 

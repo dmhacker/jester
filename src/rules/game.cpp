@@ -1,6 +1,7 @@
 #include "game.hpp"
 #include "game_view.hpp"
-#include "player.hpp"
+#include "../observers/observer.hpp"
+#include "../players/player.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -65,11 +66,13 @@ Game::Game(const Game& game)
     , d_currentDefense(game.d_currentDefense)
     , d_winOrder(game.d_winOrder)
     , d_attackOrder(game.d_attackOrder)
+    , d_observers(game.d_observers)
 {
     setupViews();
 }
 
-Game::~Game() {
+Game::~Game()
+{
 }
 
 void Game::reset()
@@ -96,7 +99,6 @@ void Game::reset()
         d_attackOrder.push_back(pid);
     }
     d_winOrder.clear();
-    std::cerr << "Trump suit is " << to_string(trumpSuit()) << "." << std::endl;
 }
 
 Action Game::nextAction()
@@ -110,36 +112,32 @@ Action Game::nextAction()
         do {
             attack = attacker->attack(d_views[aid], std::chrono::milliseconds(3000));
         } while (!validateAttack(attack));
-        if (attack.empty()) {
-            std::cerr << "Attacker " << aid << " passes on his turn." << std::endl;
-        } else {
-            std::cerr << "Attacker " << aid << " plays " << attack.card() << "." << std::endl;
-        }
         return attack;
     } else {
         Action defense;
         do {
             defense = defender->defend(d_views[did], std::chrono::milliseconds(3000));
         } while (!validateDefense(defense));
-        if (defense.empty()) {
-            std::cerr << "Defender " << did << " gives up on his defense." << std::endl;
-        } else {
-            std::cerr << "Defender " << did << " plays " << defense.card() << "." << std::endl;
-        }
         return defense;
     }
 }
 
 void Game::playAction(const Action& action)
 {
+    if (d_hidden.size() == 35) {
+        for (auto& observer : d_observers) {
+            observer->onGameStart(*this);
+        }
+    }
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
     auto& defense_hand = d_hands[did];
-
     if (d_currentAttack.size() == d_currentDefense.size()) {
+        for (auto& observer : d_observers) {
+            observer->onPostAttack(*this, action);
+        }
         if (action.empty()) {
-            assert(d_currentAttack.size() > 0);
             finishGoodDefense();
         } else {
             auto& attack_card = action.card();
@@ -148,14 +146,24 @@ void Game::playAction(const Action& action)
             attack_hand.erase(attack_card);
             // End condition 1: defender is the losing player
             if (attack_hand.empty() && d_deck.empty() && d_winOrder.size() + 2 == d_players.size()) {
-                d_winOrder.push_back(aid);
-                d_winOrder.push_back(did);
                 d_attackOrder.clear();
-                std::cerr << "Player " << aid << " has finished the game!" << std::endl;
-                std::cerr << "Player " << did << " has finished the game!" << std::endl;
+                d_winOrder.push_back(aid);
+                for (auto& observer : d_observers) {
+                    observer->onPlayerWin(*this, aid, d_winOrder.size());
+                }
+                d_winOrder.push_back(did);
+                for (auto& observer : d_observers) {
+                    observer->onPlayerWin(*this, did, d_winOrder.size());
+                }
+                for (auto& observer : d_observers) {
+                    observer->onGameEnd(*this);
+                }
             }
         }
     } else {
+        for (auto& observer : d_observers) {
+            observer->onPostDefend(*this, action);
+        }
         if (action.empty()) {
             finishBadDefense();
         } else {
@@ -186,20 +194,33 @@ void Game::finishGoodDefense()
     d_attackOrder.pop_front();
     if (attack_hand.empty()) {
         d_winOrder.push_back(aid);
-        std::cerr << "Player " << aid << " has finished the game!" << std::endl;
+        for (auto& observer : d_observers) {
+            observer->onPlayerWin(*this, aid, d_winOrder.size());
+        }
     } else {
         d_attackOrder.push_back(aid);
     }
     if (defense_hand.empty()) {
         d_attackOrder.pop_front();
         d_winOrder.push_back(did);
-        std::cerr << "Player " << did << " has finished the game!" << std::endl;
+        for (auto& observer : d_observers) {
+            observer->onPlayerWin(*this, did, d_winOrder.size());
+        }
         // End condition 2: attacker is the losing player
         if (d_winOrder.size() + 1 == d_players.size()) {
-            d_winOrder.push_back(aid);
             d_attackOrder.clear();
-            std::cerr << "Player " << aid << " has finished the game!" << std::endl;
+            d_winOrder.push_back(aid);
+            for (auto& observer : d_observers) {
+                observer->onPlayerWin(*this, aid, d_winOrder.size());
+            }
+            for (auto& observer : d_observers) {
+                observer->onGameEnd(*this);
+            }
+            return;
         }
+    }
+    for (auto& observer : d_observers) {
+        observer->onTurnEnd(*this, true);
     }
 }
 
@@ -222,11 +243,16 @@ void Game::finishBadDefense()
     d_attackOrder.pop_front();
     if (attack_hand.empty()) {
         d_winOrder.push_back(aid);
-        std::cerr << "Player " << aid << " has finished the game!" << std::endl;
+        for (auto& observer : d_observers) {
+            observer->onPlayerWin(*this, aid, d_winOrder.size());
+        }
     } else {
         d_attackOrder.push_back(aid);
     }
     d_attackOrder.push_back(did);
+    for (auto& observer : d_observers) {
+        observer->onTurnEnd(*this, false);
+    }
 }
 
 bool Game::validateAttack(const Action& attack) const

@@ -11,6 +11,8 @@ class Player;
 
 class GameView;
 
+class Observer;
+
 class Game {
 private:
     std::vector<std::shared_ptr<Player>> d_players;
@@ -23,12 +25,16 @@ private:
     CardSequence d_currentDefense;
     std::vector<size_t> d_winOrder;
     std::deque<size_t> d_attackOrder;
+    std::vector<std::shared_ptr<Observer>> d_observers;
 
 public:
     Game(const std::vector<std::shared_ptr<Player>>& players);
     Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& view);
     Game(const Game& game);
     ~Game();
+
+    // Observational methods
+    void registerObserver(const std::shared_ptr<Observer>& observer);
 
     // Public methods used to advance gameplay
     void reset();
@@ -37,12 +43,12 @@ public:
     void play();
 
     // Private information (protected by the game view)
+    const Deck& deck() const;
     const Hand& hand(size_t pid) const;
 
     // Public information (available to all players)
     bool finished() const;
     size_t playerCount() const;
-    size_t deckSize() const;
     const std::vector<size_t>& winOrder() const;
     const std::deque<size_t>& attackOrder() const;
     const CardPile& hiddenCards() const;
@@ -62,21 +68,21 @@ private:
     void replenishHand(Hand& hand, size_t max_count);
 };
 
+inline void Game::registerObserver(const std::shared_ptr<Observer>& observer)
+{
+    d_observers.push_back(observer);
+}
+
 inline bool Game::finished() const
 {
     return d_winOrder.size() == d_players.size();
 }
 
-inline size_t Game::playerCount() const 
+inline size_t Game::playerCount() const
 {
     return d_players.size();
 }
 
-inline size_t Game::deckSize() const
-{
-    return d_deck.size();
-}
- 
 inline const std::vector<size_t>& Game::winOrder() const
 {
     return d_winOrder;
@@ -90,6 +96,11 @@ inline const std::deque<size_t>& Game::attackOrder() const
 inline const Hand& Game::hand(size_t pid) const
 {
     return d_hands[pid];
+}
+
+inline const Deck& Game::deck() const
+{
+    return d_deck;
 }
 
 inline const CardPile& Game::hiddenCards() const
