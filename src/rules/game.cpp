@@ -1,13 +1,18 @@
 #include "game.hpp"
-#include "game_view.hpp"
 #include "../observers/observer.hpp"
 #include "../players/player.hpp"
+#include "game_view.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <iostream>
 
 namespace jester {
+
+GameException::GameException(const std::string& message)
+    : d_message(message)
+{
+}
 
 Game::Game(const std::vector<std::shared_ptr<Player>>& players)
     : d_players(players)
@@ -108,16 +113,12 @@ Action Game::nextAction()
     auto& attacker = d_players[aid];
     auto& defender = d_players[did];
     if (d_currentAttack.size() == d_currentDefense.size()) {
-        Action attack;
-        do {
-            attack = attacker->attack(d_views[aid], std::chrono::milliseconds(3000));
-        } while (!validateAttack(attack));
+        Action attack = attacker->attack(d_views[aid], std::chrono::milliseconds(3000));
+        validateAttack(attack);
         return attack;
     } else {
-        Action defense;
-        do {
-            defense = defender->defend(d_views[did], std::chrono::milliseconds(3000));
-        } while (!validateDefense(defense));
+        Action defense = defender->defend(d_views[did], std::chrono::milliseconds(3000));
+        validateDefense(defense);
         return defense;
     }
 }
@@ -255,21 +256,23 @@ void Game::finishBadDefense()
     }
 }
 
-bool Game::validateAttack(const Action& attack) const
+void Game::validateAttack(const Action& attack) const
 {
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
     auto& defense_hand = d_hands[did];
     if (d_currentAttack.size() >= 6 || defense_hand.size() < 1) {
-        return false;
+        throw GameException("Too many cards in attack or defense has no cards.");
     }
     if (attack.empty()) {
-        return !d_currentAttack.empty();
+        if (d_currentAttack.empty()) {
+            throw GameException("Player must play a card on their first attack.");
+        }
     } else {
         auto& attacking = attack.card();
         if (attack_hand.find(attacking) == attack_hand.end()) {
-            return false;
+            throw GameException("Player must possess the card they are attacking with.");
         }
         if (!d_currentAttack.empty()) {
             std::unordered_set<size_t> valid_ranks;
@@ -280,37 +283,34 @@ bool Game::validateAttack(const Action& attack) const
                 valid_ranks.insert(card.rank());
             }
             if (valid_ranks.find(attacking.rank()) == valid_ranks.end()) {
-                return false;
+                throw GameException("Attacking card rank must exist already.");
             }
         }
-        return true;
     }
 }
 
-bool Game::validateDefense(const Action& defense) const
+void Game::validateDefense(const Action& defense) const
 {
     if (defense.empty()) {
-        return true;
+        return;
     }
     auto did = defenderId();
     auto& defense_hand = d_hands[did];
     auto& defending = defense.card();
     if (defense_hand.find(defending) == defense_hand.end()) {
-        return false;
+        throw GameException("Player must possess the card they are defending with.");
     }
     auto& attacking = d_currentAttack.back();
-    if (defending.suit() == trumpSuit()) {
-        if (attacking.suit() == trumpSuit()
-            && attacking.rank() >= defending.rank()) {
-            return false;
-        }
-    } else {
-        if (attacking.suit() != defending.suit()
-            || attacking.rank() >= defending.rank()) {
-            return false;
-        }
+    bool suit_match = defending.suit() == trumpSuit()
+        || defending.suit() == attacking.suit();
+    if (!suit_match) {
+        throw GameException("Defending card must be the same suit as the attack card");
     }
-    return true;
+    bool rank_match = defending.rank() > attacking.rank() || 
+        (defending.suit() == trumpSuit() && attacking.suit() != trumpSuit()); 
+    if (!rank_match) {
+        throw GameException("Defending card must have a higher rank than the attack card");
+    }
 }
 
 void Game::replenishHand(Hand& hand, size_t max_count)

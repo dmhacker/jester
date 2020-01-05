@@ -11,6 +11,15 @@ class Player;
 class GameView;
 class Observer;
 
+class GameException : public std::exception {
+private:
+    std::string d_message;
+
+public:
+    GameException(const std::string& message);
+    const char* what() const throw();
+};
+
 class Game {
 private:
     std::vector<std::shared_ptr<Player>> d_players;
@@ -58,13 +67,17 @@ public:
     size_t defenderId() const;
 
 private:
-    bool validateAttack(const Action& attack) const;
-    bool validateDefense(const Action& defense) const;
+    void validateAttack(const Action& attack) const;
+    void validateDefense(const Action& defense) const;
     void setupViews();
     void finishGoodDefense();
     void finishBadDefense();
     void replenishHand(Hand& hand, size_t max_count);
 };
+
+inline const char* GameException::what() const throw() {
+    return d_message.c_str();
+}
 
 inline void Game::registerObserver(const std::shared_ptr<Observer>& observer)
 {

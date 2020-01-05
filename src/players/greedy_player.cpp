@@ -1,14 +1,14 @@
-#include "random_player.hpp"
+#include "greedy_player.hpp"
 #include <iostream>
 
 namespace jester {
 
-RandomPlayer::RandomPlayer()
+GreedyPlayer::GreedyPlayer()
     : d_rng(d_dev())
 {
 }
 
-Action RandomPlayer::attack(const GameView& view, std::chrono::milliseconds time_limit)
+Action GreedyPlayer::attack(const GameView& view, std::chrono::milliseconds time_limit)
 {
     auto& hand = view.hand();
     if (view.currentAttack().empty()) {
@@ -35,7 +35,7 @@ Action RandomPlayer::attack(const GameView& view, std::chrono::milliseconds time
     }
 }
 
-Action RandomPlayer::defend(const GameView& view, std::chrono::milliseconds time_limit)
+Action GreedyPlayer::defend(const GameView& view, std::chrono::milliseconds time_limit)
 {
     auto& hand = view.hand();
     auto attacking = view.currentAttack().back();
@@ -56,15 +56,15 @@ Action RandomPlayer::defend(const GameView& view, std::chrono::milliseconds time
     return randomCard(defenses);
 }
 
-Action RandomPlayer::randomCard(const std::vector<Card>& cards)
+Action GreedyPlayer::randomCard(const std::vector<Card>& cards)
 {
-    std::uniform_int_distribution<std::mt19937::result_type> dist(0, cards.size());
-    size_t idx = dist(d_rng);
-    if (idx < cards.size()) {
-        std::cerr << cards[idx] << std::endl;
-        return Action(cards[idx]);
+    if (cards.empty()) {
+        return Action();
     }
-    return Action();
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0, cards.size() - 1);
+    size_t idx = dist(d_rng);
+    std::cerr << cards[idx] << std::endl;
+    return Action(cards[idx]);
 }
 
 }
