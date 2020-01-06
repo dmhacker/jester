@@ -13,6 +13,10 @@ private:
 public:
     MCTSTree(const Game& game);
     ~MCTSTree();
+
+    MCTSNode* root() const;
+
+    void initialize();
     void iterate();
 
 private:
@@ -24,6 +28,11 @@ inline void MCTSTree::iterate()
 {
     Game game(d_game);
     rollout(game, select(game));
+}
+
+inline MCTSNode* MCTSTree::root() const
+{
+    return d_root;
 }
 
 }

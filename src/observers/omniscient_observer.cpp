@@ -1,5 +1,7 @@
 #include "omniscient_observer.hpp"
 
+#include "../rules/game.hpp"
+
 #include <cassert>
 #include <iostream>
 #include <sstream>
@@ -7,24 +9,6 @@
 namespace jester {
 
 namespace {
-    template <class T>
-    std::string stringifyIterable(T objects)
-    {
-        std::stringstream ss;
-        ss << "[";
-        size_t idx = 0;
-        auto it = objects.begin();
-        for (; it != objects.end(); it++) {
-            ss << *it;
-            if (idx < objects.size() - 1) {
-                ss << ", ";
-            }
-            idx++;
-        }
-        ss << "]";
-        return ss.str();
-    }
-
     template <bool thin>
     void printBarrier()
     {
@@ -43,14 +27,7 @@ namespace {
     void printGameState(const Game& game)
     {
         std::cout << "The game state is now: " << std::endl;
-        for (size_t pid = 0; pid < game.playerCount(); pid++) {
-            std::cout << "  P" << pid << " -- "
-                      << stringifyIterable(game.hand(pid))
-                      << std::endl;
-        }
-        std::cout << "  DK -- "
-                  << stringifyIterable(game.deck())
-                  << std::endl;
+        std::cout << game; 
     }
 }
 
@@ -117,7 +94,7 @@ void OmniscientObserver::onGameEnd(const Game& game)
     printBarrier<true>();
     std::cout
         << "The winners in order are "
-        << stringifyIterable(game.winOrder())
+        << game.winOrder()
         << "." << std::endl;
     std::cout
         << "This means that player "

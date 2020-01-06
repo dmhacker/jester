@@ -41,13 +41,13 @@ strategy and will always lose, even against random play.
 a valid, random action with no bias.
 * Greedy — A greedy player is similar to a random player.
 However, a greedy player will always play a random card if it can. 
-
-Work-in-progress options are:
-
 * Determinized UCT — A player implementing Monte Carlo tree
 search with explicit determinzations. That is, the player will
 fill in incomplete game information with several potential 
 determinizations and then run MCTS on each state.
+
+Work-in-progress options are:
+
 * ISMCTS — A player implementing [information-set Monte Carlo
 tree search](http://eprints.whiterose.ac.uk/75048/1/CowlingPowleyWhitehouse2012.pdf), most likely the multi-observer variant.
 * Smart — The smart player will follow a pre-defined strategy. The

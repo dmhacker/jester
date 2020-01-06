@@ -38,7 +38,11 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& 
     // Cards in hidden set may be in player hands or may be in the deck
     // Convert set into vector and then shuffle the vector
     std::vector<Card> hidden_cards;
-    hidden_cards.insert(hidden_cards.end(), d_hidden.begin(), d_hidden.end());
+    for (auto& card : d_hidden) {
+        if (view.hand().find(card) == view.hand().end()) {
+            hidden_cards.push_back(card);
+        }
+    }
     std::random_shuffle(hidden_cards.begin(), hidden_cards.end());
     // Populate player hands with their known cards
     for (size_t pid = 0; pid < players.size(); pid++) {
@@ -370,6 +374,19 @@ void Game::setupViews()
     for (size_t pid = 0; pid < d_players.size(); pid++) {
         d_views.push_back(GameView(*this, pid));
     }
+}
+
+std::ostream& operator<<(std::ostream& os, const Game& game)
+{
+    for (size_t pid = 0; pid < game.playerCount(); pid++) {
+        os << "  P" << pid << " -- "
+                  << game.d_hands[pid]
+                  << std::endl;
+    }
+    os << "  DK -- "
+              << game.d_deck
+              << std::endl;
+    return os;
 }
 
 }

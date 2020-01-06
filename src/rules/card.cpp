@@ -1,5 +1,6 @@
 #include "card.hpp"
 
+
 namespace jester {
 
 Card::Card()
@@ -61,6 +62,16 @@ Action::Action()
 Action::Action(const Card & _card)
     : d_card(std::make_shared<Card>(_card))
 {
+}
+
+std::ostream& operator<<(std::ostream& os, const Action& action)
+{
+    if (action.d_card == nullptr) {
+        return os << "Yield";
+    }
+    else {
+        return os << "Use " << *action.d_card;
+    }
 }
 
 }

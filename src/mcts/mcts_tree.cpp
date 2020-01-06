@@ -6,13 +6,18 @@ namespace jester {
 
 MCTSTree::MCTSTree(const Game& game)
     : d_game(game)
-    , d_root(new MCTSNode(game, nullptr))
+    , d_root(nullptr)
 {
 }
 
 MCTSTree::~MCTSTree()
 {
     delete d_root;
+}
+
+void MCTSTree::initialize()
+{
+    d_root = new MCTSNode(d_game, nullptr);
 }
 
 MCTSNode* MCTSTree::select(Game& game)
@@ -41,7 +46,7 @@ MCTSNode* MCTSTree::select(Game& game)
     return leaf->expand(game);
 }
 
-void rollout(Game& game, MCTSNode* node)
+void MCTSTree::rollout(Game& game, MCTSNode* node)
 {
     game.play();
     auto& result = game.winOrder();

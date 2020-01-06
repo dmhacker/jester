@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <deque>
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -47,6 +48,9 @@ public:
     bool empty() const;
     const Card& card() const;
     bool operator==(const Action& action) const;
+
+private:
+    friend std::ostream& operator<<(std::ostream& os, const Action& action);
 };
 
 using Deck = std::deque<Card>;
@@ -85,7 +89,7 @@ inline const Card& Action::card() const
 inline bool Action::operator==(const Action& action) const
 {
     if (empty()) {
-        return action.empty(); 
+        return action.empty();
     }
     if (action.empty()) {
         return false;
@@ -110,7 +114,7 @@ struct hash<jester::Action> {
     size_t operator()(const jester::Action& action) const
     {
         if (action.empty()) {
-            return hash<int>()(-1);
+            return hash<int>()(0);
         }
         return hash<jester::Card>()(action.card());
     }

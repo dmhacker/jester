@@ -7,6 +7,47 @@
 
 namespace jester {
 
+template<class T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& container) {
+    os << "[";
+    for (size_t i = 0; i < container.size(); i++) {
+        os << container[i];
+        if (i < container.size() - 1) {
+            os << ", ";
+        }
+    }
+    os << "]";
+    return os;
+}
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const std::deque<T>& container) {
+    os << "[";
+    for (size_t i = 0; i < container.size(); i++) {
+        os << container[i];
+        if (i < container.size() - 1) {
+            os << ", ";
+        }
+    }
+    os << "]";
+    return os;
+}
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const std::unordered_set<T>& container) {
+    os << "{";
+    size_t i = 0;
+    for (auto& item : container) {
+        os << item;
+        if (i < container.size() - 1) {
+            os << ", ";
+        }
+        i++;
+    }
+    os << "}";
+    return os;
+}
+
 class Player;
 class GameView;
 class Observer;
@@ -74,6 +115,9 @@ private:
     void finishGoodDefense();
     void finishBadDefense();
     void replenishHand(Hand& hand, size_t max_count);
+
+private:
+    friend std::ostream& operator<<(std::ostream& os, const Game& game);
 };
 
 inline const char* GameException::what() const throw() {
