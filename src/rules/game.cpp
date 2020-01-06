@@ -129,9 +129,12 @@ Action Game::nextAction() const
 
 std::vector<Action> Game::nextActions() const
 {
+    std::vector<Action> actions;
+    if (finished()) {
+        return actions;
+    }
     auto aid = attackerId();
     auto did = defenderId();
-    std::vector<Action> actions;
     if (d_currentAttack.size() == d_currentDefense.size()) {
         if (d_currentAttack.empty()) {
             for (auto& card : d_hands[aid]) {

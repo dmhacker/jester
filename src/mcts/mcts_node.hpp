@@ -15,21 +15,19 @@ private:
     std::unordered_map<Action, MCTSNode*> d_children;
     std::vector<Action> d_unexpanded;
     size_t d_player;
-    bool d_terminal;
 
 public:
     MCTSNode(const Game& game, MCTSNode* parent);
     ~MCTSNode();
 
-    const Game& game() const;
     size_t playouts() const;
     float reward() const;
     float rewardRatio() const;
     MCTSNode* parent() const;
     const std::unordered_map<Action, MCTSNode*>& children() const;
-    bool terminal() const;
     size_t currentPlayer() const;
     bool fullyExpanded() const;
+    std::ostream& print(std::ostream& os, size_t level = 0) const;
 
     MCTSNode* expand(Game& game);
     void addReward(float reward);
@@ -62,11 +60,6 @@ inline const std::unordered_map<Action, MCTSNode*>& MCTSNode::children() const
 inline MCTSNode* MCTSNode::parent() const
 {
     return d_parent_p;
-}
-
-inline bool MCTSNode::terminal() const
-{
-    return d_terminal;
 }
 
 inline size_t MCTSNode::currentPlayer() const

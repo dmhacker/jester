@@ -1,12 +1,13 @@
 #include "mcts_tree.hpp"
 
 #include <cmath>
+#include <cassert>
 
 namespace jester {
 
 MCTSTree::MCTSTree(const Game& game)
     : d_game(game)
-    , d_root(nullptr)
+    , d_root(new MCTSNode(d_game, nullptr))
 {
 }
 
@@ -15,16 +16,11 @@ MCTSTree::~MCTSTree()
     delete d_root;
 }
 
-void MCTSTree::initialize()
-{
-    d_root = new MCTSNode(d_game, nullptr);
-}
-
 MCTSNode* MCTSTree::select(Game& game)
 {
     MCTSNode* leaf = d_root;
     while (leaf->fullyExpanded()) {
-        if (leaf->terminal()) {
+        if (game.finished()) {
             return leaf;
         }
         Action best_action;
@@ -41,6 +37,8 @@ MCTSNode* MCTSTree::select(Game& game)
                 best_score = score;
             }
         }
+        assert(best_node != nullptr);
+        game.playAction(best_action);
         leaf = best_node;
     }
     return leaf->expand(game);

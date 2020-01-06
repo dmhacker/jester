@@ -14,9 +14,11 @@ public:
     MCTSTree(const Game& game);
     ~MCTSTree();
 
+    MCTSTree(const MCTSTree& tree) = delete;
+    MCTSTree& operator=(const MCTSTree& tree) = delete;
+
     MCTSNode* root() const;
 
-    void initialize();
     void iterate();
 
 private:
