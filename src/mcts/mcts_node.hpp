@@ -12,21 +12,24 @@ private:
     Game d_game;
     size_t d_playouts;
     float d_reward;
-    std::weak_ptr<MCTSNode> d_parent;
-    std::unordered_map<Action, std::shared_ptr<MCTSNode>> d_children;
+    MCTSNode* d_parent_p;
+    std::unordered_map<Action, MCTSNode*> d_children;
+    std::vector<Action> d_unexpanded;
 
 public:
-    MCTSNode(const Game& game, const std::shared_ptr<MCTSNode>& parent);
+    MCTSNode(const Game& game, MCTSNode* parent);
+    ~MCTSNode();
 
     const Game& game() const;
     size_t playouts() const;
     float reward() const;
     float rewardRatio() const;
-    const std::unordered_map<Action, std::shared_ptr<MCTSNode>>& children() const;
-    const std::weak_ptr<MCTSNode>& parent() const;
+    const std::unordered_map<Action, MCTSNode*>& children() const;
+    MCTSNode* parent() const;
     bool terminal() const;
     size_t currentPlayer() const;
 
+    MCTSNode* expand();
     void addReward(float reward);
     void incrementPlayouts();
 };
@@ -54,14 +57,14 @@ inline float MCTSNode::rewardRatio() const
     return d_reward / d_playouts;
 }
 
-inline const std::unordered_map<Action, std::shared_ptr<MCTSNode>>& MCTSNode::children() const
+inline const std::unordered_map<Action, MCTSNode*>& MCTSNode::children() const
 {
     return d_children;
 }
 
-inline const std::weak_ptr<MCTSNode>& MCTSNode::parent() const
+inline MCTSNode* MCTSNode::parent() const
 {
-    return d_parent;
+    return d_parent_p;
 }
 
 inline bool MCTSNode::terminal() const

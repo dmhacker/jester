@@ -5,15 +5,25 @@
 namespace jester {
 
 MCTSTree::MCTSTree(const Game& game)
-    : d_root(std::make_shared<MCTSNode>(game, nullptr))
+    : d_root(new MCTSNode(game, nullptr))
 {
 }
 
-std::shared_ptr<MCTSNode>& MCTSTree::select() {
-    
+MCTSTree::~MCTSTree() {
+    delete d_root;
 }
 
-void rollout(std::shared_ptr<MCTSNode>& node) {
+MCTSNode* MCTSTree::select() {
+   MCTSNode* expansion = d_root->expand(); 
+   while (expansion == nullptr) {
+        // TODO: Use UCT algorithm to select best child node
+        MCTSNode* visited; 
+        expansion = visited->expand();
+   }
+   return expansion;
+}
+
+void rollout(MCTSNode* node) {
     Game simulation(node->game());
     simulation.play();
     auto& result = simulation.winOrder();
@@ -24,13 +34,13 @@ void rollout(std::shared_ptr<MCTSNode>& node) {
             * (result.size() - 1 - widx) 
             / (result.size() - 1);
     }
-    std::shared_ptr<MCTSNode> current(node);
-    std::shared_ptr<MCTSNode> parent(current->parent().lock());
+    MCTSNode* current = node;
+    MCTSNode* parent = current->parent();
     while (parent != nullptr) {
         current->addReward(rewards[parent->currentPlayer()]);
         current->incrementPlayouts();
         current = parent;
-        parent = current->parent().lock();
+        parent = current->parent();
     }
     current->incrementPlayouts();
 }
