@@ -27,6 +27,7 @@ public:
 
     // Information available to all players about the game
     bool finished() const;
+    bool attackerNext() const;
     size_t playerCount() const;
     size_t deckSize() const;
     std::vector<Action> nextActions() const;

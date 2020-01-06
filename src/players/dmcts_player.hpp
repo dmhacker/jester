@@ -9,8 +9,7 @@ namespace jester {
 
 class DMCTSPlayer : public Player {
 public:
-    Action attack(const GameView& view, std::chrono::milliseconds time_limit);
-    Action defend(const GameView& view, std::chrono::milliseconds time_limit);
+    Action nextAction(const GameView& view);
 };
 
 }

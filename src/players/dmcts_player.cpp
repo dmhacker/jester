@@ -10,7 +10,9 @@
 
 namespace jester {
 
-Action DMCTSPlayer::attack(const GameView& view, std::chrono::milliseconds time_limit)
+const std::chrono::milliseconds DMCTS_TIME_LIMIT = std::chrono::milliseconds(3000);
+
+Action DMCTSPlayer::nextAction(const GameView& view)
 {
     std::cerr << view.nextActions() << std::endl;
     std::unordered_map<Action, std::pair<int, int>> statistics;
@@ -36,7 +38,7 @@ Action DMCTSPlayer::attack(const GameView& view, std::chrono::milliseconds time_
             auto start_timestamp = std::chrono::system_clock::now();
             while (true) {
                 auto end_timestamp = std::chrono::system_clock::now();
-                if (end_timestamp - start_timestamp > time_limit) {
+                if (end_timestamp - start_timestamp > DMCTS_TIME_LIMIT) {
                     break;
                 }
                 tree.iterate();
@@ -65,11 +67,6 @@ Action DMCTSPlayer::attack(const GameView& view, std::chrono::milliseconds time_
         }
     }
     return best_action;
-}
-
-Action DMCTSPlayer::defend(const GameView& view, std::chrono::milliseconds time_limit)
-{
-    return attack(view, time_limit);
 }
 
 }

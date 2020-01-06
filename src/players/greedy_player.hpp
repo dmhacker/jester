@@ -14,8 +14,7 @@ private:
 
 public:
     GreedyPlayer();
-    Action attack(const GameView& view, std::chrono::milliseconds time_limit);
-    Action defend(const GameView& view, std::chrono::milliseconds time_limit);
+    Action nextAction(const GameView& view);
 };
 
 }

@@ -55,6 +55,11 @@ bool GameView::finished() const
     return d_game.finished();
 }
 
+bool GameView::attackerNext() const
+{
+    return d_game.attackerNext();
+}
+
 size_t GameView::deckSize() const
 {
     return d_game.deck().size();

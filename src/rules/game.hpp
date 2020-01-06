@@ -64,7 +64,6 @@ public:
 class Game {
 private:
     std::vector<std::shared_ptr<Player>> d_players;
-    std::vector<GameView> d_views;
     std::vector<Hand> d_hands;
     Deck d_deck;
     CardPile d_hidden;
@@ -78,7 +77,7 @@ private:
 public:
     Game(const std::vector<std::shared_ptr<Player>>& players);
     Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& view);
-    Game(const Game& game);
+    Game(const Game& game) = default;
     ~Game();
 
     // Observational methods
@@ -96,6 +95,7 @@ public:
 
     // Public information (available to all players)
     bool finished() const;
+    bool attackerNext() const;
     size_t playerCount() const;
     std::vector<Action> nextActions() const;
     const std::vector<size_t>& winOrder() const;
@@ -109,9 +109,7 @@ public:
     size_t defenderId() const;
 
 private:
-    void validateAttack(const Action& attack) const;
-    void validateDefense(const Action& defense) const;
-    void setupViews();
+    void validateAction(const Action& action) const;
     void finishGoodDefense();
     void finishBadDefense();
     void replenishHand(Hand& hand, size_t max_count);
@@ -132,6 +130,11 @@ inline void Game::registerObserver(const std::shared_ptr<Observer>& observer)
 inline bool Game::finished() const
 {
     return d_winOrder.size() == d_players.size();
+}
+
+inline bool Game::attackerNext() const
+{
+    return d_currentAttack.size() == d_currentDefense.size();
 }
 
 inline size_t Game::playerCount() const

@@ -19,7 +19,6 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players)
     , d_hands(players.size())
 {
     assert(players.size() >= 2);
-    setupViews();
     reset();
 }
 
@@ -34,7 +33,6 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& 
     , d_attackOrder(view.attackOrder())
 {
     assert(players.size() == view.playerCount());
-    setupViews();
     // Cards in hidden set may be in player hands or may be in the deck
     // Convert set into vector and then shuffle the vector
     std::vector<Card> hidden_cards;
@@ -63,21 +61,6 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& 
         d_deck.push_back(d_trump);
     }
     assert(d_deck.size() == view.deckSize());
-}
-
-Game::Game(const Game& game)
-    : d_players(game.d_players)
-    , d_hands(game.d_hands)
-    , d_deck(game.d_deck)
-    , d_hidden(game.d_hidden)
-    , d_trump(game.d_trump)
-    , d_currentAttack(game.d_currentAttack)
-    , d_currentDefense(game.d_currentDefense)
-    , d_winOrder(game.d_winOrder)
-    , d_attackOrder(game.d_attackOrder)
-    , d_observers(game.d_observers)
-{
-    setupViews();
 }
 
 Game::~Game()
@@ -116,15 +99,14 @@ Action Game::nextAction() const
     auto did = defenderId();
     auto& attacker = d_players[aid];
     auto& defender = d_players[did];
-    if (d_currentAttack.size() == d_currentDefense.size()) {
-        Action attack = attacker->attack(d_views[aid], std::chrono::milliseconds(3000));
-        validateAttack(attack);
-        return attack;
+    Action action;
+    if (attackerNext()) {
+        action = attacker->nextAction(GameView(*this, aid));
     } else {
-        Action defense = defender->defend(d_views[did], std::chrono::milliseconds(3000));
-        validateDefense(defense);
-        return defense;
+        action = defender->nextAction(GameView(*this, did));
     }
+    validateAction(action);
+    return action;
 }
 
 std::vector<Action> Game::nextActions() const
@@ -135,7 +117,7 @@ std::vector<Action> Game::nextActions() const
     }
     auto aid = attackerId();
     auto did = defenderId();
-    if (d_currentAttack.size() == d_currentDefense.size()) {
+    if (attackerNext()) {
         if (d_currentAttack.empty()) {
             for (auto& card : d_hands[aid]) {
                 actions.push_back(Action(card));
@@ -186,7 +168,7 @@ void Game::playAction(const Action& action)
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
     auto& defense_hand = d_hands[did];
-    if (d_currentAttack.size() == d_currentDefense.size()) {
+    if (attackerNext()) {
         for (auto& observer : d_observers) {
             observer->onPostAttack(*this, action);
         }
@@ -308,59 +290,56 @@ void Game::finishBadDefense()
     }
 }
 
-void Game::validateAttack(const Action& attack) const
+void Game::validateAction(const Action& action) const
 {
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
     auto& defense_hand = d_hands[did];
-    if (d_currentAttack.size() >= 6 || defense_hand.size() < 1) {
-        throw GameException("Too many cards in attack or defense has no cards.");
-    }
-    if (attack.empty()) {
-        if (d_currentAttack.empty()) {
-            throw GameException("Player must play a card on their first attack.");
+    if (attackerNext()) {
+        if (d_currentAttack.size() >= 6 || defense_hand.size() < 1) {
+            throw GameException("Too many cards in attack or defense has no cards.");
+        }
+        if (action.empty()) {
+            if (d_currentAttack.empty()) {
+                throw GameException("Player must play a card on their first attack.");
+            }
+        } else {
+            auto& attacking = action.card();
+            if (attack_hand.find(attacking) == attack_hand.end()) {
+                throw GameException("Player must possess the card they are attacking with.");
+            }
+            if (!d_currentAttack.empty()) {
+                std::unordered_set<size_t> valid_ranks;
+                for (auto& card : d_currentAttack) {
+                    valid_ranks.insert(card.rank());
+                }
+                for (auto& card : d_currentDefense) {
+                    valid_ranks.insert(card.rank());
+                }
+                if (valid_ranks.find(attacking.rank()) == valid_ranks.end()) {
+                    throw GameException("Attacking card rank must exist already.");
+                }
+            }
         }
     } else {
-        auto& attacking = attack.card();
-        if (attack_hand.find(attacking) == attack_hand.end()) {
-            throw GameException("Player must possess the card they are attacking with.");
+        if (action.empty()) {
+            return;
         }
-        if (!d_currentAttack.empty()) {
-            std::unordered_set<size_t> valid_ranks;
-            for (auto& card : d_currentAttack) {
-                valid_ranks.insert(card.rank());
-            }
-            for (auto& card : d_currentDefense) {
-                valid_ranks.insert(card.rank());
-            }
-            if (valid_ranks.find(attacking.rank()) == valid_ranks.end()) {
-                throw GameException("Attacking card rank must exist already.");
-            }
+        auto& defending = action.card();
+        if (defense_hand.find(defending) == defense_hand.end()) {
+            throw GameException("Player must possess the card they are defending with.");
         }
-    }
-}
-
-void Game::validateDefense(const Action& defense) const
-{
-    if (defense.empty()) {
-        return;
-    }
-    auto did = defenderId();
-    auto& defense_hand = d_hands[did];
-    auto& defending = defense.card();
-    if (defense_hand.find(defending) == defense_hand.end()) {
-        throw GameException("Player must possess the card they are defending with.");
-    }
-    auto& attacking = d_currentAttack.back();
-    bool suit_match = defending.suit() == trumpSuit()
-        || defending.suit() == attacking.suit();
-    if (!suit_match) {
-        throw GameException("Defending card must be the same suit as the attack card");
-    }
-    bool rank_match = defending.rank() > attacking.rank() || (defending.suit() == trumpSuit() && attacking.suit() != trumpSuit());
-    if (!rank_match) {
-        throw GameException("Defending card must have a higher rank than the attack card");
+        auto& attacking = d_currentAttack.back();
+        bool suit_match = defending.suit() == trumpSuit()
+            || defending.suit() == attacking.suit();
+        if (!suit_match) {
+            throw GameException("Defending card must be the same suit as the attack card");
+        }
+        bool rank_match = defending.rank() > attacking.rank() || (defending.suit() == trumpSuit() && attacking.suit() != trumpSuit());
+        if (!rank_match) {
+            throw GameException("Defending card must have a higher rank than the attack card");
+        }
     }
 }
 
@@ -372,23 +351,16 @@ void Game::replenishHand(Hand& hand, size_t max_count)
     }
 }
 
-void Game::setupViews()
-{
-    for (size_t pid = 0; pid < d_players.size(); pid++) {
-        d_views.push_back(GameView(*this, pid));
-    }
-}
-
 std::ostream& operator<<(std::ostream& os, const Game& game)
 {
     for (size_t pid = 0; pid < game.playerCount(); pid++) {
         os << "  P" << pid << " -- "
-                  << game.d_hands[pid]
-                  << std::endl;
+           << game.d_hands[pid]
+           << std::endl;
     }
     os << "  DK -- "
-              << game.d_deck
-              << std::endl;
+       << game.d_deck
+       << std::endl;
     return os;
 }
 

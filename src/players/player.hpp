@@ -9,8 +9,7 @@ namespace jester {
 
 class Player {
 public:
-    virtual Action attack(const GameView& view, std::chrono::milliseconds time_limit) = 0;
-    virtual Action defend(const GameView & view, std::chrono::milliseconds time_limit) = 0;
+    virtual Action nextAction(const GameView& view) = 0;
 };
 
 }
