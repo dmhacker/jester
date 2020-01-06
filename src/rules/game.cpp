@@ -106,7 +106,7 @@ void Game::reset()
     d_winOrder.clear();
 }
 
-Action Game::nextAction()
+Action Game::nextAction() const
 {
     auto aid = attackerId();
     auto did = defenderId();
@@ -121,6 +121,51 @@ Action Game::nextAction()
         validateDefense(defense);
         return defense;
     }
+}
+
+std::vector<Action> Game::nextActions() const
+{
+    auto aid = attackerId();
+    auto did = defenderId();
+    std::vector<Action> actions;
+    if (d_currentAttack.size() == d_currentDefense.size()) {
+        if (d_currentAttack.empty()) {
+            for (auto& card : d_hands[aid]) {
+                actions.push_back(Action(card));
+            }
+        } else {
+            actions.push_back(Action());
+            std::unordered_set<size_t> valid_ranks;
+            for (auto& card : d_currentAttack) {
+                valid_ranks.insert(card.rank());
+            }
+            for (auto& card : d_currentDefense) {
+                valid_ranks.insert(card.rank());
+            }
+            for (auto& card : d_hands[aid]) {
+                if (valid_ranks.find(card.rank()) != valid_ranks.end()) {
+                    actions.push_back(Action(card));
+                }
+            }
+        }
+    } else {
+        actions.push_back(Action());
+        auto attacking = d_currentAttack.back();
+        for (auto& card : d_hands[did]) {
+            if (attacking.suit() == trumpSuit()) {
+                if (card.suit() == trumpSuit() && card.rank() > attacking.rank()) {
+                    actions.push_back(Action(card));
+                }
+            } else {
+                if (card.suit() == trumpSuit()
+                    || (card.suit() == attacking.suit()
+                        && card.rank() > attacking.rank())) {
+                    actions.push_back(Action(card));
+                }
+            }
+        }
+    }
+    return actions;
 }
 
 void Game::playAction(const Action& action)
@@ -306,8 +351,7 @@ void Game::validateDefense(const Action& defense) const
     if (!suit_match) {
         throw GameException("Defending card must be the same suit as the attack card");
     }
-    bool rank_match = defending.rank() > attacking.rank() || 
-        (defending.suit() == trumpSuit() && attacking.suit() != trumpSuit()); 
+    bool rank_match = defending.rank() > attacking.rank() || (defending.suit() == trumpSuit() && attacking.suit() != trumpSuit());
     if (!rank_match) {
         throw GameException("Defending card must have a higher rank than the attack card");
     }

@@ -45,7 +45,7 @@ public:
 
     // Public methods used to advance gameplay
     void reset();
-    Action nextAction();
+    Action nextAction() const;
     void playAction(const Action& action);
     void play();
 
@@ -56,6 +56,7 @@ public:
     // Public information (available to all players)
     bool finished() const;
     size_t playerCount() const;
+    std::vector<Action> nextActions() const;
     const std::vector<size_t>& winOrder() const;
     const std::deque<size_t>& attackOrder() const;
     const CardPile& hiddenCards() const;

@@ -1,13 +1,21 @@
 #ifndef JESTER_GREEDY_PLAYER_HPP
 #define JESTER_GREEDY_PLAYER_HPP
 
-#include "random_player.hpp"
+#include <random>
+
+#include "player.hpp"
 
 namespace jester {
 
-class GreedyPlayer : public RandomPlayer {
+class GreedyPlayer : public Player {
 private:
-    Action randomAction(const std::vector<Card>& cards);
+    std::random_device d_dev;
+    std::mt19937 d_rng;
+
+public:
+    GreedyPlayer();
+    Action attack(const GameView& view, std::chrono::milliseconds time_limit);
+    Action defend(const GameView& view, std::chrono::milliseconds time_limit);
 };
 
 }

@@ -2,16 +2,42 @@
 
 namespace jester {
 
-Action GreedyPlayer::randomAction(const std::vector<Card>& cards)
+GreedyPlayer::GreedyPlayer()
+    : d_rng(d_dev())
 {
-    // Only select an empty action if nothing else is possible
-    if (cards.empty()) {
+}
+
+Action GreedyPlayer::attack(const GameView& view, std::chrono::milliseconds time_limit)
+{
+    auto actions = view.nextActions();
+    std::vector<Action> filtered;
+    for (auto& action : actions) {
+        if (!action.empty()) {
+            filtered.push_back(action);
+        }
+    }
+    if (filtered.empty()) {
         return Action();
     }
-    // If there are available cards, pick one at random
-    std::uniform_int_distribution<std::mt19937::result_type> dist(0, cards.size() - 1);
-    size_t idx = dist(d_rng);
-    return Action(cards[idx]);
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0, filtered.size() - 1);
+    return filtered[dist(d_rng)];
+
+}
+
+Action GreedyPlayer::defend(const GameView& view, std::chrono::milliseconds time_limit)
+{
+    auto actions = view.nextActions();
+    std::vector<Action> filtered;
+    for (auto& action : actions) {
+        if (!action.empty()) {
+            filtered.push_back(action);
+        }
+    }
+    if (filtered.empty()) {
+        return Action();
+    }
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0, filtered.size() - 1);
+    return filtered[dist(d_rng)];
 }
 
 }

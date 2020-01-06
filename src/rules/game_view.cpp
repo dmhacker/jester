@@ -65,6 +65,10 @@ size_t GameView::playerCount() const
     return d_game.playerCount();
 }
 
+std::vector<Action> GameView::nextActions() const {
+    return d_game.nextActions();
+}
+
 const std::vector<size_t>& GameView::winOrder() const
 {
     return d_game.winOrder();
