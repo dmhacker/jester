@@ -1,37 +1,55 @@
 #include "mcts_tree.hpp"
 
-#include <cassert>
+#include <cmath>
 
 namespace jester {
 
 MCTSTree::MCTSTree(const Game& game)
-    : d_root(new MCTSNode(game, nullptr))
+    : d_game(game)
+    , d_root(new MCTSNode(game, nullptr))
 {
 }
 
-MCTSTree::~MCTSTree() {
+MCTSTree::~MCTSTree()
+{
     delete d_root;
 }
 
-MCTSNode* MCTSTree::select() {
-   MCTSNode* expansion = d_root->expand(); 
-   while (expansion == nullptr) {
-        // TODO: Use UCT algorithm to select best child node
-        MCTSNode* visited; 
-        expansion = visited->expand();
-   }
-   return expansion;
+MCTSNode* MCTSTree::select(Game& game)
+{
+    MCTSNode* leaf = d_root;
+    while (leaf->fullyExpanded()) {
+        if (leaf->terminal()) {
+            return leaf;
+        }
+        Action best_action;
+        MCTSNode* best_node = nullptr;
+        float best_score = -1;
+        for (auto it : leaf->children()) {
+            auto child = it.second;
+            float exploitation = child->rewardRatio();
+            float exploration = std::sqrt(2 * std::log(leaf->playouts()) / child->playouts());
+            float score = exploitation + exploration;
+            if (best_node == nullptr || score > best_score) {
+                best_action = it.first;
+                best_node = child;
+                best_score = score;
+            }
+        }
+        leaf = best_node;
+    }
+    return leaf->expand(game);
 }
 
-void rollout(MCTSNode* node) {
-    Game simulation(node->game());
-    simulation.play();
-    auto& result = simulation.winOrder();
+void rollout(Game& game, MCTSNode* node)
+{
+    game.play();
+    auto& result = game.winOrder();
     std::unordered_map<size_t, float> rewards;
     for (size_t widx = 0; widx < result.size(); widx++) {
         size_t pid = result[widx];
-        rewards[pid] = 1.f 
-            * (result.size() - 1 - widx) 
+        rewards[pid] = 1.f
+            * (result.size() - 1 - widx)
             / (result.size() - 1);
     }
     MCTSNode* current = node;

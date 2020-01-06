@@ -3,26 +3,27 @@
 
 #include "mcts_node.hpp"
 
-// TODO: Node does not store a game state, only maps action
-// Only one game is created per iteration and passed through path we select
-
 namespace jester {
 
 class MCTSTree {
 private:
+    const Game& d_game;
     MCTSNode* d_root;
 
 public:
     MCTSTree(const Game& game);
     ~MCTSTree();
-    void iterate(); 
+    void iterate();
+
 private:
-    MCTSNode* select();
-    void rollout(MCTSNode* node);
+    MCTSNode* select(Game& game);
+    void rollout(Game& game, MCTSNode* node);
 };
 
-inline void MCTSTree::iterate() {
-    rollout(select());
+inline void MCTSTree::iterate()
+{
+    Game game(d_game);
+    rollout(game, select(game));
 }
 
 }

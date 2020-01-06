@@ -9,12 +9,13 @@ namespace jester {
 
 class MCTSNode {
 private:
-    Game d_game;
     size_t d_playouts;
     float d_reward;
     MCTSNode* d_parent_p;
     std::unordered_map<Action, MCTSNode*> d_children;
     std::vector<Action> d_unexpanded;
+    size_t d_player;
+    bool d_terminal;
 
 public:
     MCTSNode(const Game& game, MCTSNode* parent);
@@ -24,20 +25,16 @@ public:
     size_t playouts() const;
     float reward() const;
     float rewardRatio() const;
-    const std::unordered_map<Action, MCTSNode*>& children() const;
     MCTSNode* parent() const;
+    const std::unordered_map<Action, MCTSNode*>& children() const;
     bool terminal() const;
     size_t currentPlayer() const;
+    bool fullyExpanded() const;
 
-    MCTSNode* expand();
+    MCTSNode* expand(Game& game);
     void addReward(float reward);
     void incrementPlayouts();
 };
-
-inline const Game& MCTSNode::game() const
-{
-    return d_game;
-}
 
 inline size_t MCTSNode::playouts() const
 {
@@ -69,16 +66,17 @@ inline MCTSNode* MCTSNode::parent() const
 
 inline bool MCTSNode::terminal() const
 {
-    return d_game.finished();
+    return d_terminal;
 }
 
 inline size_t MCTSNode::currentPlayer() const
 {
-    if (d_game.currentAttack().size() == d_game.currentDefense().size()) {
-        return d_game.attackerId();
-    } else {
-        return d_game.defenderId();
-    }
+    return d_player;
+}
+
+inline bool MCTSNode::fullyExpanded() const
+{
+    return d_unexpanded.empty();
 }
 
 inline void MCTSNode::addReward(float reward)
