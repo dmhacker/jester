@@ -10,13 +10,10 @@ MCTSTree::MCTSTree(const Game& game)
 }
 
 std::shared_ptr<MCTSNode>& MCTSTree::select() {
-
+    
 }
 
 void rollout(std::shared_ptr<MCTSNode>& node) {
-    if (node->terminal()) {
-        return; 
-    }
     Game simulation(node->game());
     simulation.play();
     auto& result = simulation.winOrder();
@@ -28,10 +25,14 @@ void rollout(std::shared_ptr<MCTSNode>& node) {
             / (result.size() - 1);
     }
     std::shared_ptr<MCTSNode> current(node);
-    while (current != nullptr) {
-        current->addReward(rewards[current->currentPlayer()]);
-        current = current->parent().lock();
+    std::shared_ptr<MCTSNode> parent(current->parent().lock());
+    while (parent != nullptr) {
+        current->addReward(rewards[parent->currentPlayer()]);
+        current->incrementPlayouts();
+        current = parent;
+        parent = current->parent().lock();
     }
+    current->incrementPlayouts();
 }
 
 }

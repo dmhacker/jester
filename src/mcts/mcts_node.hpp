@@ -28,6 +28,7 @@ public:
     size_t currentPlayer() const;
 
     void addReward(float reward);
+    void incrementPlayouts();
 };
 
 inline const Game& MCTSNode::game() const
@@ -68,11 +69,11 @@ inline bool MCTSNode::terminal() const
     return d_game.finished();
 }
 
-inline size_t MCTSNode::currentPlayer() const {
+inline size_t MCTSNode::currentPlayer() const
+{
     if (d_game.currentAttack().size() == d_game.currentDefense().size()) {
         return d_game.attackerId();
-    }
-    else {
+    } else {
         return d_game.defenderId();
     }
 }
@@ -80,6 +81,10 @@ inline size_t MCTSNode::currentPlayer() const {
 inline void MCTSNode::addReward(float reward)
 {
     d_reward += reward;
+}
+
+inline void MCTSNode::incrementPlayouts()
+{
     d_playouts++;
 }
 
