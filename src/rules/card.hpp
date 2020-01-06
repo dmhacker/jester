@@ -46,6 +46,7 @@ public:
 
     bool empty() const;
     const Card& card() const;
+    bool operator==(const Action& action) const;
 };
 
 using Deck = std::deque<Card>;
@@ -81,9 +82,21 @@ inline const Card& Action::card() const
     return *d_card;
 }
 
+inline bool Action::operator==(const Action& action) const
+{
+    if (empty()) {
+        return action.empty(); 
+    }
+    if (action.empty()) {
+        return false;
+    }
+    return card() == action.card();
+}
+
 }
 
 namespace std {
+
 template <>
 struct hash<jester::Card> {
     size_t operator()(const jester::Card& card) const
@@ -91,6 +104,18 @@ struct hash<jester::Card> {
         return hash<int>()(card.rank() * 4 + card.suit());
     }
 };
+
+template <>
+struct hash<jester::Action> {
+    size_t operator()(const jester::Action& action) const
+    {
+        if (action.empty()) {
+            return hash<int>()(-1);
+        }
+        return hash<jester::Card>()(action.card());
+    }
+};
+
 }
 
 #endif
