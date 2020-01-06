@@ -64,6 +64,7 @@ Action DMCTSPlayer::nextAction(const GameView& view)
         float rat = it.second.first / it.second.second;
         if (rat > best_ratio) {
             best_action = it.first;
+            best_ratio = rat;
         }
     }
     return best_action;
