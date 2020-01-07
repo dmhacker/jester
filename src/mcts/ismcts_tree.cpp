@@ -32,7 +32,7 @@ void ISMCTSTree::iterate()
 ISMCTSNode* ISMCTSTree::selectAndExpand(Game& game)
 {
     ISMCTSNode* selection = d_root;
-    std::shared_ptr<Action> next_action; 
+    std::shared_ptr<Action> next_action = nullptr;
     while ((next_action = selection->unexpandedAction(game)) == nullptr) {
         if (game.finished()) {
             return selection;
@@ -40,15 +40,15 @@ ISMCTSNode* ISMCTSTree::selectAndExpand(Game& game)
         Action best_action;
         ISMCTSNode* best_node = nullptr;
         float best_score = -1;
-        for (auto it : selection->children()) {
-            auto child = it.second;
+        for (auto& action : game.nextActions()) {
+            auto child = selection->children()[action];
             float exploitation = child->stats().rewardRatio();
             float exploration = std::sqrt(
                 2 * std::log(selection->stats().playouts())
                 / child->stats().playouts());
             float score = exploitation + exploration;
             if (best_node == nullptr || score > best_score) {
-                best_action = it.first;
+                best_action = action;
                 best_node = child;
                 best_score = score;
             }

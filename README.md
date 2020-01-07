@@ -45,11 +45,11 @@ However, a greedy player will always play a random card if it can.
 search with explicit determinzations. That is, the player will
 fill in incomplete game information with several potential 
 determinizations and then run MCTS on each state.
+* ISMCTS — A player implementing [information-set Monte Carlo
+tree search](http://eprints.whiterose.ac.uk/75048/1/CowlingPowleyWhitehouse2012.pdf). For now, the single-observer variant has been implemented.
 
 Work-in-progress options are:
 
-* ISMCTS — A player implementing [information-set Monte Carlo
-tree search](http://eprints.whiterose.ac.uk/75048/1/CowlingPowleyWhitehouse2012.pdf), most likely the multi-observer variant.
 * Smart — The smart player will follow a pre-defined strategy. The
 smart player will try to perform prudent actions, such as saving
 trump and high cards for later and attacking with low cards 
