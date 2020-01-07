@@ -9,8 +9,9 @@ using namespace jester;
 
 int main() {
     std::vector<std::shared_ptr<Player>> players;
+    /* players.push_back(std::make_shared<GreedyPlayer>()); */
     players.push_back(std::make_shared<DMCTSPlayer>());
-    players.push_back(std::make_shared<GreedyPlayer>());
+    players.push_back(std::make_shared<DMCTSPlayer>());
     Game game(players);
     game.registerObserver(std::make_shared<OmniscientObserver>());
     game.play();

@@ -158,13 +158,6 @@ inline Suit Game::trumpSuit() const
     return d_trump.suit();
 }
 
-inline void Game::play()
-{
-    while (!finished()) {
-        playAction(nextAction());
-    }
-}
-
 }
 
 #endif

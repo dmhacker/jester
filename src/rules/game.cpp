@@ -8,7 +8,7 @@
 #include <random>
 
 namespace jester {
-    
+
 GameException::GameException(const std::string& message)
     : d_message(message)
 {
@@ -19,7 +19,7 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players)
     , d_hands(players.size())
 {
     assert(players.size() >= 2);
-    std::mt19937 rng(std::random_device{}());
+    std::mt19937 rng(std::random_device {}());
     reset(rng);
 }
 
@@ -158,20 +158,28 @@ std::vector<Action> Game::nextActions() const
     return actions;
 }
 
+void Game::play()
+{
+    for (auto& observer : d_observers) {
+        observer->onGameStart(*this);
+    }
+    while (!finished()) {
+        playAction(nextAction());
+    }
+    for (auto& observer : d_observers) {
+        observer->onGameEnd(*this);
+    }
+}
+
 void Game::playAction(const Action& action)
 {
-    if (d_hidden.size() == 35) {
-        for (auto& observer : d_observers) {
-            observer->onGameStart(*this);
-        }
-    }
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
     auto& defense_hand = d_hands[did];
     if (attackerNext()) {
         for (auto& observer : d_observers) {
-            observer->onPostAttack(*this, action);
+            observer->onPostAction(*this, action, true);
         }
         if (action.empty()) {
             finishGoodDefense();
@@ -191,14 +199,11 @@ void Game::playAction(const Action& action)
                 for (auto& observer : d_observers) {
                     observer->onPlayerWin(*this, did, d_winOrder.size());
                 }
-                for (auto& observer : d_observers) {
-                    observer->onGameEnd(*this);
-                }
             }
         }
     } else {
         for (auto& observer : d_observers) {
-            observer->onPostDefend(*this, action);
+            observer->onPostAction(*this, action, false);
         }
         if (action.empty()) {
             finishBadDefense();
@@ -248,9 +253,6 @@ void Game::finishGoodDefense()
             d_winOrder.push_back(aid);
             for (auto& observer : d_observers) {
                 observer->onPlayerWin(*this, aid, d_winOrder.size());
-            }
-            for (auto& observer : d_observers) {
-                observer->onGameEnd(*this);
             }
             return;
         }

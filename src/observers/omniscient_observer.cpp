@@ -16,19 +16,6 @@ namespace {
             << std::string(60, thin ? '-' : '=')
             << std::endl;
     }
-
-    void printPlayerLine(size_t pid, std::string line)
-    {
-        std::cout
-            << "[P" << pid << "] [GAME] "
-            << line << std::endl;
-    }
-
-    void printGameState(const Game& game)
-    {
-        std::cout << "The game state is now: " << std::endl;
-        std::cout << game; 
-    }
 }
 
 void OmniscientObserver::onGameStart(const Game& game)
@@ -44,49 +31,45 @@ void OmniscientObserver::onGameStart(const Game& game)
     printBarrier<true>();
 }
 
-void OmniscientObserver::onPostAttack(const Game& game, const Action& action)
+void OmniscientObserver::onPostAction(const Game& game, const Action& action, bool was_attack)
 {
-    auto pid = game.attackerId();
-    if (action.empty()) {
-        assert(!game.currentAttack().empty());
-        printPlayerLine(pid, "Choose to halt the attack.");
+    auto pid = was_attack ? game.attackerId() : game.defenderId();
+    std::cout << "[GAME] Player " << pid << " ";
+    if (was_attack) {
+        if (action.empty()) {
+            assert(!game.currentAttack().empty());
+            std::cout << "choose to halt the attack." << std::endl;
+        } else {
+            std::cout << "attacked with " << action.card() << "." << std::endl;
+        }
     } else {
-        std::stringstream ss;
-        ss << "Attacked with " << action.card() << ".";
-        printPlayerLine(pid, ss.str());
-    }
-}
-
-void OmniscientObserver::onPostDefend(const Game& game, const Action& action)
-{
-    auto pid = game.defenderId();
-    if (action.empty()) {
-        printPlayerLine(pid, "Gave up the defense.");
-    } else {
-        std::stringstream ss;
-        ss << "Defended with " << action.card() << ".";
-        printPlayerLine(pid, ss.str());
+        if (action.empty()) {
+            std::cout << "gave up the defense." << std::endl;
+        } else {
+            std::cout << "defended with " << action.card() << "." << std::endl;
+        }
     }
 }
 
 void OmniscientObserver::onTurnEnd(const Game& game, bool defense_success)
 {
-    printGameState(game);
+    std::cout << "The game state is now: " << std::endl;
+    std::cout << game;
     printBarrier<true>();
 }
 
 void OmniscientObserver::onPlayerWin(const Game& game, size_t player_id, size_t win_position)
 {
-    std::stringstream ss;
-    ss << "Finished game in " << win_position;
+    std::cout << "[GAME] Player " << player_id
+              << " Finished game in " << win_position;
     if (win_position == 1) {
-        ss << "st place.";
+        std::cout << "st place.";
     } else if (win_position == 2) {
-        ss << "nd place.";
+        std::cout << "nd place.";
     } else {
-        ss << "th place.";
+        std::cout << "th place.";
     }
-    printPlayerLine(player_id, ss.str());
+    std::cout << std::endl;
 }
 
 void OmniscientObserver::onGameEnd(const Game& game)
@@ -97,7 +80,7 @@ void OmniscientObserver::onGameEnd(const Game& game)
         << game.winOrder()
         << "." << std::endl;
     std::cout
-        << "This means that player "
+        << "Player "
         << game.winOrder().back()
         << " is the loser!" << std::endl;
     printBarrier<false>();
