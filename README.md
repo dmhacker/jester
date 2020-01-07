@@ -27,7 +27,7 @@ There are no plans to add a GUI.
 
 jester's game-playing algorithm of choice is 
 [Monte Carlo tree search](https://en.wikipedia.org/wiki/Monte_Carlo_tree_search), 
-specifically variants such as determinized UCT and 
+specifically variants such as determinized and 
 information-set MCTS that have been adapted
 for games with imperfect information. 
 
@@ -41,7 +41,7 @@ strategy and will always lose, even against random play.
 a valid, random action with no bias.
 * Greedy — A greedy player is similar to a random player.
 However, a greedy player will always play a random card if it can. 
-* Determinized UCT — A player implementing Monte Carlo tree
+* Determinized MCTS — A player implementing Monte Carlo tree
 search with explicit determinzations. That is, the player will
 fill in incomplete game information with several potential 
 determinizations and then run MCTS on each state.
