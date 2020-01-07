@@ -2,6 +2,7 @@
 #define JESTER_MCTS_NODE_HPP
 
 #include "../rules/game.hpp"
+#include "mcts_stats.hpp"
 
 #include <unordered_map>
 
@@ -9,57 +10,34 @@ namespace jester {
 
 class MCTSNode {
 private:
-    size_t d_playouts;
-    float d_reward;
+    MCTSStats d_stats;
+    size_t d_player;
     MCTSNode* d_parent_p;
     std::unordered_map<Action, MCTSNode*> d_children;
     std::vector<Action> d_unexpanded;
-    size_t d_player;
 
 public:
     MCTSNode(const Game& game, MCTSNode* parent);
     ~MCTSNode();
 
-    size_t playouts() const;
-    float reward() const;
-    float rewardRatio() const;
-    MCTSNode* parent() const;
-    const std::unordered_map<Action, MCTSNode*>& children() const;
-    size_t currentPlayer() const;
-    bool fullyExpanded() const;
-    std::ostream& print(std::ostream& os, size_t level = 0) const;
+    // Disable copy and assignment operators
+    MCTSNode(const MCTSNode& tree) = delete;
+    MCTSNode& operator=(const MCTSNode& tree) = delete;
 
-    MCTSNode* expand(Game& game);
-    void addReward(float reward);
-    void incrementPlayouts();
+    bool fullyExpanded() const;
+    size_t currentPlayer() const;
+    MCTSNode* parent() const;
+
+    std::unordered_map<Action, MCTSNode*>& children();
+    MCTSStats& stats();
+    Action expand();
+
+    std::ostream& print(std::ostream& os, size_t level = 0) const;
 };
 
-inline size_t MCTSNode::playouts() const
+inline bool MCTSNode::fullyExpanded() const
 {
-    return d_playouts;
-}
-
-inline float MCTSNode::reward() const
-{
-    return d_reward;
-}
-
-inline float MCTSNode::rewardRatio() const
-{
-    if (d_playouts == 0) {
-        return 0;
-    }
-    return d_reward / d_playouts;
-}
-
-inline const std::unordered_map<Action, MCTSNode*>& MCTSNode::children() const
-{
-    return d_children;
-}
-
-inline MCTSNode* MCTSNode::parent() const
-{
-    return d_parent_p;
+    return d_unexpanded.empty();
 }
 
 inline size_t MCTSNode::currentPlayer() const
@@ -67,19 +45,26 @@ inline size_t MCTSNode::currentPlayer() const
     return d_player;
 }
 
-inline bool MCTSNode::fullyExpanded() const
+inline MCTSNode* MCTSNode::parent() const
 {
-    return d_unexpanded.empty();
+    return d_parent_p;
 }
 
-inline void MCTSNode::addReward(float reward)
+inline std::unordered_map<Action, MCTSNode*>& MCTSNode::children()
 {
-    d_reward += reward;
+    return d_children;
 }
 
-inline void MCTSNode::incrementPlayouts()
+inline MCTSStats& MCTSNode::stats()
 {
-    d_playouts++;
+    return d_stats;
+}
+
+inline Action MCTSNode::expand()
+{
+    Action action = d_unexpanded.back();
+    d_unexpanded.pop_back();
+    return action;
 }
 
 }

@@ -1,7 +1,7 @@
 #include "mcts_tree.hpp"
 
-#include <cmath>
 #include <cassert>
+#include <cmath>
 
 namespace jester {
 
@@ -9,6 +9,7 @@ MCTSTree::MCTSTree(const Game& game)
     : d_game(game)
     , d_root(new MCTSNode(d_game, nullptr))
 {
+    assert(!d_game.finished());
 }
 
 MCTSTree::~MCTSTree()
@@ -16,20 +17,31 @@ MCTSTree::~MCTSTree()
     delete d_root;
 }
 
-MCTSNode* MCTSTree::select(Game& game)
+MCTSNode* MCTSTree::expandNode(Game& game, MCTSNode* node) const
 {
-    MCTSNode* leaf = d_root;
-    while (leaf->fullyExpanded()) {
+    auto action = node->expand();
+    game.playAction(action);
+    auto child = new MCTSNode(game, node);
+    node->children()[action] = child;
+    return child;
+}
+
+MCTSNode* MCTSTree::selectAndExpand(Game& game)
+{
+    MCTSNode* selection = d_root;
+    while (selection->fullyExpanded()) {
         if (game.finished()) {
-            return leaf;
+            return selection;
         }
         Action best_action;
         MCTSNode* best_node = nullptr;
         float best_score = -1;
-        for (auto it : leaf->children()) {
+        for (auto it : selection->children()) {
             auto child = it.second;
-            float exploitation = child->rewardRatio();
-            float exploration = std::sqrt(2 * std::log(leaf->playouts()) / child->playouts());
+            float exploitation = child->stats().rewardRatio();
+            float exploration = std::sqrt(
+                2 * std::log(selection->stats().playouts())
+                / child->stats().playouts());
             float score = exploitation + exploration;
             if (best_node == nullptr || score > best_score) {
                 best_action = it.first;
@@ -39,12 +51,12 @@ MCTSNode* MCTSTree::select(Game& game)
         }
         assert(best_node != nullptr);
         game.playAction(best_action);
-        leaf = best_node;
+        selection = best_node;
     }
-    return leaf->expand(game);
+    return expandNode(game, selection);
 }
 
-void MCTSTree::rollout(Game& game, MCTSNode* node)
+void MCTSTree::rolloutAndPropogate(Game& game, MCTSNode* node)
 {
     game.play();
     auto& result = game.winOrder();
@@ -58,12 +70,12 @@ void MCTSTree::rollout(Game& game, MCTSNode* node)
     MCTSNode* current = node;
     MCTSNode* parent = current->parent();
     while (parent != nullptr) {
-        current->addReward(rewards[parent->currentPlayer()]);
-        current->incrementPlayouts();
+        current->stats().addReward(rewards[parent->currentPlayer()]);
+        current->stats().incrementPlayouts();
         current = parent;
         parent = current->parent();
     }
-    current->incrementPlayouts();
+    current->stats().incrementPlayouts();
 }
 
 }

@@ -20,7 +20,7 @@ namespace {
     void printPlayerLine(size_t pid, std::string line)
     {
         std::cout
-            << "[P" << pid << "] "
+            << "[P" << pid << "] [GAME] "
             << line << std::endl;
     }
 

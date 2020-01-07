@@ -14,6 +14,7 @@ public:
     MCTSTree(const Game& game);
     ~MCTSTree();
 
+    // Disable copy and assignment operators
     MCTSTree(const MCTSTree& tree) = delete;
     MCTSTree& operator=(const MCTSTree& tree) = delete;
 
@@ -22,14 +23,15 @@ public:
     void iterate();
 
 private:
-    MCTSNode* select(Game& game);
-    void rollout(Game& game, MCTSNode* node);
+    MCTSNode* expandNode(Game& game, MCTSNode* node) const;
+    MCTSNode* selectAndExpand(Game& game);
+    void rolloutAndPropogate(Game& game, MCTSNode* node);
 };
 
 inline void MCTSTree::iterate()
 {
     Game game(d_game);
-    rollout(game, select(game));
+    rolloutAndPropogate(game, selectAndExpand(game));
 }
 
 inline MCTSNode* MCTSTree::root() const

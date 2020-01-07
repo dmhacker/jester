@@ -7,10 +7,10 @@ MinimalPlayer::MinimalPlayer()
 {
 }
 
-Action MinimalPlayer::attack(const GameView& view, std::chrono::milliseconds time_limit)
+Action MinimalPlayer::nextAction(const GameView& view)
 {
     auto& hand = view.hand();
-    if (view.currentAttack().empty()) {
+    if (view.attackerNext() && view.currentAttack().empty()) {
         std::uniform_int_distribution<std::mt19937::result_type> dist(0, hand.size() - 1);
         size_t idx = dist(d_rng);
         auto it = hand.begin();
@@ -19,11 +19,6 @@ Action MinimalPlayer::attack(const GameView& view, std::chrono::milliseconds tim
     } else {
         return Action(); 
     }
-}
-
-Action MinimalPlayer::defend(const GameView& view, std::chrono::milliseconds time_limit)
-{
-    return Action(); 
 }
 
 }
