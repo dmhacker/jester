@@ -2,6 +2,7 @@
 #define JESTER_GAME_HPP
 
 #include <memory>
+#include <random>
 
 #include "card.hpp"
 
@@ -35,7 +36,7 @@ private:
 
 public:
     Game(const std::vector<std::shared_ptr<Player>>& players);
-    Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& view);
+    Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& view, std::mt19937& rng);
     Game(const Game& game) = default;
     ~Game();
 
@@ -43,7 +44,7 @@ public:
     void registerObserver(const std::shared_ptr<Observer>& observer);
 
     // Public methods used to advance gameplay
-    void reset();
+    void reset(std::mt19937& rng);
     Action nextAction() const;
     void playAction(const Action& action);
     void play();
@@ -77,7 +78,8 @@ private:
     friend std::ostream& operator<<(std::ostream& os, const Game& game);
 };
 
-inline const char* GameException::what() const throw() {
+inline const char* GameException::what() const throw()
+{
     return d_message.c_str();
 }
 

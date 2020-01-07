@@ -9,7 +9,6 @@ namespace jester {
 
 class MinimalPlayer : public Player {
 private:
-    std::random_device d_dev;
     std::mt19937 d_rng;
 
 public:

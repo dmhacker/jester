@@ -3,7 +3,7 @@
 namespace jester {
 
 MinimalPlayer::MinimalPlayer()
-    : d_rng(d_dev())
+    : d_rng(std::random_device{}())
 {
 }
 

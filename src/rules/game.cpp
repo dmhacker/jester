@@ -5,10 +5,10 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
+#include <random>
 
 namespace jester {
-
+    
 GameException::GameException(const std::string& message)
     : d_message(message)
 {
@@ -19,10 +19,11 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players)
     , d_hands(players.size())
 {
     assert(players.size() >= 2);
-    reset();
+    std::mt19937 rng(std::random_device{}());
+    reset(rng);
 }
 
-Game::Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& view)
+Game::Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& view, std::mt19937& rng)
     : d_players(players)
     , d_hands(players.size())
     , d_hidden(view.hiddenCards())
@@ -41,7 +42,7 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& 
             hidden_cards.push_back(card);
         }
     }
-    std::random_shuffle(hidden_cards.begin(), hidden_cards.end());
+    std::shuffle(hidden_cards.begin(), hidden_cards.end(), rng);
     // Populate player hands with their known cards
     for (size_t pid = 0; pid < players.size(); pid++) {
         auto const& visible = view.visibleHand(pid);
@@ -67,7 +68,7 @@ Game::~Game()
 {
 }
 
-void Game::reset()
+void Game::reset(std::mt19937& rng)
 {
     for (size_t rank = 6; rank <= 14; rank++) {
         d_deck.push_back(Card(rank, Suit::hearts));
@@ -75,7 +76,7 @@ void Game::reset()
         d_deck.push_back(Card(rank, Suit::spades));
         d_deck.push_back(Card(rank, Suit::clubs));
     }
-    std::random_shuffle(d_deck.begin(), d_deck.end());
+    std::shuffle(d_deck.begin(), d_deck.end(), rng);
     d_trump = d_deck.back();
     d_hidden.clear();
     d_hidden.insert(d_deck.begin(), d_deck.end());

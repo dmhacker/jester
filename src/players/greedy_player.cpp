@@ -3,7 +3,7 @@
 namespace jester {
 
 GreedyPlayer::GreedyPlayer()
-    : d_rng(d_dev())
+    : d_rng(std::random_device{}())
 {
 }
 

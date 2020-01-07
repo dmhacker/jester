@@ -37,8 +37,11 @@ Action DMCTSPlayer::nextAction(const GameView& view)
                 auto player = std::make_shared<RandomPlayer>();
                 players.push_back(player);
             }
-            Game game(players, view);
+            // Create a determinization of the current game
+            std::mt19937 rng(std::random_device{}());
+            Game game(players, view, rng);
             MCTSTree tree(game);
+            // While we have enough time, incrementally build the tree 
             auto start_timestamp = std::chrono::system_clock::now();
             while (true) {
                 auto end_timestamp = std::chrono::system_clock::now();
