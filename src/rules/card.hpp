@@ -39,11 +39,14 @@ private:
 
 class Action {
 private:
-    std::shared_ptr<Card> d_card;
+    Card* d_card;
 
 public:
     Action();
     Action(const Card& _card);
+    Action(const Action& action);
+    Action& operator=(const Action& action);
+    ~Action();
 
     bool empty() const;
     const Card& card() const;
@@ -97,8 +100,9 @@ inline bool Action::operator==(const Action& action) const
     return card() == action.card();
 }
 
-template<class T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& container) {
+template <class T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& container)
+{
     os << "[";
     for (size_t i = 0; i < container.size(); i++) {
         os << container[i];
@@ -110,8 +114,9 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& container) {
     return os;
 }
 
-template<class T>
-std::ostream& operator<<(std::ostream& os, const std::deque<T>& container) {
+template <class T>
+std::ostream& operator<<(std::ostream& os, const std::deque<T>& container)
+{
     os << "[";
     for (size_t i = 0; i < container.size(); i++) {
         os << container[i];
@@ -123,8 +128,9 @@ std::ostream& operator<<(std::ostream& os, const std::deque<T>& container) {
     return os;
 }
 
-template<class T>
-std::ostream& operator<<(std::ostream& os, const std::unordered_set<T>& container) {
+template <class T>
+std::ostream& operator<<(std::ostream& os, const std::unordered_set<T>& container)
+{
     os << "{";
     size_t i = 0;
     for (auto& item : container) {

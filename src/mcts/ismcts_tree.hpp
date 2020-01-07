@@ -25,7 +25,6 @@ public:
     void iterate();
 
 private:
-    ISMCTSNode* expandNode(Game& game, ISMCTSNode* node) const;
     ISMCTSNode* selectAndExpand(Game& game);
     void rolloutAndPropogate(Game& game, ISMCTSNode* node);
 };

@@ -25,7 +25,7 @@ public:
     DMCTSNode& operator=(const DMCTSNode& tree) = delete;
 
     bool fullyExpanded() const;
-    size_t currentPlayer() const;
+    size_t playerId() const;
     DMCTSNode* parent() const;
 
     std::unordered_map<Action, DMCTSNode*>& children();
@@ -40,7 +40,7 @@ inline bool DMCTSNode::fullyExpanded() const
     return d_unexpanded.empty();
 }
 
-inline size_t DMCTSNode::currentPlayer() const
+inline size_t DMCTSNode::playerId() const
 {
     return d_player;
 }

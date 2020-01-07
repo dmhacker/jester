@@ -1,11 +1,10 @@
 #ifndef JESTER_ISMCTS_NODE_HPP
 #define JESTER_ISMCTS_NODE_HPP
 
-#include "mcts_stats.hpp"
-#include "../rules/game_view.hpp"
 #include "../rules/game.hpp"
+#include "../rules/game_view.hpp"
+#include "mcts_stats.hpp"
 
-#include <tuple>
 #include <unordered_map>
 
 namespace jester {
@@ -13,9 +12,9 @@ namespace jester {
 class ISMCTSNode {
 private:
     MCTSStats d_stats;
-    size_t d_player;
     ISMCTSNode* d_parent_p;
     std::unordered_map<Action, ISMCTSNode*> d_children;
+    size_t d_player;
 
 public:
     ISMCTSNode(size_t player, ISMCTSNode* parent);
@@ -25,17 +24,17 @@ public:
     ISMCTSNode(const ISMCTSNode& tree) = delete;
     ISMCTSNode& operator=(const ISMCTSNode& tree) = delete;
 
-    size_t currentPlayer() const;
+    size_t playerId() const;
     ISMCTSNode* parent() const;
 
     std::unordered_map<Action, ISMCTSNode*>& children();
     MCTSStats& stats();
-    std::shared_ptr<std::tuple<Game, Action>> expand(const GameView& view, std::mt19937& rng);
+    std::shared_ptr<Action> unexpandedAction(const Game& game) const;
 
     std::ostream& print(std::ostream& os, size_t level = 0) const;
 };
 
-inline size_t ISMCTSNode::currentPlayer() const
+inline size_t ISMCTSNode::playerId() const
 {
     return d_player;
 }

@@ -94,7 +94,8 @@ void Game::reset(std::mt19937& rng)
     d_winOrder.clear();
 }
 
-GameView Game::currentPlayerView() const {
+GameView Game::currentPlayerView() const
+{
     return GameView(*this, currentPlayerId());
 }
 
@@ -102,6 +103,9 @@ Action Game::nextAction() const
 {
     auto& player = d_players[currentPlayerId()];
     Action action = player->nextAction(currentPlayerView());
+    std::cerr << this << std::endl;
+    std::cerr << *this;
+    std::cerr << action << " " << nextActions() << std::endl;
     return action;
 }
 
@@ -291,6 +295,9 @@ void Game::finishBadDefense()
 
 void Game::validateAction(const Action& action) const
 {
+    if (finished()) {
+        throw GameException("The game is finished.");
+    }
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
@@ -306,6 +313,9 @@ void Game::validateAction(const Action& action) const
         } else {
             auto& attacking = action.card();
             if (attack_hand.find(attacking) == attack_hand.end()) {
+                std::cerr << this << std::endl;
+                std::cerr << *this;
+                std::cerr << attacking << " " << nextActions() << std::endl;
                 throw GameException("Player must possess the card they are attacking with.");
             }
             if (!d_currentAttack.empty()) {

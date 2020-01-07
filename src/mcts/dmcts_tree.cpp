@@ -70,7 +70,7 @@ void DMCTSTree::rolloutAndPropogate(Game& game, DMCTSNode* node)
     DMCTSNode* current = node;
     DMCTSNode* parent = current->parent();
     while (parent != nullptr) {
-        current->stats().addReward(rewards[parent->currentPlayer()]);
+        current->stats().addReward(rewards[parent->playerId()]);
         current->stats().incrementPlayouts();
         current = parent;
         parent = current->parent();

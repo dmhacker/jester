@@ -4,8 +4,8 @@
 namespace jester {
 
 ISMCTSNode::ISMCTSNode(size_t player, ISMCTSNode* parent)
-    : d_player(player)
-    , d_parent_p(parent)
+    : d_parent_p(parent)
+    , d_player(player)
 {
 }
 
@@ -16,17 +16,12 @@ ISMCTSNode::~ISMCTSNode()
     }
 }
 
-inline std::shared_ptr<std::tuple<Game, Action>> ISMCTSNode::expand(const GameView& view, std::mt19937& rng)
+std::shared_ptr<Action> ISMCTSNode::unexpandedAction(const Game& game) const
 {
-    std::vector<std::shared_ptr<Player>> players;
-    for (size_t pid = 0; pid < view.playerCount(); pid++) {
-        players.push_back(std::make_shared<RandomPlayer>());
-    }
-    Game game(players, view, rng);
     for (auto& action : game.nextActions()) {
         auto it = d_children.find(action);
         if (it == d_children.end()) {
-            return std::make_shared<std::tuple<Game, Action>>(std::make_pair<>(game, action)); 
+            return std::make_shared<Action>(action);
         }
     }
     return nullptr;
