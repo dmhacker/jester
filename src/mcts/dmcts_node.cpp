@@ -1,8 +1,8 @@
-#include "mcts_node.hpp"
+#include "dmcts_node.hpp"
 
 namespace jester {
 
-MCTSNode::MCTSNode(const Game& game, MCTSNode* parent)
+DMCTSNode::DMCTSNode(const Game& game, DMCTSNode* parent)
     : d_parent_p(parent)
     , d_unexpanded(game.nextActions())
 {
@@ -13,14 +13,14 @@ MCTSNode::MCTSNode(const Game& game, MCTSNode* parent)
     }
 }
 
-MCTSNode::~MCTSNode()
+DMCTSNode::~DMCTSNode()
 {
     for (auto& it : d_children) {
         delete it.second;
     }
 }
 
-std::ostream& MCTSNode::print(std::ostream& os, size_t level) const
+std::ostream& DMCTSNode::print(std::ostream& os, size_t level) const
 {
     if (level > 3) {
         return os;

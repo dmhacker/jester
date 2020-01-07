@@ -1,40 +1,53 @@
-#include "mcts_tree.hpp"
+#include "ismcts_tree.hpp"
+#include "../players/random_player.hpp"
 
 #include <cassert>
 #include <cmath>
 
 namespace jester {
 
-MCTSTree::MCTSTree(const Game& game)
-    : d_game(game)
-    , d_root(new MCTSNode(d_game, nullptr))
+ISMCTSTree::ISMCTSTree(const GameView& view)
+    : d_view(view)
+    , d_root(new ISMCTSNode(view.playerId(), nullptr))
+    , d_rng(std::random_device {}())
+
 {
-    assert(!d_game.finished());
+    for (size_t i = 0; i < d_view.playerCount(); i++) {
+        d_players.push_back(std::make_shared<RandomPlayer>());
+    }
+    assert(!view.finished());
 }
 
-MCTSTree::~MCTSTree()
+ISMCTSTree::~ISMCTSTree()
 {
     delete d_root;
 }
 
-MCTSNode* MCTSTree::expandNode(Game& game, MCTSNode* node) const
+void ISMCTSTree::iterate()
+{
+    Game game(d_players, d_view, d_rng);
+    rolloutAndPropogate(game, selectAndExpand(game));
+}
+
+DMCTSNode* DMCTSTree::expandNode(Game& game, DMCTSNode* node) const
 {
     auto action = node->expand();
     game.playAction(action);
-    auto child = new MCTSNode(game, node);
+    auto child = new DMCTSNode(game, node);
     node->children()[action] = child;
     return child;
 }
 
-MCTSNode* MCTSTree::selectAndExpand(Game& game)
+ISMCTSNode* ISMCTSTree::selectAndExpand(Game& game)
 {
-    MCTSNode* selection = d_root;
-    while (selection->fullyExpanded()) {
+    ISMCTSNode* selection = d_root;
+    std::shared_ptr<std::tuple<Game, Action>> next_action; 
+    while ((next_action = selection->expand(game.currentPlayerView(), d_rng)) == nullptr) {
         if (game.finished()) {
             return selection;
         }
         Action best_action;
-        MCTSNode* best_node = nullptr;
+        ISMCTSNode* best_node = nullptr;
         float best_score = -1;
         for (auto it : selection->children()) {
             auto child = it.second;
@@ -56,7 +69,7 @@ MCTSNode* MCTSTree::selectAndExpand(Game& game)
     return expandNode(game, selection);
 }
 
-void MCTSTree::rolloutAndPropogate(Game& game, MCTSNode* node)
+void DMCTSTree::rolloutAndPropogate(Game& game, DMCTSNode* node)
 {
     game.play();
     auto& result = game.winOrder();
@@ -67,8 +80,8 @@ void MCTSTree::rolloutAndPropogate(Game& game, MCTSNode* node)
             * (result.size() - 1 - widx)
             / (result.size() - 1);
     }
-    MCTSNode* current = node;
-    MCTSNode* parent = current->parent();
+    DMCTSNode* current = node;
+    DMCTSNode* parent = current->parent();
     while (parent != nullptr) {
         current->stats().addReward(rewards[parent->currentPlayer()]);
         current->stats().incrementPlayouts();

@@ -1,5 +1,5 @@
 #include "dmcts_player.hpp"
-#include "../mcts/mcts_tree.hpp"
+#include "../mcts/dmcts_tree.hpp"
 #include "../rules/game.hpp"
 #include "random_player.hpp"
 
@@ -24,7 +24,7 @@ Action DMCTSPlayer::nextAction(const GameView& view)
     }
 
     // Create separate trees for possible determinizations
-    std::vector<std::unique_ptr<MCTSTree>> trees;
+    std::vector<std::unique_ptr<DMCTSTree>> trees;
     std::deque<size_t> available;
     for (size_t i = 0; i < DETERMINIZATION_COUNT; i++) {
         std::vector<std::shared_ptr<Player>> players;
@@ -34,7 +34,7 @@ Action DMCTSPlayer::nextAction(const GameView& view)
         }
         std::mt19937 rng(std::random_device {}());
         Game game(players, view, rng);
-        trees.push_back(std::unique_ptr<MCTSTree>(new MCTSTree(game)));
+        trees.push_back(std::unique_ptr<DMCTSTree>(new DMCTSTree(game)));
         available.push_back(i);
     }
 

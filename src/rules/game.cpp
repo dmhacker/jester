@@ -14,7 +14,7 @@ GameException::GameException(const std::string& message)
 {
 }
 
-Game::Game(const std::vector<std::shared_ptr<Player>>& players)
+Game::Game(const Players& players)
     : d_players(players)
     , d_hands(players.size())
 {
@@ -23,7 +23,7 @@ Game::Game(const std::vector<std::shared_ptr<Player>>& players)
     reset(rng);
 }
 
-Game::Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& view, std::mt19937& rng)
+Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
     : d_players(players)
     , d_hands(players.size())
     , d_hidden(view.hiddenCards())
@@ -94,19 +94,14 @@ void Game::reset(std::mt19937& rng)
     d_winOrder.clear();
 }
 
+GameView Game::currentPlayerView() const {
+    return GameView(*this, currentPlayerId());
+}
+
 Action Game::nextAction() const
 {
-    auto aid = attackerId();
-    auto did = defenderId();
-    auto& attacker = d_players[aid];
-    auto& defender = d_players[did];
-    Action action;
-    if (attackerNext()) {
-        action = attacker->nextAction(GameView(*this, aid));
-    } else {
-        action = defender->nextAction(GameView(*this, did));
-    }
-    validateAction(action);
+    auto& player = d_players[currentPlayerId()];
+    Action action = player->nextAction(currentPlayerView());
     return action;
 }
 
@@ -173,6 +168,7 @@ void Game::play()
 
 void Game::playAction(const Action& action)
 {
+    validateAction(action);
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];

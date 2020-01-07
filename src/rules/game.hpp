@@ -21,9 +21,12 @@ public:
     const char* what() const throw();
 };
 
+using Players = std::vector<std::shared_ptr<Player>>;
+using Observers = std::vector<std::shared_ptr<Observer>>;
+
 class Game {
 private:
-    std::vector<std::shared_ptr<Player>> d_players;
+    Players d_players;
     std::vector<Hand> d_hands;
     Deck d_deck;
     CardPile d_hidden;
@@ -32,11 +35,11 @@ private:
     CardSequence d_currentDefense;
     std::vector<size_t> d_winOrder;
     std::deque<size_t> d_attackOrder;
-    std::vector<std::shared_ptr<Observer>> d_observers;
+    Observers d_observers;
 
 public:
-    Game(const std::vector<std::shared_ptr<Player>>& players);
-    Game(const std::vector<std::shared_ptr<Player>>& players, const GameView& view, std::mt19937& rng);
+    Game(const Players& players);
+    Game(const Players& players, const GameView& view, std::mt19937& rng);
     Game(const Game& game) = default;
     ~Game();
 
@@ -48,6 +51,7 @@ public:
     Action nextAction() const;
     void playAction(const Action& action);
     void play();
+    GameView currentPlayerView() const;
 
     // Private information (protected by the game view)
     const Deck& deck() const;
@@ -67,6 +71,7 @@ public:
     Suit trumpSuit() const;
     size_t attackerId() const;
     size_t defenderId() const;
+    size_t currentPlayerId() const;
 
 private:
     void validateAction(const Action& action) const;
@@ -156,6 +161,14 @@ inline const Card& Game::trumpCard() const
 inline Suit Game::trumpSuit() const
 {
     return d_trump.suit();
+}
+
+inline size_t Game::currentPlayerId() const {
+    if (attackerNext()) {
+        return attackerId();
+    } else {
+        return defenderId();
+    }
 }
 
 }
