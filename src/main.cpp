@@ -12,6 +12,8 @@ int main() {
     players.push_back(std::make_shared<GreedyPlayer>());
     players.push_back(std::make_shared<RandomPlayer>());
     players.push_back(std::make_shared<DMCTSPlayer>());
+    players.push_back(std::make_shared<DMCTSPlayer>());
+    players.push_back(std::make_shared<RandomPlayer>());
     Game game(players);
     game.registerObserver(std::make_shared<OmniscientObserver>());
     game.play();
