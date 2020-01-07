@@ -7,7 +7,7 @@ namespace jester {
 
 class MCTSTree {
 private:
-    const Game& d_game;
+    Game d_game;
     MCTSNode* d_root;
 
 public:
