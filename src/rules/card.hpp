@@ -39,14 +39,11 @@ private:
 
 class Action {
 private:
-    Card* d_card;
+    std::shared_ptr<Card> d_card;
 
 public:
     Action();
-    Action(const Card& _card);
-    Action(const Action& action);
-    Action& operator=(const Action& action);
-    ~Action();
+    Action(const Card& card);
 
     bool empty() const;
     const Card& card() const;

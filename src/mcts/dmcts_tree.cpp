@@ -17,19 +17,11 @@ DMCTSTree::~DMCTSTree()
     delete d_root;
 }
 
-DMCTSNode* DMCTSTree::expandNode(Game& game, DMCTSNode* node) const
-{
-    auto action = node->expand();
-    game.playAction(action);
-    auto child = new DMCTSNode(game, node);
-    node->children()[action] = child;
-    return child;
-}
-
 DMCTSNode* DMCTSTree::selectAndExpand(Game& game)
 {
     DMCTSNode* selection = d_root;
-    while (selection->fullyExpanded()) {
+    std::shared_ptr<Action> next_action;
+    while ((next_action = selection->unexpandedAction())) {
         if (game.finished()) {
             return selection;
         }
@@ -53,7 +45,11 @@ DMCTSNode* DMCTSTree::selectAndExpand(Game& game)
         game.playAction(best_action);
         selection = best_node;
     }
-    return expandNode(game, selection);
+    auto action = *next_action;
+    game.playAction(action);
+    auto child = new DMCTSNode(game, selection);
+    selection->children()[action] = child;
+    return child;
 }
 
 void DMCTSTree::rolloutAndPropogate(Game& game, DMCTSNode* node)

@@ -1,9 +1,9 @@
 #ifndef JESTER_ISMCTS_NODE_HPP
 #define JESTER_ISMCTS_NODE_HPP
 
+#include "mcts_stats.hpp"
 #include "../rules/game.hpp"
 #include "../rules/game_view.hpp"
-#include "mcts_stats.hpp"
 
 #include <unordered_map>
 

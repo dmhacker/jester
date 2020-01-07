@@ -38,4 +38,14 @@ std::ostream& DMCTSNode::print(std::ostream& os, size_t level) const
     return os;
 }
 
+std::shared_ptr<Action> DMCTSNode::unexpandedAction()
+{
+    if (d_unexpanded.empty()) {
+        return nullptr;
+    }
+    Action action = d_unexpanded.back();
+    d_unexpanded.pop_back();
+    return std::make_shared<Action>(action);
+}
+
 }

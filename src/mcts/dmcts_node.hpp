@@ -11,9 +11,9 @@ namespace jester {
 class DMCTSNode {
 private:
     MCTSStats d_stats;
-    size_t d_player;
     DMCTSNode* d_parent_p;
     std::unordered_map<Action, DMCTSNode*> d_children;
+    size_t d_player;
     std::vector<Action> d_unexpanded;
 
 public:
@@ -24,21 +24,15 @@ public:
     DMCTSNode(const DMCTSNode& tree) = delete;
     DMCTSNode& operator=(const DMCTSNode& tree) = delete;
 
-    bool fullyExpanded() const;
     size_t playerId() const;
     DMCTSNode* parent() const;
 
     std::unordered_map<Action, DMCTSNode*>& children();
     MCTSStats& stats();
-    Action expand();
+    std::shared_ptr<Action> unexpandedAction();
 
     std::ostream& print(std::ostream& os, size_t level = 0) const;
 };
-
-inline bool DMCTSNode::fullyExpanded() const
-{
-    return d_unexpanded.empty();
-}
 
 inline size_t DMCTSNode::playerId() const
 {
@@ -58,13 +52,6 @@ inline std::unordered_map<Action, DMCTSNode*>& DMCTSNode::children()
 inline MCTSStats& DMCTSNode::stats()
 {
     return d_stats;
-}
-
-inline Action DMCTSNode::expand()
-{
-    Action action = d_unexpanded.back();
-    d_unexpanded.pop_back();
-    return action;
 }
 
 }

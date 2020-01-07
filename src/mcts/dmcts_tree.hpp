@@ -23,7 +23,6 @@ public:
     void iterate();
 
 private:
-    DMCTSNode* expandNode(Game& game, DMCTSNode* node) const;
     DMCTSNode* selectAndExpand(Game& game);
     void rolloutAndPropogate(Game& game, DMCTSNode* node);
 };
