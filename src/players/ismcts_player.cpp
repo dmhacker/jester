@@ -8,7 +8,7 @@
 
 namespace jester {
 
-const std::chrono::milliseconds TIME_LIMIT = std::chrono::milliseconds(4000);
+const std::chrono::milliseconds TIME_LIMIT = std::chrono::milliseconds(9000);
 
 Action ISMCTSPlayer::nextAction(const GameView& view)
 {

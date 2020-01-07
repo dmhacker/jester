@@ -12,7 +12,7 @@ namespace jester {
 
 const size_t DETERMINIZATION_COUNT = 6;
 const size_t WORKER_COUNT = 4;
-const std::chrono::milliseconds TIME_LIMIT = std::chrono::milliseconds(4000);
+const std::chrono::milliseconds TIME_LIMIT = std::chrono::milliseconds(9000);
 
 Action DMCTSPlayer::nextAction(const GameView& view)
 {
