@@ -3,14 +3,23 @@
 #include "../rules/game.hpp"
 #include "random_player.hpp"
 
-#include <iostream>
 #include <mutex>
 #include <thread>
+#include <iostream>
+#include <sstream>
 
 namespace jester {
 
 const size_t DETERMINIZATION_COUNT = 3;
 const std::chrono::milliseconds TIME_LIMIT = std::chrono::milliseconds(4000);
+
+namespace {
+    std::string playerPrefix(size_t pid) {
+        std::stringstream ss;
+        ss << "[P" << pid << "] [THINKING] ";
+        return ss.str();
+    }
+}
 
 Action DMCTSPlayer::nextAction(const GameView& view)
 {
@@ -26,12 +35,13 @@ Action DMCTSPlayer::nextAction(const GameView& view)
             return it.first;
         }
     }
-
-    // Run N simulations on N threads for X seconds
+            
+    // Run N simulations on N threads for the given time limit 
     std::mutex mtx;
     std::vector<std::thread> threads;
+    const auto start_timestamp = std::chrono::system_clock::now();
     for (size_t i = 0; i < DETERMINIZATION_COUNT; i++) {
-        threads.push_back(std::thread([&view, &mtx, &statistics]() {
+        threads.push_back(std::thread([&view, &mtx, &statistics, &start_timestamp]() {
             std::vector<std::shared_ptr<Player>> players;
             for (size_t pid = 0; pid < view.playerCount(); pid++) {
                 auto player = std::make_shared<RandomPlayer>();
@@ -42,9 +52,8 @@ Action DMCTSPlayer::nextAction(const GameView& view)
             Game game(players, view, rng);
             MCTSTree tree(game);
             // While we have enough time, incrementally build the tree 
-            auto start_timestamp = std::chrono::system_clock::now();
             while (true) {
-                auto end_timestamp = std::chrono::system_clock::now();
+                const auto end_timestamp = std::chrono::system_clock::now();
                 if (end_timestamp - start_timestamp > TIME_LIMIT) {
                     break;
                 }
@@ -75,11 +84,19 @@ Action DMCTSPlayer::nextAction(const GameView& view)
             best_ratio = ratio;
         }
         std::cerr 
-            << "[P" << view.playerId() 
-            << "] [THINKING] \"" << it.first 
+            << playerPrefix(view.playerId())
+            << "\"" << it.first 
             << "\" has DMCTS stats " << it.second 
             << "." << std::endl;
     }
+                
+    // Print out actual time spent on calculating moves
+    const auto end_timestamp = std::chrono::system_clock::now();
+    std::cerr 
+        << playerPrefix(view.playerId())
+        << "Total time spent was "
+        << std::chrono::duration_cast<std::chrono::milliseconds>(end_timestamp - start_timestamp).count()
+        << " ms." << std::endl;
 
     return best_action;
 }
