@@ -39,7 +39,7 @@ private:
 
 class Action {
 private:
-    std::shared_ptr<Card> d_card;
+    Card d_card;
 
 public:
     Action();
@@ -78,12 +78,12 @@ inline bool Card::operator==(const Card& card) const
 
 inline bool Action::empty() const
 {
-    return d_card == nullptr;
+    return d_card.rank() == 0;
 }
 
 inline const Card& Action::card() const
 {
-    return *d_card;
+    return d_card;
 }
 
 inline bool Action::operator==(const Action& action) const
@@ -157,9 +157,6 @@ template <>
 struct hash<jester::Action> {
     size_t operator()(const jester::Action& action) const
     {
-        if (action.empty()) {
-            return hash<int>()(0);
-        }
         return hash<jester::Card>()(action.card());
     }
 };

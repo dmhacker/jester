@@ -5,31 +5,58 @@
 
 namespace jester {
 
+DMCTSNode::DMCTSNode(size_t player)
+    : MCTSNode(player)
+    , d_cacheSetup(false)
+{
+}
+
+std::shared_ptr<Action> DMCTSNode::unexpandedAction(const Game& game)
+{
+    if (game.finished()) {
+        return nullptr;
+    }
+    if (!d_cacheSetup) {
+        d_unexpandedCache = game.nextActions();
+        d_cacheSetup = true;
+    }
+    if (d_unexpandedCache.empty()) {
+        return nullptr;
+    }
+    Action action = d_unexpandedCache.back();
+    d_unexpandedCache.pop_back();
+    return std::make_shared<Action>(action);
+}
+
 DMCTSTree::DMCTSTree(const Game& game)
     : d_game(game)
-    , d_root(new DMCTSNode(d_game, nullptr))
+    , d_root(new DMCTSNode(d_game.currentPlayerId()))
 {
     assert(!d_game.finished());
 }
 
-DMCTSTree::~DMCTSTree()
+void DMCTSTree::play()
 {
-    delete d_root;
+    Game game(d_game);
+    std::vector<std::shared_ptr<DMCTSNode>> path;
+    selectPath(game, path);
+    rolloutPath(game, path);
 }
 
-DMCTSNode* DMCTSTree::selectAndExpand(Game& game)
+void DMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& path)
 {
-    DMCTSNode* selection = d_root;
-    std::shared_ptr<Action> next_action;
-    while ((next_action = selection->unexpandedAction()) == nullptr) {
+    auto selection = d_root;
+    std::shared_ptr<Action> next_action = nullptr;
+    path.push_back(d_root);
+    while ((next_action = selection->unexpandedAction(game)) == nullptr) {
         if (game.finished()) {
-            return selection;
+            return;
         }
         Action best_action;
-        DMCTSNode* best_node = nullptr;
+        std::shared_ptr<DMCTSNode> best_node = nullptr;
         float best_score = -1;
         for (auto it : selection->children()) {
-            auto child = it.second;
+            auto child = std::static_pointer_cast<DMCTSNode>(it.second);
             float exploitation = child->stats().rewardRatio();
             float exploration = std::sqrt(
                 2 * std::log(selection->stats().playouts())
@@ -44,15 +71,16 @@ DMCTSNode* DMCTSTree::selectAndExpand(Game& game)
         assert(best_node != nullptr);
         game.playAction(best_action);
         selection = best_node;
+        path.push_back(selection);
     }
     auto action = *next_action;
     game.playAction(action);
-    auto child = new DMCTSNode(game, selection);
+    auto child = std::make_shared<DMCTSNode>(game.currentPlayerId());
     selection->children()[action] = child;
-    return child;
+    path.push_back(child);
 }
 
-void DMCTSTree::rolloutAndPropogate(Game& game, DMCTSNode* node)
+void DMCTSTree::rolloutPath(Game& game, const std::vector<std::shared_ptr<DMCTSNode>>& path)
 {
     game.play();
     auto& result = game.winOrder();
@@ -63,15 +91,13 @@ void DMCTSTree::rolloutAndPropogate(Game& game, DMCTSNode* node)
             * (result.size() - 1 - widx)
             / (result.size() - 1);
     }
-    DMCTSNode* current = node;
-    DMCTSNode* parent = current->parent();
-    while (parent != nullptr) {
+    d_root->stats().incrementPlayouts();
+    for (size_t i = 1; i < path.size(); i++) {
+        auto parent = path[i - 1];
+        auto current = path[i];
         current->stats().addReward(rewards[parent->playerId()]);
         current->stats().incrementPlayouts();
-        current = parent;
-        parent = current->parent();
     }
-    current->stats().incrementPlayouts();
 }
 
 }

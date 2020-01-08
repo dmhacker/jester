@@ -1,35 +1,40 @@
 #ifndef JESTER_ISMCTS_TREE_HPP
 #define JESTER_ISMCTS_TREE_HPP
 
-#include "ismcts_node.hpp"
+#include "mcts_node.hpp"
 
 namespace jester {
+
+class ISMCTSNode : public MCTSNode {
+public:
+    ISMCTSNode(size_t player);
+    std::shared_ptr<Action> unexpandedAction(const Game& game);
+};
 
 class ISMCTSTree {
 private:
     const GameView& d_view;
-    ISMCTSNode* d_root;
+    std::shared_ptr<ISMCTSNode> d_root;
     std::vector<std::shared_ptr<Player>> d_players;
     std::mt19937 d_rng;
 
 public:
     ISMCTSTree(const GameView& view);
-    ~ISMCTSTree();
 
     // Disable copy and assignment operators
     ISMCTSTree(const ISMCTSTree& tree) = delete;
     ISMCTSTree& operator=(const ISMCTSTree& tree) = delete;
 
-    ISMCTSNode* root() const;
+    const std::shared_ptr<ISMCTSNode>& root() const;
 
-    void iterate();
+    void play();
 
 private:
-    ISMCTSNode* selectAndExpand(Game& game);
-    void rolloutAndPropogate(Game& game, ISMCTSNode* node);
+    void selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>& path);
+    void rolloutPath(Game& game, const std::vector<std::shared_ptr<ISMCTSNode>>& path);
 };
 
-inline ISMCTSNode* ISMCTSTree::root() const
+inline const std::shared_ptr<ISMCTSNode>& ISMCTSTree::root() const
 {
     return d_root;
 }

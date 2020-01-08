@@ -8,7 +8,7 @@
 
 namespace jester {
 
-const std::chrono::milliseconds TIME_LIMIT = std::chrono::milliseconds(9000);
+const std::chrono::milliseconds TIME_LIMIT = std::chrono::milliseconds(12000);
 
 Action ISMCTSPlayer::nextAction(const GameView& view)
 {
@@ -26,18 +26,18 @@ Action ISMCTSPlayer::nextAction(const GameView& view)
         if (end_timestamp - start_timestamp > TIME_LIMIT) {
             break;
         }
-        tree.iterate();
+        tree.play();
     }
 
-    // Choose the best action (the one with the highest reward ratio)
+    // Choose the best action (the one with the highest visits)
     Action best_action;
-    float best_ratio = -1;
+    size_t most_visits = 0;
     for (auto action : actions) {
         auto child = tree.root()->children()[action];
         auto& stats = child->stats();
-        if (best_ratio < stats.rewardRatio()) {
+        if (most_visits < stats.playouts()) {
             best_action = action;
-            best_ratio = stats.rewardRatio();
+            most_visits = stats.playouts();
         }
         std::cerr
             << "[P" << view.playerId()

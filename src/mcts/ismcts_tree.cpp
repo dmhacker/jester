@@ -6,9 +6,25 @@
 
 namespace jester {
 
+ISMCTSNode::ISMCTSNode(size_t player)
+    : MCTSNode(player)
+{
+}
+
+std::shared_ptr<Action> ISMCTSNode::unexpandedAction(const Game& game)
+{
+    for (auto& action : game.nextActions()) {
+        auto it = children().find(action);
+        if (it == children().end()) {
+            return std::make_shared<Action>(action);
+        }
+    }
+    return nullptr;
+}
+
 ISMCTSTree::ISMCTSTree(const GameView& view)
     : d_view(view)
-    , d_root(new ISMCTSNode(view.playerId(), nullptr))
+    , d_root(new ISMCTSNode(view.playerId()))
     , d_rng(std::random_device {}())
 
 {
@@ -18,30 +34,29 @@ ISMCTSTree::ISMCTSTree(const GameView& view)
     assert(!view.finished());
 }
 
-ISMCTSTree::~ISMCTSTree()
-{
-    delete d_root;
-}
-
-void ISMCTSTree::iterate()
+void ISMCTSTree::play()
 {
     Game game(d_players, d_view, d_rng);
-    rolloutAndPropogate(game, selectAndExpand(game));
+    std::vector<std::shared_ptr<ISMCTSNode>> path;
+    selectPath(game, path);
+    rolloutPath(game, path);
 }
 
-ISMCTSNode* ISMCTSTree::selectAndExpand(Game& game)
+void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>& path)
 {
-    ISMCTSNode* selection = d_root;
+    auto selection = d_root;
     std::shared_ptr<Action> next_action = nullptr;
+    path.push_back(d_root);
     while ((next_action = selection->unexpandedAction(game)) == nullptr) {
         if (game.finished()) {
-            return selection;
+            return;
         }
         Action best_action;
-        ISMCTSNode* best_node = nullptr;
+        std::shared_ptr<ISMCTSNode> best_node = nullptr;
         float best_score = -1;
         for (auto& action : game.nextActions()) {
-            auto child = selection->children()[action];
+            auto child = std::static_pointer_cast<ISMCTSNode>(
+                selection->children()[action]);
             float exploitation = child->stats().rewardRatio();
             float exploration = std::sqrt(
                 2 * std::log(selection->stats().playouts())
@@ -56,15 +71,16 @@ ISMCTSNode* ISMCTSTree::selectAndExpand(Game& game)
         assert(best_node != nullptr);
         game.playAction(best_action);
         selection = best_node;
+        path.push_back(selection);
     }
     auto action = *next_action;
     game.playAction(action);
-    auto child = new ISMCTSNode(game.currentPlayerId(), selection);
+    auto child = std::make_shared<ISMCTSNode>(game.currentPlayerId());
     selection->children()[action] = child;
-    return child;
+    path.push_back(child);
 }
 
-void ISMCTSTree::rolloutAndPropogate(Game& game, ISMCTSNode* node)
+void ISMCTSTree::rolloutPath(Game& game, const std::vector<std::shared_ptr<ISMCTSNode>>& path)
 {
     game.play();
     auto& result = game.winOrder();
@@ -75,15 +91,13 @@ void ISMCTSTree::rolloutAndPropogate(Game& game, ISMCTSNode* node)
             * (result.size() - 1 - widx)
             / (result.size() - 1);
     }
-    ISMCTSNode* current = node;
-    ISMCTSNode* parent = current->parent();
-    while (parent != nullptr) {
+    d_root->stats().incrementPlayouts();
+    for (size_t i = 1; i < path.size(); i++) {
+        auto parent = path[i - 1];
+        auto current = path[i];
         current->stats().addReward(rewards[parent->playerId()]);
         current->stats().incrementPlayouts();
-        current = parent;
-        parent = current->parent();
     }
-    current->stats().incrementPlayouts();
 }
 
 }

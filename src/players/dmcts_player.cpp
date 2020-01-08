@@ -57,7 +57,7 @@ Action DMCTSPlayer::nextAction(const GameView& view)
                 if (end_timestamp - start_timestamp > TIME_LIMIT) {
                     break;
                 }
-                trees[choice]->iterate();
+                trees[choice]->play();
             }
         }));
     }
@@ -65,9 +65,9 @@ Action DMCTSPlayer::nextAction(const GameView& view)
         thr.join();
     }
 
-    // Choose the best action (the one with the highest reward ratio)
+    // Choose the best action (the one with the highest visits)
     Action best_action;
-    float best_ratio = -1;
+    size_t most_visits = 0;
     for (auto action : actions) {
         MCTSStats stats;
         for (auto& tree : trees) {
@@ -77,9 +77,9 @@ Action DMCTSPlayer::nextAction(const GameView& view)
                 stats.addStats(it->second->stats());
             }
         }
-        if (best_ratio < stats.rewardRatio()) {
+        if (most_visits < stats.playouts()) {
             best_action = action;
-            best_ratio = stats.rewardRatio();
+            most_visits = stats.playouts();
         }
         std::cerr
             << "[P" << view.playerId()

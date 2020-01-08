@@ -54,21 +54,21 @@ std::ostream& operator<<(std::ostream& os, const Card& card)
 }
 
 Action::Action()
-    : d_card(nullptr)
+    : d_card(0, Suit::hearts)
 {
 }
 
 Action::Action(const Card& card)
-    : d_card(std::make_shared<Card>(card))
+    : d_card(card)
 {
 }
 
 std::ostream& operator<<(std::ostream& os, const Action& action)
 {
-    if (action.d_card == nullptr) {
+    if (action.empty()) {
         return os << "Yield";
     } else {
-        return os << "Use " << *action.d_card;
+        return os << "Use " << action.card();
     }
 }
 
