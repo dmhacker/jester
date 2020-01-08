@@ -9,9 +9,10 @@
 
 namespace jester {
 
-ISMCTSPlayer::ISMCTSPlayer(size_t workers, 
-        const std::chrono::milliseconds& time_limit)
-    : d_workerCount(workers)
+ISMCTSPlayer::ISMCTSPlayer(bool verbose, size_t workers,
+    const std::chrono::milliseconds& time_limit)
+    : d_verbose(verbose)
+    , d_workerCount(workers)
     , d_timeLimit(time_limit)
 {
 }
@@ -54,11 +55,13 @@ Action ISMCTSPlayer::nextAction(const GameView& view)
             best_action = action;
             most_visits = stats.playouts();
         }
-        std::cerr
-            << "[P" << view.playerId()
-            << "] ISMCTS evaluated \"" << action
-            << "\" as " << stats
-            << "." << std::endl;
+        if (d_verbose) {
+            std::cerr
+                << "[P" << view.playerId()
+                << "] ISMCTS evaluated \"" << action
+                << "\" as " << stats
+                << "." << std::endl;
+        }
     }
 
     return best_action;

@@ -61,7 +61,7 @@ void OmniscientObserver::onTurnEnd(const Game& game, bool defense_success)
 void OmniscientObserver::onPlayerWin(const Game& game, size_t player_id, size_t win_position)
 {
     std::cout << "[GAME] Player " << player_id
-              << " Finished game in " << win_position;
+              << " finished game in " << win_position;
     if (win_position == 1) {
         std::cout << "st place.";
     } else if (win_position == 2) {

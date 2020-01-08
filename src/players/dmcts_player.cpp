@@ -10,9 +10,11 @@
 
 namespace jester {
 
-DMCTSPlayer::DMCTSPlayer(size_t determinizations, size_t workers,
+DMCTSPlayer::DMCTSPlayer(bool verbose,
+    size_t determinizations, size_t workers,
     const std::chrono::milliseconds& time_limit)
-    : d_determinizationCount(determinizations)
+    : d_verbose(verbose)
+    , d_determinizationCount(determinizations)
     , d_workerCount(workers)
     , d_timeLimit(time_limit)
 {
@@ -86,11 +88,13 @@ Action DMCTSPlayer::nextAction(const GameView& view)
             best_action = action;
             most_visits = stats.playouts();
         }
-        std::cerr
-            << "[P" << view.playerId()
-            << "] DMCTS evaluated \"" << action
-            << "\" as " << stats
-            << "." << std::endl;
+        if (d_verbose) {
+            std::cerr
+                << "[P" << view.playerId()
+                << "] DMCTS evaluated \"" << action
+                << "\" as " << stats
+                << "." << std::endl;
+        }
     }
 
     return best_action;
