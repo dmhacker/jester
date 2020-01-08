@@ -28,7 +28,7 @@ Action ISMCTSPlayer::nextAction(const GameView& view)
     if (d_verbose) {
         std::cerr
             << "[P" << view.playerId()
-            << "] ISMCTS is running." << std::endl;
+            << "] ISMCTS has started." << std::endl;
     }
 
     // Build tree while we are within time limit

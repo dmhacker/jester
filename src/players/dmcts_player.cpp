@@ -31,7 +31,7 @@ Action DMCTSPlayer::nextAction(const GameView& view)
     if (d_verbose) {
         std::cerr
             << "[P" << view.playerId()
-            << "] DMCTS is running." << std::endl;
+            << "] DMCTS has started." << std::endl;
     }
 
     // Create separate trees for possible determinizations
