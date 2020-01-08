@@ -15,7 +15,7 @@ public:
     ISMCTSNode(size_t player);
     ~ISMCTSNode() = default;
 
-    std::shared_ptr<Action> unexpandedAction(const Game& game);
+    std::unique_ptr<Action> unexpandedAction(const Game& game);
     
     std::mutex& mutex();
 };

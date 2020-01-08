@@ -11,7 +11,7 @@ DMCTSNode::DMCTSNode(size_t player)
 {
 }
 
-std::shared_ptr<Action> DMCTSNode::unexpandedAction(const Game& game)
+std::unique_ptr<Action> DMCTSNode::unexpandedAction(const Game& game)
 {
     if (game.finished()) {
         return nullptr;
@@ -25,7 +25,7 @@ std::shared_ptr<Action> DMCTSNode::unexpandedAction(const Game& game)
     }
     Action action = d_unexpandedCache.back();
     d_unexpandedCache.pop_back();
-    return std::make_shared<Action>(action);
+    return std::unique_ptr<Action>(new Action(action));
 }
 
 DMCTSTree::DMCTSTree(const Game& game)
@@ -46,7 +46,7 @@ void DMCTSTree::play()
 void DMCTSTree::selectPath(Game& game, std::vector<DMCTSNode*>& path)
 {
     auto selection = d_root.get();
-    std::shared_ptr<Action> next_action = nullptr;
+    std::unique_ptr<Action> next_action = nullptr;
     path.push_back(selection);
     while ((next_action = selection->unexpandedAction(game)) == nullptr) {
         if (game.finished()) {

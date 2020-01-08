@@ -29,7 +29,7 @@ public:
     std::unordered_map<Action, stda::erased_ptr<MCTSNode>>& children();
     MCTSStats& stats();
 
-    virtual std::shared_ptr<Action> unexpandedAction(const Game& game) = 0;
+    virtual std::unique_ptr<Action> unexpandedAction(const Game& game) = 0;
 
     std::ostream& print(std::ostream& os, size_t level = 0) const;
 };
