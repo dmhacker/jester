@@ -21,7 +21,7 @@ DMCTSNode* DMCTSTree::selectAndExpand(Game& game)
 {
     DMCTSNode* selection = d_root;
     std::shared_ptr<Action> next_action;
-    while ((next_action = selection->unexpandedAction())) {
+    while ((next_action = selection->unexpandedAction()) == nullptr) {
         if (game.finished()) {
             return selection;
         }
