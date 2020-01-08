@@ -81,7 +81,7 @@ void ISMCTSTree::selectPath(Game& game, std::vector<ISMCTSNode*>& path)
     }
     auto action = *next_action;
     game.playAction(action);
-    auto child = stda::make_erased<ISMCTSNode>(
+    auto child = std::make_shared<ISMCTSNode>(
         game.currentPlayerId());
     path.push_back(child.get());
     {

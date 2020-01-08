@@ -10,10 +10,13 @@
 
 namespace jester {
 
+template<class T>
+using mcts_ptr = std::shared_ptr<T>;
+
 class MCTSNode {
 private:
     MCTSStats d_stats;
-    std::unordered_map<Action, stda::erased_ptr<MCTSNode>> d_children;
+    std::unordered_map<Action, mcts_ptr<MCTSNode>> d_children;
     size_t d_player;
 
 public:
@@ -26,7 +29,7 @@ public:
 
     size_t playerId() const;
 
-    std::unordered_map<Action, stda::erased_ptr<MCTSNode>>& children();
+    std::unordered_map<Action, mcts_ptr<MCTSNode>>& children();
     MCTSStats& stats();
 
     virtual std::unique_ptr<Action> unexpandedAction(const Game& game) = 0;
@@ -39,7 +42,7 @@ inline size_t MCTSNode::playerId() const
     return d_player;
 }
 
-inline std::unordered_map<Action, stda::erased_ptr<MCTSNode>>& MCTSNode::children()
+inline std::unordered_map<Action, mcts_ptr<MCTSNode>>& MCTSNode::children()
 {
     return d_children;
 }
