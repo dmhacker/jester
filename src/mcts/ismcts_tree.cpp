@@ -44,10 +44,7 @@ void ISMCTSTree::play()
 
 void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>& path)
 {
-    {
-        std::lock_guard<std::mutex> lck(d_root->mutex());
-        d_root->stats().incrementPlayouts();
-    }
+    
     auto selection = d_root;
     path.push_back(selection);
     NodeExpansion expansion;
@@ -81,14 +78,12 @@ void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>
         assert(best_node != nullptr);
         game.playAction(best_action);
         selection = best_node;
-        selection->stats().incrementPlayouts();
         path.push_back(selection);
     }
     auto& action = expansion.action();
     game.playAction(action);
     auto child = std::make_shared<ISMCTSNode>(
         game.currentPlayerId());
-    child->stats().incrementPlayouts();
     path.push_back(child);
     {
         std::lock_guard<std::mutex> lck(selection->mutex());
@@ -107,11 +102,16 @@ void ISMCTSTree::rolloutPath(Game& game, const std::vector<std::shared_ptr<ISMCT
             * (result.size() - 1 - widx)
             / (result.size() - 1);
     }
+    {
+        std::lock_guard<std::mutex> lck(d_root->mutex());
+        d_root->stats().incrementPlayouts();
+    }
     for (size_t i = 1; i < path.size(); i++) {
         auto parent = path[i - 1];
         auto current = path[i];
         std::lock_guard<std::mutex> lck(current->mutex());
         current->stats().addReward(rewards[parent->playerId()]);
+        current->stats().incrementPlayouts();
     }
 }
 
