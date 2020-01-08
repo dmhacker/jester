@@ -75,8 +75,7 @@ void DMCTSTree::selectPath(Game& game, std::vector<DMCTSNode*>& path)
     }
     auto action = *next_action;
     game.playAction(action);
-    auto child = ErasedPtr<DMCTSNode>(
-        new DMCTSNode(game.currentPlayerId()), makeErasedDeleter<DMCTSNode>());
+    auto child = stda::make_erased<DMCTSNode>(game.currentPlayerId());
     path.push_back(child.get());
     selection->children()[action] = std::move(child);
 }

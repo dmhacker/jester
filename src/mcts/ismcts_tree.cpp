@@ -81,8 +81,8 @@ void ISMCTSTree::selectPath(Game& game, std::vector<ISMCTSNode*>& path)
     }
     auto action = *next_action;
     game.playAction(action);
-    auto child = ErasedPtr<ISMCTSNode>(
-        new ISMCTSNode(game.currentPlayerId()), makeErasedDeleter<ISMCTSNode>());
+    auto child = stda::make_erased<ISMCTSNode>(
+        game.currentPlayerId());
     path.push_back(child.get());
     {
         std::lock_guard<std::mutex> plck(selection->mutex());
