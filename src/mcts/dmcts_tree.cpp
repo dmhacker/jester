@@ -12,7 +12,8 @@ DMCTSNode::DMCTSNode(size_t player)
 }
 
 NodeExpansion DMCTSNode::tryExpand(const Game& game)
-{ if (game.finished()) {
+{
+    if (game.finished()) {
         return NodeExpansion();
     }
     if (!d_cacheSetup) {

@@ -44,7 +44,7 @@ void ISMCTSTree::play()
 
 void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>& path)
 {
-    
+
     auto selection = d_root;
     path.push_back(selection);
     NodeExpansion expansion;

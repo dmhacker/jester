@@ -16,7 +16,7 @@ public:
     ~ISMCTSNode() = default;
 
     NodeExpansion tryExpand(const Game& game);
-    
+
     std::mutex& mutex();
 };
 
@@ -43,7 +43,8 @@ private:
     void rolloutPath(Game& game, const std::vector<std::shared_ptr<ISMCTSNode>>& path);
 };
 
-inline std::mutex& ISMCTSNode::mutex() {
+inline std::mutex& ISMCTSNode::mutex()
+{
     return d_mtx;
 }
 
