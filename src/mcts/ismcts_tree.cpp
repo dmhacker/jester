@@ -23,8 +23,8 @@ std::shared_ptr<Action> ISMCTSNode::unexpandedAction(const Game& game)
 }
 
 ISMCTSTree::ISMCTSTree(const GameView& view)
-    : d_view(view)
-    , d_root(new ISMCTSNode(view.playerId()))
+    : d_root(new ISMCTSNode(view.playerId()))
+    , d_view(view)
     , d_rng(std::random_device {}())
 
 {
@@ -47,7 +47,12 @@ void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>
     auto selection = d_root;
     std::shared_ptr<Action> next_action = nullptr;
     path.push_back(d_root);
-    while ((next_action = selection->unexpandedAction(game)) == nullptr) {
+    while (true) {
+        std::lock_guard<std::mutex> plck(selection->mutex());
+        next_action = selection->unexpandedAction(game);
+        if (next_action != nullptr) {
+            break;
+        }
         if (game.finished()) {
             return;
         }
@@ -57,6 +62,7 @@ void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>
         for (auto& action : game.nextActions()) {
             auto child = std::static_pointer_cast<ISMCTSNode>(
                 selection->children()[action]);
+            std::lock_guard<std::mutex> clck(child->mutex());
             float exploitation = child->stats().rewardRatio();
             float exploration = std::sqrt(
                 2 * std::log(selection->stats().playouts())
@@ -76,7 +82,10 @@ void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>
     auto action = *next_action;
     game.playAction(action);
     auto child = std::make_shared<ISMCTSNode>(game.currentPlayerId());
-    selection->children()[action] = child;
+    {
+        std::lock_guard<std::mutex> plck(selection->mutex());
+        selection->children()[action] = child;
+    }
     path.push_back(child);
 }
 
@@ -91,10 +100,14 @@ void ISMCTSTree::rolloutPath(Game& game, const std::vector<std::shared_ptr<ISMCT
             * (result.size() - 1 - widx)
             / (result.size() - 1);
     }
-    d_root->stats().incrementPlayouts();
+    {
+        std::lock_guard<std::mutex> lck(d_root->mutex());
+        d_root->stats().incrementPlayouts();
+    }
     for (size_t i = 1; i < path.size(); i++) {
         auto parent = path[i - 1];
         auto current = path[i];
+        std::lock_guard<std::mutex> lck(current->mutex());
         current->stats().addReward(rewards[parent->playerId()]);
         current->stats().incrementPlayouts();
     }

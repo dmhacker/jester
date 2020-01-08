@@ -10,9 +10,13 @@
 
 namespace jester {
 
-const size_t DETERMINIZATION_COUNT = 6;
-const size_t WORKER_COUNT = 4;
-const std::chrono::milliseconds TIME_LIMIT = std::chrono::milliseconds(9000);
+DMCTSPlayer::DMCTSPlayer(size_t determinizations, size_t workers,
+    const std::chrono::milliseconds& time_limit)
+    : d_determinizationCount(determinizations)
+    , d_workerCount(workers)
+    , d_timeLimit(time_limit)
+{
+}
 
 Action DMCTSPlayer::nextAction(const GameView& view)
 {
@@ -25,7 +29,7 @@ Action DMCTSPlayer::nextAction(const GameView& view)
     // Create separate trees for possible determinizations
     std::vector<std::unique_ptr<DMCTSTree>> trees;
     std::deque<size_t> available;
-    for (size_t i = 0; i < DETERMINIZATION_COUNT; i++) {
+    for (size_t i = 0; i < d_determinizationCount; i++) {
         std::vector<std::shared_ptr<Player>> players;
         for (size_t pid = 0; pid < view.playerCount(); pid++) {
             auto player = std::make_shared<RandomPlayer>();
@@ -40,8 +44,9 @@ Action DMCTSPlayer::nextAction(const GameView& view)
     // Workers repeatedly pick, build, and put back MCTS trees
     std::mutex mtx;
     std::vector<std::thread> workers;
-    for (size_t widx = 0; widx < WORKER_COUNT; widx++) {
-        workers.push_back(std::thread([&mtx, &trees, &available]() {
+    const auto& limit = d_timeLimit;
+    for (size_t widx = 0; widx < d_workerCount; widx++) {
+        workers.push_back(std::thread([&mtx, &trees, &available, &limit]() {
             const auto start_timestamp = std::chrono::system_clock::now();
             ssize_t choice = -1;
             while (true) {
@@ -54,7 +59,7 @@ Action DMCTSPlayer::nextAction(const GameView& view)
                     available.pop_front();
                 }
                 const auto end_timestamp = std::chrono::system_clock::now();
-                if (end_timestamp - start_timestamp > TIME_LIMIT) {
+                if (end_timestamp - start_timestamp > limit) {
                     break;
                 }
                 trees[choice]->play();

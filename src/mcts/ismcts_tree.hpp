@@ -3,19 +3,25 @@
 
 #include "mcts_node.hpp"
 
+#include <mutex>
+
 namespace jester {
 
 class ISMCTSNode : public MCTSNode {
+private:
+    std::mutex d_mtx;
+
 public:
     ISMCTSNode(size_t player);
     std::shared_ptr<Action> unexpandedAction(const Game& game);
+    std::mutex& mutex();
 };
 
 class ISMCTSTree {
 private:
-    const GameView& d_view;
     std::shared_ptr<ISMCTSNode> d_root;
-    std::vector<std::shared_ptr<Player>> d_players;
+    const GameView& d_view;
+    Players d_players;
     std::mt19937 d_rng;
 
 public:
@@ -33,6 +39,10 @@ private:
     void selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>& path);
     void rolloutPath(Game& game, const std::vector<std::shared_ptr<ISMCTSNode>>& path);
 };
+
+inline std::mutex& ISMCTSNode::mutex() {
+    return d_mtx;
+}
 
 inline const std::shared_ptr<ISMCTSNode>& ISMCTSTree::root() const
 {

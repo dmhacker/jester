@@ -5,10 +5,16 @@
 
 #include <iostream>
 #include <memory>
+#include <thread>
 
 namespace jester {
 
-const std::chrono::milliseconds TIME_LIMIT = std::chrono::milliseconds(12000);
+ISMCTSPlayer::ISMCTSPlayer(size_t workers, 
+        const std::chrono::milliseconds& time_limit)
+    : d_workerCount(workers)
+    , d_timeLimit(time_limit)
+{
+}
 
 Action ISMCTSPlayer::nextAction(const GameView& view)
 {
@@ -19,14 +25,23 @@ Action ISMCTSPlayer::nextAction(const GameView& view)
     }
 
     // Build tree while we are within time limit
-    const auto start_timestamp = std::chrono::system_clock::now();
     ISMCTSTree tree(view);
-    while (true) {
-        const auto end_timestamp = std::chrono::system_clock::now();
-        if (end_timestamp - start_timestamp > TIME_LIMIT) {
-            break;
-        }
-        tree.play();
+    std::vector<std::thread> workers;
+    const auto& limit = d_timeLimit;
+    for (size_t widx = 0; widx < d_workerCount; widx++) {
+        workers.push_back(std::thread([&tree, &limit]() {
+            const auto start_timestamp = std::chrono::system_clock::now();
+            while (true) {
+                const auto end_timestamp = std::chrono::system_clock::now();
+                if (end_timestamp - start_timestamp > limit) {
+                    break;
+                }
+                tree.play();
+            }
+        }));
+    }
+    for (auto& thr : workers) {
+        thr.join();
     }
 
     // Choose the best action (the one with the highest visits)
