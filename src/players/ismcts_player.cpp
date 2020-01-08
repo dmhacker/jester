@@ -25,6 +25,12 @@ Action ISMCTSPlayer::nextAction(const GameView& view)
         return actions[0];
     }
 
+    if (d_verbose) {
+        std::cerr
+            << "[P" << view.playerId()
+            << "] ISMCTS is running." << std::endl;
+    }
+
     // Build tree while we are within time limit
     ISMCTSTree tree(view);
     std::vector<std::thread> workers;

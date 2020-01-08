@@ -10,9 +10,9 @@ using namespace jester;
 
 int main() {
     std::vector<std::shared_ptr<Player>> players;
-    players.push_back(std::make_shared<ISMCTSPlayer>(true));
-    players.push_back(std::make_shared<GreedyPlayer>());
-    /* players.push_back(std::make_shared<DMCTSPlayer>(true)); */
+    players.push_back(std::make_shared<ISMCTSPlayer>(true, 8, std::chrono::milliseconds(30000)));
+    /* players.push_back(std::make_shared<GreedyPlayer>()); */
+    players.push_back(std::make_shared<DMCTSPlayer>(true, 8, 8, std::chrono::milliseconds(30000)));
     Game game(players);
     game.registerObserver(std::make_shared<OmniscientObserver>());
     game.play();

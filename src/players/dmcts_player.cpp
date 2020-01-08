@@ -28,6 +28,12 @@ Action DMCTSPlayer::nextAction(const GameView& view)
         return actions[0];
     }
 
+    if (d_verbose) {
+        std::cerr
+            << "[P" << view.playerId()
+            << "] DMCTS is running." << std::endl;
+    }
+
     // Create separate trees for possible determinizations
     std::vector<std::unique_ptr<DMCTSTree>> trees;
     std::deque<size_t> available;
