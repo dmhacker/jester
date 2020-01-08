@@ -19,7 +19,7 @@ public:
 
 class DMCTSTree {
 private:
-    std::unique_ptr<DMCTSNode> d_root;
+    std::shared_ptr<DMCTSNode> d_root;
     Game d_game;
 
 public:
@@ -29,16 +29,16 @@ public:
     DMCTSTree(const DMCTSTree& tree) = delete;
     DMCTSTree& operator=(const DMCTSTree& tree) = delete;
 
-    const std::unique_ptr<DMCTSNode>& root() const;
+    const std::shared_ptr<DMCTSNode>& root() const;
 
     void play();
 
 private:
-    void selectPath(Game& game, std::vector<DMCTSNode*>& path);
-    void rolloutPath(Game& game, const std::vector<DMCTSNode*>& path);
+    void selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& path);
+    void rolloutPath(Game& game, const std::vector<std::shared_ptr<DMCTSNode>>& path);
 };
 
-inline const std::unique_ptr<DMCTSNode>& DMCTSTree::root() const
+inline const std::shared_ptr<DMCTSNode>& DMCTSTree::root() const
 {
     return d_root;
 }

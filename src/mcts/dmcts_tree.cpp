@@ -12,8 +12,7 @@ DMCTSNode::DMCTSNode(size_t player)
 }
 
 NodeExpansion DMCTSNode::tryExpand(const Game& game)
-{
-    if (game.finished()) {
+{ if (game.finished()) {
         return NodeExpansion();
     }
     if (!d_cacheSetup) {
@@ -38,14 +37,14 @@ DMCTSTree::DMCTSTree(const Game& game)
 void DMCTSTree::play()
 {
     Game game(d_game);
-    std::vector<DMCTSNode*> path;
+    std::vector<std::shared_ptr<DMCTSNode>> path;
     selectPath(game, path);
     rolloutPath(game, path);
 }
 
-void DMCTSTree::selectPath(Game& game, std::vector<DMCTSNode*>& path)
+void DMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& path)
 {
-    auto selection = d_root.get();
+    auto selection = d_root;
     path.push_back(selection);
     NodeExpansion expansion;
     while ((expansion = selection->tryExpand(game)).empty()) {
@@ -53,10 +52,10 @@ void DMCTSTree::selectPath(Game& game, std::vector<DMCTSNode*>& path)
             return;
         }
         Action best_action;
-        DMCTSNode* best_node = nullptr;
+        std::shared_ptr<DMCTSNode> best_node = nullptr;
         float best_score = -1;
         for (auto& it : selection->children()) {
-            auto child = static_cast<DMCTSNode*>(it.second.get());
+            auto child = std::static_pointer_cast<DMCTSNode>(it.second);
             float exploitation = child->stats().rewardRatio();
             float exploration = std::sqrt(
                 2 * std::log(selection->stats().playouts())
@@ -76,11 +75,11 @@ void DMCTSTree::selectPath(Game& game, std::vector<DMCTSNode*>& path)
     auto& action = expansion.action();
     game.playAction(action);
     auto child = std::make_shared<DMCTSNode>(game.currentPlayerId());
-    path.push_back(child.get());
-    selection->children()[action] = std::move(child);
+    path.push_back(child);
+    selection->children()[action] = child;
 }
 
-void DMCTSTree::rolloutPath(Game& game, const std::vector<DMCTSNode*>& path)
+void DMCTSTree::rolloutPath(Game& game, const std::vector<std::shared_ptr<DMCTSNode>>& path)
 {
     game.play();
     auto& result = game.winOrder();
