@@ -149,7 +149,7 @@ template <>
 struct hash<jester::Card> {
     size_t operator()(const jester::Card& card) const
     {
-        return hash<int>()(card.rank() * 4 + card.suit());
+        return hash<int>()(card.rank() * 4 + card.suit() + 1);
     }
 };
 
