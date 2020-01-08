@@ -11,21 +11,21 @@ DMCTSNode::DMCTSNode(size_t player)
 {
 }
 
-std::unique_ptr<Action> DMCTSNode::unexpandedAction(const Game& game)
+NodeExpansion DMCTSNode::tryExpand(const Game& game)
 {
     if (game.finished()) {
-        return nullptr;
+        return NodeExpansion();
     }
     if (!d_cacheSetup) {
         d_unexpandedCache = game.nextActions();
         d_cacheSetup = true;
     }
     if (d_unexpandedCache.empty()) {
-        return nullptr;
+        return NodeExpansion();
     }
-    Action action = d_unexpandedCache.back();
+    NodeExpansion expansion(d_unexpandedCache.back());
     d_unexpandedCache.pop_back();
-    return std::unique_ptr<Action>(new Action(action));
+    return expansion;
 }
 
 DMCTSTree::DMCTSTree(const Game& game)
@@ -46,9 +46,9 @@ void DMCTSTree::play()
 void DMCTSTree::selectPath(Game& game, std::vector<DMCTSNode*>& path)
 {
     auto selection = d_root.get();
-    std::unique_ptr<Action> next_action = nullptr;
     path.push_back(selection);
-    while ((next_action = selection->unexpandedAction(game)) == nullptr) {
+    NodeExpansion expansion;
+    while ((expansion = selection->tryExpand(game)).empty()) {
         if (game.finished()) {
             return;
         }
@@ -73,7 +73,7 @@ void DMCTSTree::selectPath(Game& game, std::vector<DMCTSNode*>& path)
         selection = best_node;
         path.push_back(selection);
     }
-    auto action = *next_action;
+    auto& action = expansion.action();
     game.playAction(action);
     auto child = std::make_shared<DMCTSNode>(game.currentPlayerId());
     path.push_back(child.get());

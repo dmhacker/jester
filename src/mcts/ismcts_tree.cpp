@@ -11,15 +11,15 @@ ISMCTSNode::ISMCTSNode(size_t player)
 {
 }
 
-std::unique_ptr<Action> ISMCTSNode::unexpandedAction(const Game& game)
+NodeExpansion ISMCTSNode::tryExpand(const Game& game)
 {
     for (auto& action : game.nextActions()) {
         auto it = children().find(action);
         if (it == children().end()) {
-            return std::unique_ptr<Action>(new Action(action));
+            return NodeExpansion(action);
         }
     }
-    return nullptr;
+    return NodeExpansion();
 }
 
 ISMCTSTree::ISMCTSTree(const GameView& view)
@@ -45,12 +45,12 @@ void ISMCTSTree::play()
 void ISMCTSTree::selectPath(Game& game, std::vector<ISMCTSNode*>& path)
 {
     auto selection = d_root.get();
-    std::unique_ptr<Action> next_action = nullptr;
     path.push_back(selection);
+    NodeExpansion expansion;
     while (true) {
         std::lock_guard<std::mutex> plck(selection->mutex());
-        next_action = selection->unexpandedAction(game);
-        if (next_action != nullptr) {
+        expansion = selection->tryExpand(game);
+        if (!expansion.empty()) {
             break;
         }
         if (game.finished()) {
@@ -79,7 +79,7 @@ void ISMCTSTree::selectPath(Game& game, std::vector<ISMCTSNode*>& path)
         selection = best_node;
         path.push_back(selection);
     }
-    auto action = *next_action;
+    auto& action = expansion.action();
     game.playAction(action);
     auto child = std::make_shared<ISMCTSNode>(
         game.currentPlayerId());

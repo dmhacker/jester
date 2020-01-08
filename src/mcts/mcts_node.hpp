@@ -5,12 +5,25 @@
 #include "../rules/game_view.hpp"
 #include "mcts_stats.hpp"
 
-#include <unordered_map>
 #include <erased_ptr.hpp>
+#include <unordered_map>
 
 namespace jester {
 
-template<class T>
+class NodeExpansion {
+private:
+    bool d_empty;
+    Action d_action;
+
+public:
+    NodeExpansion();
+    NodeExpansion(const Action& action);
+
+    bool empty() const;
+    const Action& action() const;
+};
+
+template <class T>
 using mcts_ptr = std::shared_ptr<T>;
 
 class MCTSNode {
@@ -32,10 +45,20 @@ public:
     std::unordered_map<Action, mcts_ptr<MCTSNode>>& children();
     MCTSStats& stats();
 
-    virtual std::unique_ptr<Action> unexpandedAction(const Game& game) = 0;
+    virtual NodeExpansion tryExpand(const Game& game) = 0;
 
     std::ostream& print(std::ostream& os, size_t level = 0) const;
 };
+
+inline bool NodeExpansion::empty() const
+{
+    return d_empty;
+}
+
+inline const Action& NodeExpansion::action() const
+{
+    return d_action;
+}
 
 inline size_t MCTSNode::playerId() const
 {

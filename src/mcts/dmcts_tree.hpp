@@ -14,7 +14,7 @@ public:
     DMCTSNode(size_t player);
     ~DMCTSNode() = default;
 
-    std::unique_ptr<Action> unexpandedAction(const Game& game);
+    NodeExpansion tryExpand(const Game& game);
 };
 
 class DMCTSTree {
