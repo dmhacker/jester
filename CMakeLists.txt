@@ -20,7 +20,7 @@ file(GLOB test_sources
 )
 add_executable(tests "test/main.cpp" ${test_sources})
 target_include_directories(tests PRIVATE "include")
-target_include_directories(tests PRIVATE "test_include")
 target_link_libraries(tests Threads::Threads)
+
 include(CTest)
 catch_discover_tests(tests)

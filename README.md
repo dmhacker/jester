@@ -53,14 +53,11 @@ down only one tree.
 
 Work-in-progress options are:
 
+* Human — The human player will interface with the console and
+will be controlled through stdin.
 * Smart — The smart player will follow a pre-defined strategy. The
 smart player will try to perform prudent actions, such as saving
 trump and high cards for later and attacking with low cards 
 early and midgame.
-* Human — The human player will interface with the console and
-will be controlled through stdin.
-
-In the future, we will consider adding:
-
-* Temporal difference learning
-* Other machine learning based approaches
+* Deep Q-learning — Reinforcement learning agent only available for 
+2-player games.
