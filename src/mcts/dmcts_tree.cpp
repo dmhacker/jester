@@ -29,34 +29,34 @@ std::shared_ptr<Action> DMCTSNode::unexpandedAction(const Game& game)
 }
 
 DMCTSTree::DMCTSTree(const Game& game)
-    : d_game(game)
-    , d_root(new DMCTSNode(d_game.currentPlayerId()))
+    : d_root(new DMCTSNode(game.currentPlayerId()))
+    , d_game(game)
 {
-    assert(!d_game.finished());
+    assert(!game.finished());
 }
 
 void DMCTSTree::play()
 {
     Game game(d_game);
-    std::vector<std::shared_ptr<DMCTSNode>> path;
+    std::vector<DMCTSNode*> path;
     selectPath(game, path);
     rolloutPath(game, path);
 }
 
-void DMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& path)
+void DMCTSTree::selectPath(Game& game, std::vector<DMCTSNode*>& path)
 {
-    auto selection = d_root;
+    auto selection = d_root.get();
     std::shared_ptr<Action> next_action = nullptr;
-    path.push_back(d_root);
+    path.push_back(selection);
     while ((next_action = selection->unexpandedAction(game)) == nullptr) {
         if (game.finished()) {
             return;
         }
         Action best_action;
-        std::shared_ptr<DMCTSNode> best_node = nullptr;
+        DMCTSNode* best_node = nullptr;
         float best_score = -1;
-        for (auto it : selection->children()) {
-            auto child = std::static_pointer_cast<DMCTSNode>(it.second);
+        for (auto& it : selection->children()) {
+            auto child = static_cast<DMCTSNode*>(it.second.get());
             float exploitation = child->stats().rewardRatio();
             float exploration = std::sqrt(
                 2 * std::log(selection->stats().playouts())
@@ -75,12 +75,13 @@ void DMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& 
     }
     auto action = *next_action;
     game.playAction(action);
-    auto child = std::make_shared<DMCTSNode>(game.currentPlayerId());
-    selection->children()[action] = child;
-    path.push_back(child);
+    auto child = ErasedPtr<DMCTSNode>(
+        new DMCTSNode(game.currentPlayerId()), makeErasedDeleter<DMCTSNode>());
+    path.push_back(child.get());
+    selection->children()[action] = std::move(child);
 }
 
-void DMCTSTree::rolloutPath(Game& game, const std::vector<std::shared_ptr<DMCTSNode>>& path)
+void DMCTSTree::rolloutPath(Game& game, const std::vector<DMCTSNode*>& path)
 {
     game.play();
     auto& result = game.winOrder();

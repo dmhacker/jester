@@ -54,8 +54,8 @@ Action ISMCTSPlayer::nextAction(const GameView& view)
     // Choose the best action (the one with the highest visits)
     Action best_action;
     size_t most_visits = 0;
-    for (auto action : actions) {
-        auto child = tree.root()->children()[action];
+    for (auto& action : actions) {
+        auto& child = tree.root()->children()[action];
         auto& stats = child->stats();
         if (most_visits < stats.playouts()) {
             best_action = action;

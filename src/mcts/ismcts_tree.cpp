@@ -37,16 +37,16 @@ ISMCTSTree::ISMCTSTree(const GameView& view)
 void ISMCTSTree::play()
 {
     Game game(d_players, d_view, d_rng);
-    std::vector<std::shared_ptr<ISMCTSNode>> path;
+    std::vector<ISMCTSNode*> path;
     selectPath(game, path);
     rolloutPath(game, path);
 }
 
-void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>& path)
+void ISMCTSTree::selectPath(Game& game, std::vector<ISMCTSNode*>& path)
 {
-    auto selection = d_root;
+    auto selection = d_root.get();
     std::shared_ptr<Action> next_action = nullptr;
-    path.push_back(d_root);
+    path.push_back(selection);
     while (true) {
         std::lock_guard<std::mutex> plck(selection->mutex());
         next_action = selection->unexpandedAction(game);
@@ -57,11 +57,11 @@ void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>
             return;
         }
         Action best_action;
-        std::shared_ptr<ISMCTSNode> best_node = nullptr;
+        ISMCTSNode* best_node = nullptr;
         float best_score = -1;
         for (auto& action : game.nextActions()) {
-            auto child = std::static_pointer_cast<ISMCTSNode>(
-                selection->children()[action]);
+            auto child = static_cast<ISMCTSNode*>(
+                selection->children()[action].get());
             std::lock_guard<std::mutex> clck(child->mutex());
             float exploitation = child->stats().rewardRatio();
             float exploration = std::sqrt(
@@ -81,15 +81,16 @@ void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>
     }
     auto action = *next_action;
     game.playAction(action);
-    auto child = std::make_shared<ISMCTSNode>(game.currentPlayerId());
+    auto child = ErasedPtr<ISMCTSNode>(
+        new ISMCTSNode(game.currentPlayerId()), makeErasedDeleter<ISMCTSNode>());
+    path.push_back(child.get());
     {
         std::lock_guard<std::mutex> plck(selection->mutex());
-        selection->children()[action] = child;
+        selection->children()[action] = std::move(child);
     }
-    path.push_back(child);
 }
 
-void ISMCTSTree::rolloutPath(Game& game, const std::vector<std::shared_ptr<ISMCTSNode>>& path)
+void ISMCTSTree::rolloutPath(Game& game, const std::vector<ISMCTSNode*>& path)
 {
     game.play();
     auto& result = game.winOrder();

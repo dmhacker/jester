@@ -9,14 +9,30 @@
 
 namespace jester {
 
+// make type erased deleter
+template <typename T>
+std::function<void(void*)> makeErasedDeleter()
+{
+    return {
+        [](void* p) {
+            delete static_cast<T*>(p);
+        }
+    };
+};
+
+// A unique_ptr typedef
+template <typename T>
+using ErasedPtr = std::unique_ptr<T, std::function<void(void*)>>;
+
 class MCTSNode {
 private:
     MCTSStats d_stats;
-    std::unordered_map<Action, std::shared_ptr<MCTSNode>> d_children;
+    std::unordered_map<Action, ErasedPtr<MCTSNode>> d_children;
     size_t d_player;
 
 public:
     MCTSNode(size_t player);
+    virtual ~MCTSNode() = default;
 
     // Disable copy and assignment operators
     MCTSNode(const MCTSNode& tree) = delete;
@@ -24,7 +40,7 @@ public:
 
     size_t playerId() const;
 
-    std::unordered_map<Action, std::shared_ptr<MCTSNode>>& children();
+    std::unordered_map<Action, ErasedPtr<MCTSNode>>& children();
     MCTSStats& stats();
 
     virtual std::shared_ptr<Action> unexpandedAction(const Game& game) = 0;
@@ -37,7 +53,7 @@ inline size_t MCTSNode::playerId() const
     return d_player;
 }
 
-inline std::unordered_map<Action, std::shared_ptr<MCTSNode>>& MCTSNode::children()
+inline std::unordered_map<Action, ErasedPtr<MCTSNode>>& MCTSNode::children()
 {
     return d_children;
 }

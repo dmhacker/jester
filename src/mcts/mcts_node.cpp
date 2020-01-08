@@ -13,7 +13,7 @@ std::ostream& MCTSNode::print(std::ostream& os, size_t level) const
     if (level > 3) {
         return os;
     }
-    for (auto it : d_children) {
+    for (auto& it : d_children) {
         for (size_t i = 0; i < level; i++) {
             os << "    ";
         }

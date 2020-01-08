@@ -13,13 +13,16 @@ private:
 
 public:
     ISMCTSNode(size_t player);
+    ~ISMCTSNode() = default;
+
     std::shared_ptr<Action> unexpandedAction(const Game& game);
+    
     std::mutex& mutex();
 };
 
 class ISMCTSTree {
 private:
-    std::shared_ptr<ISMCTSNode> d_root;
+    std::unique_ptr<ISMCTSNode> d_root;
     const GameView& d_view;
     Players d_players;
     std::mt19937 d_rng;
@@ -31,20 +34,20 @@ public:
     ISMCTSTree(const ISMCTSTree& tree) = delete;
     ISMCTSTree& operator=(const ISMCTSTree& tree) = delete;
 
-    const std::shared_ptr<ISMCTSNode>& root() const;
+    const std::unique_ptr<ISMCTSNode>& root() const;
 
     void play();
 
 private:
-    void selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>& path);
-    void rolloutPath(Game& game, const std::vector<std::shared_ptr<ISMCTSNode>>& path);
+    void selectPath(Game& game, std::vector<ISMCTSNode*>& path);
+    void rolloutPath(Game& game, const std::vector<ISMCTSNode*>& path);
 };
 
 inline std::mutex& ISMCTSNode::mutex() {
     return d_mtx;
 }
 
-inline const std::shared_ptr<ISMCTSNode>& ISMCTSTree::root() const
+inline const std::unique_ptr<ISMCTSNode>& ISMCTSTree::root() const
 {
     return d_root;
 }

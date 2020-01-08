@@ -12,13 +12,15 @@ private:
 
 public:
     DMCTSNode(size_t player);
+    ~DMCTSNode() = default;
+
     std::shared_ptr<Action> unexpandedAction(const Game& game);
 };
 
 class DMCTSTree {
 private:
+    std::unique_ptr<DMCTSNode> d_root;
     Game d_game;
-    std::shared_ptr<DMCTSNode> d_root;
 
 public:
     DMCTSTree(const Game& game);
@@ -27,16 +29,16 @@ public:
     DMCTSTree(const DMCTSTree& tree) = delete;
     DMCTSTree& operator=(const DMCTSTree& tree) = delete;
 
-    const std::shared_ptr<DMCTSNode>& root() const;
+    const std::unique_ptr<DMCTSNode>& root() const;
 
     void play();
 
 private:
-    void selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& path);
-    void rolloutPath(Game& game, const std::vector<std::shared_ptr<DMCTSNode>>& path);
+    void selectPath(Game& game, std::vector<DMCTSNode*>& path);
+    void rolloutPath(Game& game, const std::vector<DMCTSNode*>& path);
 };
 
-inline const std::shared_ptr<DMCTSNode>& DMCTSTree::root() const
+inline const std::unique_ptr<DMCTSNode>& DMCTSTree::root() const
 {
     return d_root;
 }
