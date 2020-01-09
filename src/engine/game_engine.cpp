@@ -15,29 +15,24 @@
 
 namespace jester {
 namespace {
-    std::vector<std::string> splitString(const std::string& strn, const std::string& delimiter)
+    template <bool thin>
+    void printBarrier()
     {
-        std::vector<std::string> split;
-        auto start = 0U;
-        auto end = strn.find(delimiter);
-        while (end != std::string::npos) {
-            split.push_back(strn.substr(start, end - start));
-            start = end + delimiter.length();
-            end = strn.find(delimiter, start);
-        }
-        split.push_back(strn.substr(start, end - start));
-        return split;
+        std::cout
+            << std::string(60, thin ? '-' : '=')
+            << std::endl;
     }
 
-    std::vector<size_t> translateIntegers(const std::vector<std::string>& split)
+    size_t readInteger()
     {
-        std::vector<size_t> selections;
-        for (auto& token : split) {
-            size_t num;
-            std::istringstream(token) >> num;
-            selections.push_back(num);
+        std::string line;
+        std::getline(std::cin, line);
+        if (line.empty()) {
+            throw std::invalid_argument("Please enter a number.");
         }
-        return selections;
+        size_t num;
+        std::istringstream(line) >> num;
+        return num;
     }
 }
 
@@ -77,27 +72,51 @@ GameEngine::GameEngine()
 
 void GameEngine::shell() const
 {
-    shellMessage();
-
     while (std::cin) {
-        shellPrompt();
-
-        // Get the input from the user
-        std::string line;
-        std::getline(std::cin, line);
-        if (line.size() == 0) {
+        size_t num_players;
+        try {
+            std::cout << "Number of players: ";
+            num_players = readInteger();
+            if (num_players < 2 || num_players > 6) {
+                throw std::invalid_argument("The number of players must be between 2 and 6.");
+            }
+        } catch (std::exception& ex) {
+            if (!std::cin) {
+                break;
+            }
+            std::cerr << ex.what() << std::endl;
             continue;
         }
 
-        // Turn the input into a list of integers (list of selections)
-        std::vector<size_t> selections = translateIntegers(splitString(line, ","));
-        if (selections.empty()) {
-            std::cerr << "Your input was formatted incorrectly." << std::endl;
-            continue;
+        // Print
+        std::cout << std::endl;
+        std::cout << "Please choose strategies from the following list." << std::endl;
+        printOptions();
+        std::cout << "Enter the number corresponding to your desired strategy." << std::endl;
+        std::cout << std::endl;
+
+        std::vector<size_t> selections;
+        for (size_t i = 1; i <= num_players; i++) {
+            if (!std::cin) {
+                break;
+            }
+            std::cout << "Player " << (i - 1) << "'s strategy: ";
+            try {
+                auto selection = readInteger();
+                if (selection < 0 || selection >= d_options.size()) {
+                    throw std::invalid_argument("Please choose a number representing a valid strategy.");
+                }
+                selections.push_back(selection);
+            } catch (std::exception& ex) {
+                if (!std::cin) {
+                    break;
+                }
+                std::cerr << ex.what() << std::endl;
+                i--;
+            }
         }
-        if (selections.size() == 1) {
-            std::cerr << "There must be at least 2 players in the game." << std::endl;
-            continue;
+        if (!std::cin) {
+            break;
         }
 
         // Parse the selections into player objects
@@ -120,6 +139,7 @@ void GameEngine::shell() const
         }
 
         // Print out table mapping IDs to player types
+        std::cout << std::endl;
         std::cout
             << "ID\tPlayer" << std::endl
             << "--\t------" << std::endl;
@@ -135,37 +155,19 @@ void GameEngine::shell() const
         }
         game.play();
 
-        // Add message explaining how to set up the next game
-        shellMessage();
+        std::cout << std::endl;
+        printBarrier<false>();
+        std::cout << "The game has finished. Select players for the next game." << std::endl;
+        printBarrier<false>();
+        std::cout << std::endl;
     }
 }
 
-void GameEngine::shellPrompt() const
+void GameEngine::printOptions() const
 {
-    std::cout << ">>> ";
-}
-
-void GameEngine::shellMessage() const
-{
-    std::cout << std::endl;
-    std::cout
-        << "Use the following prompt to specify what"
-        << " players should be included in the next game." 
-        << std::endl
-        << "You will be given a numbered list of options."
-        << std::endl
-        << "List selected options in your desired order,"
-        << " separating them via commas."
-        << std::endl
-        << "For example, entering \"1,0\" would"
-        << " create a game with a minimal player 0 and"
-        << " random player 1."
-        << std::endl
-        << std::endl;
     for (size_t i = 0; i < d_options.size(); i++) {
         std::cout << i << ") " << d_options[i].name() << std::endl;
     }
-    std::cout << std::endl;
 }
 
 }

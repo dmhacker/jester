@@ -27,8 +27,7 @@ public:
     void shell() const;
 
 private:
-    void shellPrompt() const;
-    void shellMessage() const;
+    void printOptions() const;
 };
 
 inline const std::string& PlayerOption::name() const
