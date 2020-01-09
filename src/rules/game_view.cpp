@@ -9,7 +9,8 @@ GameView::GameView(const Game& game, size_t pid)
 {
 }
 
-GameView::~GameView() {
+GameView::~GameView()
+{
 }
 
 Hand GameView::visibleHand(size_t pid) const
@@ -65,12 +66,13 @@ size_t GameView::deckSize() const
     return d_game.deck().size();
 }
 
-size_t GameView::playerCount() const 
+size_t GameView::playerCount() const
 {
     return d_game.playerCount();
 }
 
-std::vector<Action> GameView::nextActions() const {
+const std::vector<Action>& GameView::nextActions() const
+{
     return d_game.nextActions();
 }
 
@@ -118,7 +120,5 @@ size_t GameView::defenderId() const
 {
     return d_game.defenderId();
 }
-
-
 
 }

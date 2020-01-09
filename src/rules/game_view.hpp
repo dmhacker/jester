@@ -30,7 +30,7 @@ public:
     bool attackerNext() const;
     size_t playerCount() const;
     size_t deckSize() const;
-    std::vector<Action> nextActions() const;
+    const std::vector<Action>& nextActions() const;
     const std::vector<size_t>& winOrder() const;
     const std::deque<size_t>& attackOrder() const;
     const CardPile& hiddenCards() const;

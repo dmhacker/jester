@@ -35,6 +35,7 @@ private:
     CardSequence d_currentDefense;
     std::vector<size_t> d_winOrder;
     std::deque<size_t> d_attackOrder;
+    std::vector<Action> d_nextActions;
     Observers d_observers;
 
 public:
@@ -61,7 +62,7 @@ public:
     bool finished() const;
     bool attackerNext() const;
     size_t playerCount() const;
-    std::vector<Action> nextActions() const;
+    const std::vector<Action>& nextActions() const;
     const std::vector<size_t>& winOrder() const;
     const std::deque<size_t>& attackOrder() const;
     const CardPile& hiddenCards() const;
@@ -78,6 +79,7 @@ private:
     void finishGoodDefense();
     void finishBadDefense();
     void replenishHand(Hand& hand, size_t max_count);
+    void calculateNextActions();
 
 private:
     friend std::ostream& operator<<(std::ostream& os, const Game& game);
@@ -116,6 +118,11 @@ inline const std::vector<size_t>& Game::winOrder() const
 inline const std::deque<size_t>& Game::attackOrder() const
 {
     return d_attackOrder;
+}
+
+inline const std::vector<Action>& Game::nextActions() const
+{
+    return d_nextActions;
 }
 
 inline const Hand& Game::hand(size_t pid) const
@@ -163,7 +170,8 @@ inline Suit Game::trumpSuit() const
     return d_trump.suit();
 }
 
-inline size_t Game::currentPlayerId() const {
+inline size_t Game::currentPlayerId() const
+{
     if (attackerNext()) {
         return attackerId();
     } else {

@@ -32,6 +32,7 @@ Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
     , d_currentDefense(view.currentDefense())
     , d_winOrder(view.winOrder())
     , d_attackOrder(view.attackOrder())
+    , d_nextActions(view.nextActions())
 {
     assert(players.size() == view.playerCount());
     // Cards in hidden set may be in player hands or may be in the deck
@@ -92,6 +93,7 @@ void Game::reset(std::mt19937& rng)
         d_attackOrder.push_back(pid);
     }
     d_winOrder.clear();
+    calculateNextActions();
 }
 
 GameView Game::currentPlayerView() const
@@ -106,21 +108,21 @@ Action Game::nextAction() const
     return action;
 }
 
-std::vector<Action> Game::nextActions() const
+void Game::calculateNextActions()
 {
-    std::vector<Action> actions;
+    d_nextActions.clear();
     if (finished()) {
-        return actions;
+        return;
     }
     auto aid = attackerId();
     auto did = defenderId();
     if (attackerNext()) {
         if (d_currentAttack.empty()) {
             for (auto& card : d_hands[aid]) {
-                actions.push_back(Action(card));
+                d_nextActions.push_back(Action(card));
             }
         } else {
-            actions.push_back(Action());
+            d_nextActions.push_back(Action());
             std::unordered_set<size_t> valid_ranks;
             for (auto& card : d_currentAttack) {
                 valid_ranks.insert(card.rank());
@@ -130,28 +132,27 @@ std::vector<Action> Game::nextActions() const
             }
             for (auto& card : d_hands[aid]) {
                 if (valid_ranks.find(card.rank()) != valid_ranks.end()) {
-                    actions.push_back(Action(card));
+                    d_nextActions.push_back(Action(card));
                 }
             }
         }
     } else {
-        actions.push_back(Action());
+        d_nextActions.push_back(Action());
         auto attacking = d_currentAttack.back();
         for (auto& card : d_hands[did]) {
             if (attacking.suit() == trumpSuit()) {
                 if (card.suit() == trumpSuit() && card.rank() > attacking.rank()) {
-                    actions.push_back(Action(card));
+                    d_nextActions.push_back(Action(card));
                 }
             } else {
                 if (card.suit() == trumpSuit()
                     || (card.suit() == attacking.suit()
                         && card.rank() > attacking.rank())) {
-                    actions.push_back(Action(card));
+                    d_nextActions.push_back(Action(card));
                 }
             }
         }
     }
-    return actions;
 }
 
 void Game::play()
@@ -189,6 +190,7 @@ void Game::playAction(const Action& action)
             if (attack_hand.empty() && d_deck.empty() && d_winOrder.size() + 2 == d_players.size()) {
                 d_attackOrder.clear();
                 d_winOrder.push_back(aid);
+                d_nextActions.clear();
                 for (auto& observer : d_observers) {
                     observer->onPlayerWin(*this, aid, d_winOrder.size());
                 }
@@ -214,6 +216,7 @@ void Game::playAction(const Action& action)
             }
         }
     }
+    calculateNextActions();
 }
 
 void Game::finishGoodDefense()
@@ -248,6 +251,7 @@ void Game::finishGoodDefense()
         if (d_winOrder.size() + 1 == d_players.size()) {
             d_attackOrder.clear();
             d_winOrder.push_back(aid);
+            d_nextActions.clear();
             for (auto& observer : d_observers) {
                 observer->onPlayerWin(*this, aid, d_winOrder.size());
             }
@@ -295,6 +299,7 @@ void Game::validateAction(const Action& action) const
     if (finished()) {
         throw GameException("The game is finished.");
     }
+    std::cerr << action << " " << d_nextActions << std::endl;
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
