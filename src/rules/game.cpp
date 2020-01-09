@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <random>
 
 namespace jester {
 
@@ -299,7 +298,6 @@ void Game::validateAction(const Action& action) const
     if (finished()) {
         throw GameException("The game is finished.");
     }
-    std::cerr << action << " " << d_nextActions << std::endl;
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
