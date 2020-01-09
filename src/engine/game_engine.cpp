@@ -149,8 +149,18 @@ void GameEngine::shellMessage() const
 {
     std::cout << std::endl;
     std::cout
-        << "For example, entering \"0,0,0\" would "
-        << "create a game with 3 minimal players."
+        << "Use the following prompt to specify what"
+        << " players should be included in the next game." 
+        << std::endl
+        << "You will be given a numbered list of options."
+        << std::endl
+        << "List selected options in your desired order,"
+        << " separating them via commas."
+        << std::endl
+        << "For example, entering \"1,0\" would"
+        << " create a game with a minimal player 0 and"
+        << " random player 1."
+        << std::endl
         << std::endl;
     for (size_t i = 0; i < d_options.size(); i++) {
         std::cout << i << ") " << d_options[i].name() << std::endl;
