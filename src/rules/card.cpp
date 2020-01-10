@@ -8,9 +8,9 @@ Card::Card()
 {
 }
 
-Card::Card(size_t _rank, Suit _suit)
-    : d_rank(_rank)
-    , d_suit(_suit)
+Card::Card(uint8_t rank, Suit suit)
+    : d_rank(rank)
+    , d_suit(suit)
 {
 }
 

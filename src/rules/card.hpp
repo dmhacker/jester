@@ -12,13 +12,13 @@
 
 namespace jester {
 
-enum Suit {
+enum Suit : uint8_t {
     hearts = 0,
     diamonds = 1,
     spades = 2,
     clubs = 3
 };
-using Rank = size_t;
+using Rank = uint8_t;
 
 class Card {
 private:
@@ -29,6 +29,7 @@ public:
     Card();
     Card(Rank _rank, Suit _suit);
 
+    uint8_t index() const;
     Rank rank() const;
     Suit suit() const;
     bool operator==(const Card& card) const;
@@ -69,6 +70,11 @@ inline Rank Card::rank() const
 inline Suit Card::suit() const
 {
     return d_suit;
+}
+
+inline uint8_t Card::index() const
+{
+    return d_suit * 4 + (d_rank - 6);
 }
 
 inline bool Card::operator==(const Card& card) const

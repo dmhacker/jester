@@ -48,16 +48,16 @@ determinizations and then run MCTS on each state.
 * ISMCTS — A player implementing 
 [information-set Monte Carlo tree search](http://eprints.whiterose.ac.uk/75048/1/CowlingPowleyWhitehouse2012.pdf). 
 Rather than associating a single determinization with an entire MCTS tree,
-every simulation determinizes and then follows an appropriate path
-down only one tree.
+every simulation determinizes and then follows an appropriate path. 
+Multiple trees can be compressed into one.
 
 Work-in-progress options are:
 
+* Tabulated CFRM — Counterfactual regret minimization with Monte Carlo 
+external sampling.
 * Human — The human player will interface with the console and
 will be controlled through stdin.
 * Smart — The smart player will follow a pre-defined strategy. The
 smart player will try to perform prudent actions, such as saving
 trump and high cards for later and attacking with low cards 
 early and midgame.
-* Deep Q-learning — Reinforcement learning agent only available for 
-2-player games.
