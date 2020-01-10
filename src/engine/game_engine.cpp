@@ -8,6 +8,7 @@
 #include "../players/ismcts_player.hpp"
 #include "../players/minimal_player.hpp"
 #include "../players/random_player.hpp"
+#include "../players/cfrm_player.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -68,6 +69,10 @@ GameEngine::GameEngine()
         auto cores = std::thread::hardware_concurrency();
         return std::make_shared<ISMCTSPlayer>(!has_human, cores, std::chrono::milliseconds(9000));
     }));
+    d_options.push_back(PlayerOption("Prototype CFRM", [](bool has_human) {
+        return std::make_shared<CFRMPlayer>(1000000);
+    }));
+
 }
 
 void GameEngine::shell() const

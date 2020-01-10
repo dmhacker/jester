@@ -20,6 +20,7 @@ public:
 
     const ActionMap& strategy(float weight);
     ActionMap averageStrategy() const;
+    void addRegret(const Action& action, float regret);
 };
 
 }

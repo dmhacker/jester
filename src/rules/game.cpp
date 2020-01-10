@@ -367,6 +367,12 @@ std::ostream& operator<<(std::ostream& os, const Game& game)
     os << "  DK -- "
        << game.d_deck
        << std::endl;
+    os << "  CA -- "
+       << game.d_currentAttack
+       << std::endl;
+    os << "  CD -- "
+       << game.d_currentDefense
+       << std::endl;
     return os;
 }
 

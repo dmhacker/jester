@@ -46,4 +46,9 @@ ActionMap CFRMNode::averageStrategy() const
     return averages;
 }
 
+void CFRMNode::addRegret(const Action& action, float regret)
+{
+    d_regretSum[action] += regret;
+}
+
 }

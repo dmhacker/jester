@@ -22,14 +22,18 @@ CompressedView::CompressedView(const GameView& view)
 
     std::memset(d_hiddenHands, 0, MAX_PLAYERS);
     for (size_t pid = 0; pid < view.playerCount(); pid++) {
-        d_hiddenHands[pid] = view.hiddenHandSize(pid);
+        auto rid = remapping[pid];
+        d_hiddenHands[rid] = view.hiddenHandSize(rid);
     }
-   
+
     std::memset(d_cardStates, CARD_DISCARDED, MAX_CARDS);
-    d_cardStates[d_trump] = CARD_DECK_BOTTOM;
+    if (view.deckSize() > 0) {
+        d_cardStates[d_trump] = CARD_DECK_BOTTOM;
+    }
     for (size_t pid = 0; pid < view.playerCount(); pid++) {
+        auto rid = remapping[pid];
         for (auto& card : view.visibleHand(pid)) {
-            d_cardStates[card.index()] = pid;
+            d_cardStates[card.index()] = rid;
         }
     }
     for (auto& card : view.currentAttack()) {
@@ -45,10 +49,45 @@ CompressedView::CompressedView(const GameView& view)
 
 bool CompressedView::operator==(const CompressedView& cv) const
 {
-    return d_trump == cv.d_trump 
+    return d_trump == cv.d_trump
         && d_attacking == cv.d_attacking
         && std::memcmp(d_cardStates, cv.d_cardStates, MAX_CARDS) == 0
         && std::memcmp(d_hiddenHands, cv.d_hiddenHands, MAX_PLAYERS) == 0;
+}
+
+std::ostream& operator<<(std::ostream& os, const CompressedView& view)
+{
+    std::vector<Hand> hands(MAX_PLAYERS);
+    Hand attack;
+    Hand defense;
+    for (uint8_t i = 0; i < MAX_CARDS; i++) {
+        Card card = toCard(i);
+        auto state = view.d_cardStates[i]; 
+        if (state == CARD_IN_ATTACK) {
+            attack.insert(card);
+        }
+        else if (state == CARD_IN_DEFENSE) {
+            defense.insert(card);
+        }
+        else if (state == CARD_HIDDEN) {
+            continue;
+        }
+        else if (state == CARD_DISCARDED) {
+            continue;
+        }
+        else if (state == CARD_DECK_BOTTOM) {
+            continue;
+        }
+        else {
+            hands[state].insert(card);
+        }
+    }
+    for (size_t pid = 0; pid < MAX_PLAYERS; pid++) {
+        std::cerr << "  P" << pid << ": " << hands[pid] << std::endl;
+    }
+    std::cerr << "  CA: " << attack << std::endl;
+    std::cerr << "  CD: " << defense << std::endl;
+    return os;
 }
 
 }

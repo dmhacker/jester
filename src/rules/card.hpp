@@ -61,6 +61,7 @@ using CardSequence = std::vector<Card>;
 
 std::string toString(Rank rank);
 std::string toString(Suit rank);
+Card toCard(uint8_t index);
 
 inline Rank Card::rank() const
 {
@@ -74,7 +75,7 @@ inline Suit Card::suit() const
 
 inline uint8_t Card::index() const
 {
-    return d_suit * 4 + (d_rank - 6);
+    return (d_rank - 6) * 4 + d_suit;
 }
 
 inline bool Card::operator==(const Card& card) const
@@ -138,6 +139,22 @@ std::ostream& operator<<(std::ostream& os, const std::unordered_set<T>& containe
     size_t i = 0;
     for (auto& item : container) {
         os << item;
+        if (i < container.size() - 1) {
+            os << ", ";
+        }
+        i++;
+    }
+    os << "}";
+    return os;
+}
+
+template <class K, class V>
+std::ostream& operator<<(std::ostream& os, const std::unordered_map<K, V>& container)
+{
+    os << "{";
+    size_t i = 0;
+    for (auto& item : container) {
+        os << item.first << " : " << item.second;
         if (i < container.size() - 1) {
             os << ", ";
         }

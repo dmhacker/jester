@@ -48,6 +48,10 @@ std::string toString(Suit suit)
     return std::string();
 }
 
+Card toCard(uint8_t index) {
+    return Card(index / 4 + 6, static_cast<Suit>(index % 4)); 
+}
+
 std::ostream& operator<<(std::ostream& os, const Card& card)
 {
     return os << toString(card.d_rank) << toString(card.d_suit);

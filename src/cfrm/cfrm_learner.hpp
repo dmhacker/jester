@@ -1,5 +1,5 @@
-#ifndef JESTER_ISMCTS_TREE_HPP
-#define JESTER_ISMCTS_TREE_HPP
+#ifndef JESTER_CFRM_LEARNER_HPP
+#define JESTER_CFRM_LEARNER_HPP
 
 #include "../rules/game.hpp"
 #include "../rules/game_view.hpp"
@@ -13,14 +13,15 @@ namespace jester {
 class CFRMLearner {
 private:
     std::unordered_map<CompressedView, CFRMNode> d_nodes;
-    std::mt19937 d_rng;
+    std::unordered_map<CompressedView, Game> d_games;
 
 public:
-    void train(size_t iterations);
+    void train(size_t iterations, std::mt19937& rng);
     ActionMap bestStrategy(const GameView& view);
 
+    Action sampleStrategy(const ActionMap& strategy, std::mt19937& rng) const;
 private:
-    std::vector<float> cfrm(Game& game, const std::vector<float>& reaches);
+    float cfrm(size_t tpid, const Game& game, const std::vector<float>& reaches, std::mt19937& rng);
 };
 
 }

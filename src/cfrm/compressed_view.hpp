@@ -32,6 +32,9 @@ public:
 
     bool operator==(const CompressedView& cv) const;
     friend struct std::hash<CompressedView>;
+
+private:
+    friend std::ostream& operator<<(std::ostream& os, const CompressedView& view);
 };
 
 }
