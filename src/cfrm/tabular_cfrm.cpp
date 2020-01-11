@@ -17,7 +17,7 @@ void TabularCFRM::randomizeSeed()
     d_rng = std::mt19937(std::random_device {}());
 }
 
-void TabularCFRM::iterate()
+void TabularCFRM::iterate(bool verbose)
 {
     for (size_t sz = 2; sz <= 6; sz++) {
         std::vector<std::shared_ptr<Player>> players(sz);
@@ -65,7 +65,7 @@ Action TabularCFRM::bestAction(const GameView& view)
     }
 }
 
-float TabularCFRM::train(size_t tpid, const Game& game, const std::vector<float>& reaches)
+float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std::vector<float>& reaches)
 {
     // Return reward/utility from terminal node; this is the evaluation function
     if (game.finished()) {

@@ -34,7 +34,7 @@ ISMCTSTree::ISMCTSTree(const GameView& view)
     assert(!view.finished());
 }
 
-void ISMCTSTree::play()
+void ISMCTSTree::iterate()
 {
     Game game(d_players, d_view, d_rng);
     std::vector<std::shared_ptr<ISMCTSNode>> path;

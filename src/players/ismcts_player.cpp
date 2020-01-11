@@ -43,7 +43,7 @@ Action ISMCTSPlayer::nextAction(const GameView& view)
                 if (end_timestamp - start_timestamp > limit) {
                     break;
                 }
-                tree.play();
+                tree.iterate();
             }
         }));
     }

@@ -31,7 +31,7 @@ public:
 
     const std::shared_ptr<DMCTSNode>& root() const;
 
-    void play();
+    void iterate();
 
 private:
     void selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& path);

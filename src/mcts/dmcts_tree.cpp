@@ -35,7 +35,7 @@ DMCTSTree::DMCTSTree(const Game& game)
     assert(!game.finished());
 }
 
-void DMCTSTree::play()
+void DMCTSTree::iterate()
 {
     Game game(d_game);
     std::vector<std::shared_ptr<DMCTSNode>> path;

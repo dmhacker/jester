@@ -70,7 +70,7 @@ Action DMCTSPlayer::nextAction(const GameView& view)
                 if (end_timestamp - start_timestamp > limit) {
                     break;
                 }
-                trees[choice]->play();
+                trees[choice]->iterate();
             }
         }));
     }
