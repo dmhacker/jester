@@ -64,10 +64,6 @@ Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
     assert(d_deck.size() == view.deckSize());
 }
 
-Game::~Game()
-{
-}
-
 void Game::reset(std::mt19937& rng)
 {
     for (size_t rank = 6; rank <= 14; rank++) {

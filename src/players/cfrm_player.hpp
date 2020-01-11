@@ -4,17 +4,15 @@
 #include <random>
 
 #include "player.hpp"
-#include "../cfrm/cfrm_learner.hpp"
+#include "../cfrm/tabular_cfrm.hpp"
 
 namespace jester {
 
 class CFRMPlayer : public Player {
 private:
-    CFRMLearner d_learner;
-    std::mt19937 d_rng;
+    TabularCFRM d_cfrm;
 
 public:
-    CFRMPlayer(size_t iterations);
     Action nextAction(const GameView& view);
 };
 

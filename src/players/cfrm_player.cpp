@@ -6,12 +6,6 @@
 
 namespace jester {
 
-CFRMPlayer::CFRMPlayer(size_t iterations)
-    : d_rng(std::random_device {}())
-{
-    d_learner.train(iterations, d_rng);
-}
-
 Action CFRMPlayer::nextAction(const GameView& view)
 {
     // If there is only one action then just take that action
@@ -19,11 +13,7 @@ Action CFRMPlayer::nextAction(const GameView& view)
     if (actions.size() == 1) {
         return actions[0];
     }
-
-    auto strategy = d_learner.bestStrategy(view);
-    std::cerr << strategy << std::endl;
-
-    return d_learner.sampleStrategy(strategy, d_rng);
+    return d_cfrm.bestAction(view);
 }
 
 }

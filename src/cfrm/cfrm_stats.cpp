@@ -1,8 +1,8 @@
-#include "cfrm_node.hpp"
+#include "cfrm_stats.hpp"
 
 namespace jester {
 
-CFRMNode::CFRMNode(const std::vector<Action>& actions)
+CFRMStats::CFRMStats(const std::vector<Action>& actions)
 {
     for (auto& action : actions) {
         d_strategy[action] = 0;
@@ -14,7 +14,7 @@ CFRMNode::CFRMNode(const std::vector<Action>& actions)
 // Taken from modelai.gettysburg.edu/2013/cfr/cfr.pdfd for now
 // FIXME: It will be replaced in the future.
 
-const ActionMap& CFRMNode::strategy(float weight)
+const std::unordered_map<Action, float>& CFRMStats::strategy(float weight)
 {
     float normal_sum = 0;
     for (const auto& it : d_regretSum) {
@@ -32,9 +32,9 @@ const ActionMap& CFRMNode::strategy(float weight)
     return d_strategy;
 }
 
-ActionMap CFRMNode::averageStrategy() const
+std::unordered_map<Action, float> CFRMStats::averageStrategy() const
 {
-    ActionMap averages(d_strategy.size());
+    std::unordered_map<Action, float> averages(d_strategy.size());
     float normal_sum = 0;
     for (const auto& it : d_strategySum)
         normal_sum += it.second;
@@ -46,9 +46,15 @@ ActionMap CFRMNode::averageStrategy() const
     return averages;
 }
 
-void CFRMNode::addRegret(const Action& action, float regret)
+void CFRMStats::addRegret(const Action& action, float regret)
 {
     d_regretSum[action] += regret;
+}
+
+template<class Archive>
+void CFRMStats::serialize(Archive& archive)
+{
+    archive(d_strategy, d_strategySum, d_regretSum);
 }
 
 }

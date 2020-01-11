@@ -34,6 +34,9 @@ public:
     Suit suit() const;
     bool operator==(const Card& card) const;
 
+    template <class Archive>
+    void serialize(Archive& archive);
+
 private:
     friend std::ostream& operator<<(std::ostream& os, const Card& card);
 };
@@ -49,6 +52,9 @@ public:
     bool empty() const;
     const Card& card() const;
     bool operator==(const Action& action) const;
+
+    template <class Archive>
+    void serialize(Archive& archive);
 
 private:
     friend std::ostream& operator<<(std::ostream& os, const Action& action);

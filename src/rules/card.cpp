@@ -14,6 +14,42 @@ Card::Card(uint8_t rank, Suit suit)
 {
 }
 
+template <class Archive>
+void Card::serialize(Archive& archive)
+{
+    archive(d_rank, d_suit);
+}
+
+std::ostream& operator<<(std::ostream& os, const Card& card)
+{
+    return os << toString(card.d_rank) << toString(card.d_suit);
+}
+
+Action::Action()
+    : d_card(0, Suit::hearts)
+{
+}
+
+Action::Action(const Card& card)
+    : d_card(card)
+{
+}
+
+template <class Archive>
+void Action::serialize(Archive& archive)
+{
+    archive(d_card);
+}
+
+std::ostream& operator<<(std::ostream& os, const Action& action)
+{
+    if (action.empty()) {
+        return os << "Yield";
+    } else {
+        return os << "Use " << action.card();
+    }
+}
+
 std::string toString(Rank rank)
 {
     if (rank == 11) {
@@ -48,32 +84,9 @@ std::string toString(Suit suit)
     return std::string();
 }
 
-Card toCard(uint8_t index) {
-    return Card(index / 4 + 6, static_cast<Suit>(index % 4)); 
-}
-
-std::ostream& operator<<(std::ostream& os, const Card& card)
+Card toCard(uint8_t index)
 {
-    return os << toString(card.d_rank) << toString(card.d_suit);
-}
-
-Action::Action()
-    : d_card(0, Suit::hearts)
-{
-}
-
-Action::Action(const Card& card)
-    : d_card(card)
-{
-}
-
-std::ostream& operator<<(std::ostream& os, const Action& action)
-{
-    if (action.empty()) {
-        return os << "Yield";
-    } else {
-        return os << "Use " << action.card();
-    }
+    return Card(index / 4 + 6, static_cast<Suit>(index % 4));
 }
 
 }

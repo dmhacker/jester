@@ -39,10 +39,10 @@ private:
     Observers d_observers;
 
 public:
+    Game() = default;
     Game(const Players& players);
     Game(const Players& players, const GameView& view, std::mt19937& rng);
     Game(const Game& game) = default;
-    ~Game();
 
     // Observational methods
     void registerObserver(const std::shared_ptr<Observer>& observer);
