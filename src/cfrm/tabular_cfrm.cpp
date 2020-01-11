@@ -11,7 +11,7 @@
 namespace jester {
 
 /* const static size_t CFRM_THREADS = std::max(1u, std::thread::hardware_concurrency()); */
-const static size_t CFRM_THREADS = 2;
+const static size_t CFRM_THREADS = 1;
 
 TabularCFRM::TabularCFRM()
 {
@@ -28,9 +28,6 @@ void TabularCFRM::iterate(bool verbose)
             size_t num_players = 2;
             std::vector<std::shared_ptr<Player>> players(num_players);
             Game game(players);
-            d_mtx.lock();
-            std::cerr << game;
-            d_mtx.unlock();
             std::vector<float> reaches;
             for (size_t pid = 0; pid < num_players; pid++) {
                 reaches.push_back(1.f);
@@ -122,6 +119,23 @@ float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std:
     }
     auto& stats = stats_it->second;
     auto strategy = stats.strategy(reaches[player]);
+
+    std::unordered_set<Action> a1;
+    for (auto& action : game.nextActions()) {
+        a1.insert(action);
+    }
+    std::unordered_set<Action> a2;
+    for (auto& it : strategy) {
+        a2.insert(it.first);
+    }
+    if (a1 != a2) {
+        std::cerr << std::endl;
+        std::cerr << game;
+        std::cerr << abstraction;
+        std::cerr << a1 << std::endl;
+        std::cerr << a2 << std::endl;
+    }
+    assert(a1 == a2);
 
     if (player == tpid) {
         std::unordered_map<Action, float> child_util;
