@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <sstream>
 #include <thread>
 
 namespace jester {
@@ -64,7 +65,10 @@ Action TabularCFRM::sampleStrategy(const std::unordered_map<Action, float>& stra
             return it.first;
         }
     }
-    throw new std::bad_exception();
+    std::stringstream ss;
+    ss << "Probability greater than 1: "
+       << strategy;
+    throw std::logic_error(ss.str());
 }
 
 float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std::vector<float>& reaches, std::mt19937& rng)
