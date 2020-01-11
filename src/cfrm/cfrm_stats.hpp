@@ -3,7 +3,7 @@
 
 #include "../rules/card.hpp"
 
-#include <unordered_map>
+#include <cereal/types/unordered_map.hpp>
 
 namespace jester {
 
@@ -14,6 +14,7 @@ private:
     std::unordered_map<Action, float> d_regretSum;
 
 public:
+    CFRMStats() = default;
     CFRMStats(const std::vector<Action>& actions);
 
     const std::unordered_map<Action, float>& strategy(float weight);
@@ -23,6 +24,12 @@ public:
     template <class Archive>
     void serialize(Archive& archive);
 };
+
+template<class Archive>
+inline void CFRMStats::serialize(Archive& archive)
+{
+    archive(d_strategy, d_strategySum, d_regretSum);
+}
 
 }
 

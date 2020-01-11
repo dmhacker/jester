@@ -51,10 +51,4 @@ void CFRMStats::addRegret(const Action& action, float regret)
     d_regretSum[action] += regret;
 }
 
-template<class Archive>
-void CFRMStats::serialize(Archive& archive)
-{
-    archive(d_strategy, d_strategySum, d_regretSum);
-}
-
 }

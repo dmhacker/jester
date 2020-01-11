@@ -4,13 +4,13 @@
 #include <random>
 
 #include "player.hpp"
-#include "../cfrm/tabular_cfrm.hpp"
+#include "../cfrm/cfrm_storage.hpp"
 
 namespace jester {
 
 class CFRMPlayer : public Player {
 private:
-    TabularCFRM d_cfrm;
+    CFRMStorage d_cfrm;
 
 public:
     Action nextAction(const GameView& view);

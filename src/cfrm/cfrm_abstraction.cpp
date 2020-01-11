@@ -67,12 +67,6 @@ CFRMAbstraction::CFRMAbstraction(const GameView& view)
     }
 }
 
-template <class Archive>
-void CFRMAbstraction::serialize(Archive& archive)
-{
-    archive(d_cardStates, d_hiddenHands, d_trump);
-}
-
 bool CFRMAbstraction::operator==(const CFRMAbstraction& abstraction) const
 {
     return d_trump == abstraction.d_trump

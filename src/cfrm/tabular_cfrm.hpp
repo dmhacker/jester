@@ -33,6 +33,18 @@ private:
     float train(bool verbose, size_t tpid, const Game& game, const std::vector<float>& reaches);
 };
 
+inline void TabularCFRM::randomizeSeed()
+{
+    d_rng = std::mt19937(std::random_device {}());
+}
+
+
+template <class Archive>
+inline void TabularCFRM::serialize(Archive& archive)
+{
+    archive(d_stats);
+}
+
 }
 
 #endif

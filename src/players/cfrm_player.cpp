@@ -13,7 +13,7 @@ Action CFRMPlayer::nextAction(const GameView& view)
     if (actions.size() == 1) {
         return actions[0];
     }
-    return d_cfrm.bestAction(view);
+    return d_cfrm.cfrm().bestAction(view);
 }
 
 }

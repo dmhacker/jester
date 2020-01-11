@@ -12,11 +12,6 @@ TabularCFRM::TabularCFRM()
     randomizeSeed();
 }
 
-void TabularCFRM::randomizeSeed()
-{
-    d_rng = std::mt19937(std::random_device {}());
-}
-
 void TabularCFRM::iterate(bool verbose)
 {
     for (size_t sz = 2; sz <= 6; sz++) {
@@ -27,15 +22,9 @@ void TabularCFRM::iterate(bool verbose)
             reaches.push_back(1.f);
         }
         for (size_t tpid = 0; tpid < sz; tpid++) {
-            train(tpid, game, reaches);
+            train(verbose, tpid, game, reaches);
         }
     }
-}
-
-template <class Archive>
-void TabularCFRM::serialize(Archive& archive)
-{
-    archive(d_stats);
 }
 
 Action TabularCFRM::sampleStrategy(const std::unordered_map<Action, float>& strategy)
@@ -105,7 +94,7 @@ float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std:
             std::vector<float> next_reaches(reaches);
             next_reaches[player] *= strategy[action];
 
-            child_util[action] = train(tpid, next_game, next_reaches);
+            child_util[action] = train(verbose, tpid, next_game, next_reaches);
             total_util += strategy[action] * child_util[action];
         }
         for (auto& action : game.nextActions()) {
@@ -119,7 +108,7 @@ float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std:
         next_game.playAction(action);
         std::vector<float> next_reaches(reaches);
         next_reaches[player] *= strategy[action];
-        return train(tpid, next_game, next_reaches);
+        return train(verbose, tpid, next_game, next_reaches);
     }
 }
 

@@ -2,7 +2,7 @@
 #define JESTER_CFRM_ABSTRACTION_HPP
 
 #include <memory>
-#include <vector>
+#include <cereal/types/vector.hpp>
 
 namespace jester {
 
@@ -28,6 +28,7 @@ private:
     uint8_t d_trump;
 
 public:
+    CFRMAbstraction() = default;
     CFRMAbstraction(const GameView&);
 
     bool operator==(const CFRMAbstraction&) const;
@@ -40,6 +41,12 @@ public:
 private:
     friend std::ostream& operator<<(std::ostream&, const CFRMAbstraction&);
 };
+
+template <class Archive>
+inline void CFRMAbstraction::serialize(Archive& archive)
+{
+    archive(d_cardStates, d_hiddenHands, d_trump);
+}
 
 }
 

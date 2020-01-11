@@ -14,17 +14,6 @@ Card::Card(uint8_t rank, Suit suit)
 {
 }
 
-template <class Archive>
-void Card::serialize(Archive& archive)
-{
-    archive(d_rank, d_suit);
-}
-
-std::ostream& operator<<(std::ostream& os, const Card& card)
-{
-    return os << toString(card.d_rank) << toString(card.d_suit);
-}
-
 Action::Action()
     : d_card(0, Suit::hearts)
 {
@@ -35,10 +24,9 @@ Action::Action(const Card& card)
 {
 }
 
-template <class Archive>
-void Action::serialize(Archive& archive)
+std::ostream& operator<<(std::ostream& os, const Card& card)
 {
-    archive(d_card);
+    return os << toString(card.d_rank) << toString(card.d_suit);
 }
 
 std::ostream& operator<<(std::ostream& os, const Action& action)

@@ -89,6 +89,12 @@ inline bool Card::operator==(const Card& card) const
     return d_rank == card.d_rank && d_suit == card.d_suit;
 }
 
+template <class Archive>
+inline void Card::serialize(Archive& archive)
+{
+    archive(d_rank, d_suit);
+}
+
 inline bool Action::empty() const
 {
     return d_card.rank() == 0;
@@ -108,6 +114,12 @@ inline bool Action::operator==(const Action& action) const
         return false;
     }
     return card() == action.card();
+}
+
+template <class Archive>
+inline void Action::serialize(Archive& archive)
+{
+    archive(d_card);
 }
 
 template <class T>
