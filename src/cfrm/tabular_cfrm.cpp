@@ -10,7 +10,8 @@
 
 namespace jester {
 
-const static size_t CFRM_THREADS = std::max(1u, std::thread::hardware_concurrency());
+/* const static size_t CFRM_THREADS = std::max(1u, std::thread::hardware_concurrency()); */
+const static size_t CFRM_THREADS = 2;
 
 TabularCFRM::TabularCFRM()
 {
@@ -27,6 +28,9 @@ void TabularCFRM::iterate(bool verbose)
             size_t num_players = 2;
             std::vector<std::shared_ptr<Player>> players(num_players);
             Game game(players);
+            d_mtx.lock();
+            std::cerr << game;
+            d_mtx.unlock();
             std::vector<float> reaches;
             for (size_t pid = 0; pid < num_players; pid++) {
                 reaches.push_back(1.f);
@@ -61,7 +65,7 @@ Action TabularCFRM::sampleStrategy(const std::unordered_map<Action, float>& stra
     float counter = 0.0f;
     for (auto& it : strategy) {
         counter += it.second;
-        if (randf < counter) {
+        if (randf <= counter) {
             return it.first;
         }
     }
@@ -98,6 +102,13 @@ float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std:
     auto player = game.currentPlayerId();
     auto& actions = game.nextActions();
     auto view = game.currentPlayerView();
+    if (actions.size() == 1) {
+        auto action = actions[0];
+        Game next_game(game);
+        next_game.playAction(action);
+        return train(verbose, tpid, next_game, reaches, rng);
+    }
+
     CFRMAbstraction abstraction(view);
     decltype(d_stats)::iterator stats_it;
     {

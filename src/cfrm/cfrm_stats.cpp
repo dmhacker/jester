@@ -51,4 +51,12 @@ void CFRMStats::addRegret(const Action& action, float regret)
     d_regretSum[action] += regret;
 }
 
+std::ostream& operator<<(std::ostream& os, const CFRMStats& stats) {
+    os << stats.d_strategy << std::endl; 
+    os << stats.d_strategySum << std::endl; 
+    os << stats.d_regretSum << std::endl; 
+    return os;
+}
+
+
 }

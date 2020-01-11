@@ -66,7 +66,7 @@ Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
 
 void Game::reset(std::mt19937& rng)
 {
-    for (size_t rank = 6; rank <= 14; rank++) {
+    for (size_t rank = 6; rank <= 7; rank++) {
         d_deck.push_back(Card(rank, Suit::hearts));
         d_deck.push_back(Card(rank, Suit::diamonds));
         d_deck.push_back(Card(rank, Suit::spades));
@@ -77,8 +77,11 @@ void Game::reset(std::mt19937& rng)
     d_hidden.clear();
     d_hidden.insert(d_deck.begin(), d_deck.end());
     d_hidden.erase(d_trump);
-    for (auto& hand : d_hands) {
-        for (size_t i = 0; i < 6; i++) {
+    for (size_t i = 0; i < 6; i++) {
+        for (auto& hand : d_hands) {
+            if (d_deck.empty()) {
+                break;
+            }
             hand.insert(d_deck.front());
             d_deck.pop_front();
         }

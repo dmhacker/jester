@@ -27,7 +27,7 @@ private:
 
 public:
     Card();
-    Card(Rank _rank, Suit _suit);
+    Card(Rank rank, Suit suit);
 
     uint8_t index() const;
     Rank rank() const;
