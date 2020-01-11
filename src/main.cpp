@@ -4,13 +4,13 @@
 using namespace jester;
 
 int main() {
-    /* GameEngine engine; */ 
-    /* engine.shell(); */
     CFRMStorage storage;
     std::cout << "Training is in progress." << std::endl;
-    while (std::cin) {
+    for (size_t i = 0; i < 200; i++) {
         storage.cfrm().iterate(true);
         storage.save();
         std::cout << std::endl << "Saved to disk!" << std::endl;
     }
+    /* GameEngine engine; */ 
+    /* engine.shell(); */
 }

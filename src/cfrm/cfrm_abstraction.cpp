@@ -30,7 +30,7 @@ CFRMAbstraction::CFRMAbstraction(const GameView& view)
     // Save number of hidden cards in each player's hands
     for (size_t pid = 0; pid < view.playerCount(); pid++) {
         auto rid = remapping[pid];
-        d_hiddenHands[rid] = view.hiddenHandSize(rid);
+        d_hiddenHands[rid] = view.hiddenHandSize(pid);
     }
 
     // All cards are initially treated as if they are discarded
@@ -40,6 +40,10 @@ CFRMAbstraction::CFRMAbstraction(const GameView& view)
     // Trump card receives a special marking if it's still in the deck
     if (view.deckSize() > 0) {
         d_cardStates[d_trump] = CARD_DECK_BOTTOM;
+    }
+    // Mark cards that are hidden
+    for (auto& card : view.hiddenCards()) {
+        d_cardStates[card.index()] = CARD_HIDDEN;
     }
     // Mark which cards belong to which player hands
     for (size_t pid = 0; pid < view.playerCount(); pid++) {
@@ -61,10 +65,6 @@ CFRMAbstraction::CFRMAbstraction(const GameView& view)
     for (auto& card : view.currentDefense()) {
         d_cardStates[card.index()] = CARD_IN_DEFENSE;
     }
-    // Mark cards that are hidden
-    for (auto& card : view.hiddenCards()) {
-        d_cardStates[card.index()] = CARD_HIDDEN;
-    }
 }
 
 bool CFRMAbstraction::operator==(const CFRMAbstraction& abstraction) const
@@ -76,17 +76,6 @@ bool CFRMAbstraction::operator==(const CFRMAbstraction& abstraction) const
 
 std::ostream& operator<<(std::ostream& os, const CFRMAbstraction& abstraction)
 {
-    std::vector<size_t> states;
-    for (auto& t : abstraction.d_cardStates) {
-        states.push_back(t);
-    }
-    std::vector<size_t> hhszs;
-    for (auto& t : abstraction.d_hiddenHands) {
-        hhszs.push_back(t);
-    }
-    os << states << std::endl;
-    os << hhszs << std::endl;
-    os << toCard(abstraction.d_trump) << std::endl;
     std::vector<Hand> hands(abstraction.d_hiddenHands.size());
     Hand attack;
     Hand defense;
@@ -110,7 +99,9 @@ std::ostream& operator<<(std::ostream& os, const CFRMAbstraction& abstraction)
         }
     }
     for (size_t pid = 0; pid < abstraction.d_hiddenHands.size(); pid++) {
-        os << "  P" << pid << " -- " << hands[pid] << std::endl;
+        os << "  P" << pid << " -- " 
+            << hands[pid] << " " 
+            << static_cast<size_t>(abstraction.d_hiddenHands[pid]) << std::endl;
     }
     return os
         << "  CA -- " << attack << std::endl

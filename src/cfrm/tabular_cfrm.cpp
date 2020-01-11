@@ -10,8 +10,7 @@
 
 namespace jester {
 
-/* const static size_t CFRM_THREADS = std::max(1u, std::thread::hardware_concurrency()); */
-const static size_t CFRM_THREADS = 1;
+const static size_t CFRM_THREADS = std::max(1u, std::thread::hardware_concurrency());
 
 TabularCFRM::TabularCFRM()
 {
@@ -25,15 +24,17 @@ void TabularCFRM::iterate(bool verbose)
     std::vector<std::thread> threads;
     for (size_t t = 0; t < CFRM_THREADS; t++) {
         threads.push_back(std::thread([&]() {
-            size_t num_players = 2;
-            std::vector<std::shared_ptr<Player>> players(num_players);
-            Game game(players);
-            std::vector<float> reaches;
-            for (size_t pid = 0; pid < num_players; pid++) {
-                reaches.push_back(1.f);
-            }
-            for (size_t tpid = 0; tpid < num_players; tpid++) {
-                train(verbose, tpid, game, reaches, d_rngs[0]);
+            for (size_t a = 0; a < 100; a++) {
+                size_t num_players = 2;
+                std::vector<std::shared_ptr<Player>> players(num_players);
+                Game game(players);
+                std::vector<float> reaches;
+                for (size_t pid = 0; pid < num_players; pid++) {
+                    reaches.push_back(1.f);
+                }
+                for (size_t tpid = 0; tpid < num_players; tpid++) {
+                    train(verbose, tpid, game, reaches, d_rngs[0]);
+                }
             }
         }));
     }
@@ -47,8 +48,10 @@ Action TabularCFRM::bestAction(const GameView& view)
     CFRMAbstraction abstraction(view);
     auto it = d_stats.find(abstraction);
     if (it != d_stats.end()) {
+        std::cerr << "Found information set. Strategy = " << it->second.averageStrategy() << std::endl;
         return sampleStrategy(it->second.averageStrategy(), d_rngs[0]);
     } else {
+        std::cerr << "Could not find information set. Selecting action randomly." << std::endl;
         const auto& actions = view.nextActions();
         std::uniform_int_distribution<std::mt19937::result_type> dist(0, actions.size() - 1);
         return actions[dist(d_rngs[0])];
@@ -60,16 +63,15 @@ Action TabularCFRM::sampleStrategy(const std::unordered_map<Action, float>& stra
     std::uniform_real_distribution<> dist(0, 1);
     float randf = dist(rng);
     float counter = 0.0f;
+    Action chosen;
     for (auto& it : strategy) {
         counter += it.second;
+        chosen = it.first;
         if (randf <= counter) {
-            return it.first;
+            break;
         }
     }
-    std::stringstream ss;
-    ss << "Probability greater than 1: "
-       << strategy;
-    throw std::logic_error(ss.str());
+    return chosen;
 }
 
 float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std::vector<float>& reaches, std::mt19937& rng)
@@ -87,9 +89,9 @@ float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std:
             auto pid = game.winOrder()[i];
             if (pid == tpid) {
                 if (i < game.playerCount() - 1) {
-                    return game.playerCount() - 1 - i;
+                    return -(game.playerCount() - 1 - i);
                 } else {
-                    return -(game.playerCount() * (game.playerCount() - 1)) / 2;
+                    return game.playerCount() * (game.playerCount() - 1) / 2;
                 }
             }
         }
@@ -119,23 +121,6 @@ float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std:
     }
     auto& stats = stats_it->second;
     auto strategy = stats.strategy(reaches[player]);
-
-    std::unordered_set<Action> a1;
-    for (auto& action : game.nextActions()) {
-        a1.insert(action);
-    }
-    std::unordered_set<Action> a2;
-    for (auto& it : strategy) {
-        a2.insert(it.first);
-    }
-    if (a1 != a2) {
-        std::cerr << std::endl;
-        std::cerr << game;
-        std::cerr << abstraction;
-        std::cerr << a1 << std::endl;
-        std::cerr << a2 << std::endl;
-    }
-    assert(a1 == a2);
 
     if (player == tpid) {
         std::unordered_map<Action, float> child_util;

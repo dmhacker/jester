@@ -32,7 +32,7 @@ void CFRMStorage::save()
         oarchive(d_cfrm);
     }
     else {
-        throw std::bad_exception();
+        throw std::runtime_error("Unable to save CFRM to disk.");
     }
 }
 
