@@ -3,7 +3,6 @@
 #include "../rules/game_view.hpp"
 
 #include <cassert>
-#include <cmath>
 #include <iostream>
 
 namespace jester {
