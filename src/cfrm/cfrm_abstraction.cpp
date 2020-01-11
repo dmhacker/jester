@@ -76,7 +76,18 @@ bool CFRMAbstraction::operator==(const CFRMAbstraction& abstraction) const
 
 std::ostream& operator<<(std::ostream& os, const CFRMAbstraction& abstraction)
 {
-    std::vector<Hand> hands(MAX_PLAYERS);
+    std::vector<size_t> states;
+    for (auto& t : abstraction.d_cardStates) {
+        states.push_back(t);
+    }
+    std::vector<size_t> hhszs;
+    for (auto& t : abstraction.d_hiddenHands) {
+        hhszs.push_back(t);
+    }
+    os << states << std::endl;
+    os << hhszs << std::endl;
+    os << toCard(abstraction.d_trump) << std::endl;
+    std::vector<Hand> hands(abstraction.d_hiddenHands.size());
     Hand attack;
     Hand defense;
     for (uint8_t i = 0; i < MAX_CARDS; i++) {
@@ -98,7 +109,7 @@ std::ostream& operator<<(std::ostream& os, const CFRMAbstraction& abstraction)
             hands[state].insert(card);
         }
     }
-    for (size_t pid = 0; pid < MAX_PLAYERS; pid++) {
+    for (size_t pid = 0; pid < abstraction.d_hiddenHands.size(); pid++) {
         os << "  P" << pid << " -- " << hands[pid] << std::endl;
     }
     return os

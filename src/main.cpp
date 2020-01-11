@@ -8,9 +8,9 @@ int main() {
     /* engine.shell(); */
     CFRMStorage storage;
     std::cout << "Training is in progress." << std::endl;
-    while (true) {
+    while (std::cin) {
         storage.cfrm().iterate(true);
         storage.save();
-        std::cout << "Saved to disk!" << std::endl;
+        std::cout << std::endl << "Saved to disk!" << std::endl;
     }
 }
