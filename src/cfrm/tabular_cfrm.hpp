@@ -6,6 +6,7 @@
 
 #include <mutex>
 #include <random>
+#include <thread>
 
 namespace jester {
 
@@ -13,31 +14,25 @@ class Game;
 
 class TabularCFRM {
 private:
-    std::mt19937 d_rng;
-    std::mutex d_mtx;
     std::unordered_map<CFRMAbstraction, CFRMStats> d_stats;
+    std::vector<std::mt19937> d_rngs;
+    std::mutex d_mtx;
+    std::mutex d_pmtx;
 
 public:
     TabularCFRM();
 
-    Action sampleStrategy(const std::unordered_map<Action, float>& strategy);
     Action bestAction(const GameView& view);
 
     void iterate(bool verbose);
-    void randomizeSeed();
 
     template <class Archive>
     void serialize(Archive& archive);
 
 private:
-    float train(bool verbose, size_t tpid, const Game& game, const std::vector<float>& reaches);
+    Action sampleStrategy(const std::unordered_map<Action, float>& strategy, std::mt19937& rng);
+    float train(bool verbose, size_t tpid, const Game& game, const std::vector<float>& reaches, std::mt19937& rng);
 };
-
-inline void TabularCFRM::randomizeSeed()
-{
-    d_rng = std::mt19937(std::random_device {}());
-}
-
 
 template <class Archive>
 inline void TabularCFRM::serialize(Archive& archive)
