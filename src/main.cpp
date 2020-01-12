@@ -9,14 +9,14 @@ int main() {
     std::cout << "!!! WARNING !!! This is for CFRM training purposes." << std::endl;
     std::cout << std::endl;
 
-    /* CFRMStorage storage; */
-    /* std::cout << "Training is in progress." << std::endl; */
-    /* for (size_t i = 0; i < 200; i++) { */
-    /*     storage.cfrm().iterate(); */
-    /*     std::cout << std::endl << "Saving in progress." << std::endl; */
-    /*     storage.save(); */
-    /*     std::cout << "Saved to disk." << std::endl; */
-    /* } */
-    GameEngine engine; 
-    engine.shell();
+    CFRMStorage storage;
+    std::cout << "Training is in progress." << std::endl;
+    for (size_t i = 0; i < 200; i++) {
+        storage.cfrm().iterate();
+        std::cout << std::endl << "Saving in progress." << std::endl;
+        storage.save();
+        std::cout << "Saved to disk." << std::endl;
+    }
+    /* GameEngine engine; */ 
+    /* engine.shell(); */
 }

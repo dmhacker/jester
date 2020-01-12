@@ -50,11 +50,19 @@ determinizations and then run MCTS on each state.
 Rather than associating a single determinization with an entire MCTS tree,
 every simulation determinizes and then follows an appropriate path. 
 Multiple trees can be compressed into one.
+* Tabulated CFRM — Counterfactual regret minimization with Monte Carlo 
+external sampling. The algorithm is implemented as listed in page 16
+of [Richard Gibson's PhD dissertation](poker.cs.ualberta.ca/publications/gibson.phd.pdf). 
+There is an extreme amount of training required to get this algorithm working,
+which jester implements using the `-t` flag. The training can be parallelized
+across multiple CPUs, and tabulated information sets are stored in a single
+Redis database instance provided by the user. Despite the resource limitations, 
+CFRM can quickly be trained to play an extremely simple version of Durak 
+involving only 8-12 cards and 2 players (requiring only a few minutes of 
+multi-threaded training on my 8-core 4.2GHz laptop processor).
 
 Work-in-progress options are:
 
-* Tabulated CFRM — Counterfactual regret minimization with Monte Carlo 
-external sampling.
 * Human — The human player will interface with the console and
 will be controlled through stdin.
 * Smart — The smart player will follow a pre-defined strategy. The
