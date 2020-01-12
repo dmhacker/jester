@@ -76,13 +76,6 @@ Action TabularCFRM::sampleStrategy(const std::unordered_map<Action, float>& stra
 
 float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std::vector<float>& reaches, std::mt19937& rng)
 {
-    {
-        std::lock_guard<std::mutex> lck(d_pmtx);
-        std::cout << "\r"
-                  << d_stats.size() << " information sets in storage."
-                  << std::flush;
-    }
-
     // Return reward/utility from terminal node; this is the evaluation function
     if (game.finished()) {
         for (size_t i = 0; i < game.playerCount(); i++) {
@@ -118,6 +111,9 @@ float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std:
                 abstraction, CFRMStats(game.nextActions()));
             stats_it = d_stats.insert(new_stats).first;
         }
+        std::cout << "\r"
+                  << d_stats.size() << " information sets in storage."
+                  << std::flush;
     }
     auto& stats = stats_it->second;
     auto strategy = stats.strategy(reaches[player]);

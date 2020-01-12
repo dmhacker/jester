@@ -151,6 +151,7 @@ void Game::calculateNextActions()
             }
         }
     }
+    std::sort(d_nextActions.begin(), d_nextActions.end());
 }
 
 void Game::play()

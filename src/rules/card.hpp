@@ -52,6 +52,7 @@ public:
     bool empty() const;
     const Card& card() const;
     bool operator==(const Action& action) const;
+    bool operator<(const Action& action) const;
 
     template <class Archive>
     void serialize(Archive& archive);
@@ -113,7 +114,14 @@ inline bool Action::operator==(const Action& action) const
     if (action.empty()) {
         return false;
     }
-    return card() == action.card();
+    return d_card == action.d_card;
+}
+
+inline bool Action::operator<(const Action& action) const
+{
+    size_t i =  d_card.rank() * 4 + d_card.suit();
+    size_t j =  action.d_card.rank() * 4 + action.d_card.suit();
+    return i < j;
 }
 
 template <class Archive>

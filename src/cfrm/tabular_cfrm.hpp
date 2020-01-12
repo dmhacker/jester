@@ -17,7 +17,6 @@ private:
     std::unordered_map<CFRMAbstraction, CFRMStats> d_stats;
     std::vector<std::mt19937> d_rngs;
     std::mutex d_mtx;
-    std::mutex d_pmtx;
 
 public:
     TabularCFRM();
