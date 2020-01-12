@@ -5,58 +5,52 @@ namespace jester {
 CFRMStats::CFRMStats(const std::vector<Action>& actions)
 {
     for (auto& action : actions) {
-        d_strategy[action] = 0;
-        d_strategySum[action] = 0;
-        d_regretSum[action] = 0;
+        d_cumulProfile[action] = 0;
+        d_cumulRegret[action] = 0;
     }
 }
 
-// Taken from modelai.gettysburg.edu/2013/cfr/cfr.pdfd for now
-// FIXME: It will be replaced in the future.
-
-const std::unordered_map<Action, float>& CFRMStats::strategy(float weight)
+std::unordered_map<Action, float> CFRMStats::currentProfile() const
 {
-    float normal_sum = 0;
-    for (const auto& it : d_regretSum) {
-        float piece = it.second > 0 ? it.second : 0;
-        d_strategy[it.first] = piece;
-        normal_sum += piece;
+    std::unordered_map<Action, float> profile(d_cumulProfile.size());
+    float regret_sum = 0;
+    for (auto& it : d_cumulRegret) {
+        float positive_regret = std::max(it.second, 0.f);
+        profile[it.first] = positive_regret;
+        regret_sum += positive_regret;
     }
-    for (auto& it : d_strategy) {
-        if (normal_sum > 0)
-            it.second /= normal_sum;
-        else
-            it.second = 1.f / d_strategy.size();
-        d_strategySum[it.first] += weight * it.second;
+    for (auto& it : profile) {
+        if (regret_sum > 0) {
+            it.second /= regret_sum;
+        }
+        else {
+            it.second = 1.f / d_cumulProfile.size();
+        }
     }
-    return d_strategy;
+    return profile;
 }
 
-std::unordered_map<Action, float> CFRMStats::averageStrategy() const
+std::unordered_map<Action, float> CFRMStats::averageProfile() const
 {
-    std::unordered_map<Action, float> averages(d_strategy.size());
-    float normal_sum = 0;
-    for (const auto& it : d_strategySum)
-        normal_sum += it.second;
-    for (const auto& it : d_strategySum)
-        if (normal_sum > 0)
-            averages[it.first] = it.second / normal_sum;
-        else
-            averages[it.first] = 1.0 / d_strategy.size();
-    return averages;
+    std::unordered_map<Action, float> profile(d_cumulProfile.size());
+    float profile_sum = 0;
+    for (auto& it : d_cumulProfile) {
+        profile_sum += it.second;
+    }
+    for (auto& it : d_cumulProfile)
+        if (profile_sum > 0) {
+            profile[it.first] = it.second / profile_sum;
+        } else {
+            profile[it.first] = 1.f / d_cumulProfile.size();
+        }
+    return profile;
 }
 
-void CFRMStats::addRegret(const Action& action, float regret)
+std::ostream& operator<<(std::ostream& os, const CFRMStats& stats)
 {
-    d_regretSum[action] += regret;
+    return os
+        << stats.d_cumulProfile << std::endl
+        << stats.d_cumulRegret << std::endl;
 }
-
-std::ostream& operator<<(std::ostream& os, const CFRMStats& stats) {
-    os << stats.d_strategy << std::endl; 
-    os << stats.d_strategySum << std::endl; 
-    os << stats.d_regretSum << std::endl; 
-    return os;
-}
-
 
 }

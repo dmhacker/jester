@@ -28,12 +28,8 @@ void TabularCFRM::iterate()
                 size_t num_players = 2;
                 std::vector<std::shared_ptr<Player>> players(num_players);
                 Game game(players);
-                std::vector<float> reaches;
-                for (size_t pid = 0; pid < num_players; pid++) {
-                    reaches.push_back(1.f);
-                }
                 for (size_t tpid = 0; tpid < num_players; tpid++) {
-                    train(tpid, game, reaches, d_rngs[0]);
+                    train(tpid, game, d_rngs[0]);
                 }
             }
         }));
@@ -48,8 +44,8 @@ Action TabularCFRM::bestAction(const GameView& view)
     CFRMAbstraction abstraction(view);
     auto it = d_stats.find(abstraction);
     if (it != d_stats.end()) {
-        std::cerr << "Found information set. Strategy = " << it->second.averageStrategy() << std::endl;
-        return sampleStrategy(it->second.averageStrategy(), d_rngs[0]);
+        std::cerr << "Found information set. Distribution = " << it->second.averageProfile() << std::endl;
+        return sample(it->second.averageProfile(), d_rngs[0]);
     } else {
         std::cerr << "Could not find information set. Selecting action randomly." << std::endl;
         const auto& actions = view.nextActions();
@@ -58,13 +54,13 @@ Action TabularCFRM::bestAction(const GameView& view)
     }
 }
 
-Action TabularCFRM::sampleStrategy(const std::unordered_map<Action, float>& strategy, std::mt19937& rng)
+Action TabularCFRM::sample(const std::unordered_map<Action, float>& profile, std::mt19937& rng)
 {
     std::uniform_real_distribution<> dist(0, 1);
     float randf = dist(rng);
     float counter = 0.0f;
     Action chosen;
-    for (auto& it : strategy) {
+    for (auto& it : profile) {
         counter += it.second;
         chosen = it.first;
         if (randf <= counter) {
@@ -74,7 +70,7 @@ Action TabularCFRM::sampleStrategy(const std::unordered_map<Action, float>& stra
     return chosen;
 }
 
-float TabularCFRM::train(size_t tpid, const Game& game, const std::vector<float>& reaches, std::mt19937& rng)
+float TabularCFRM::train(size_t tpid, const Game& game, std::mt19937& rng)
 {
     // Return utility from terminal node; this is the evaluation function
     if (game.finished()) {
@@ -85,7 +81,8 @@ float TabularCFRM::train(size_t tpid, const Game& game, const std::vector<float>
                 if (i < game.playerCount() - 1) {
                     reward = game.playerCount() - 1 - i;
                 } else {
-                    reward = -(game.playerCount() * (game.playerCount() - 1) / 2);
+                    reward = game.playerCount() * (game.playerCount() - 1) / 2;
+                    reward *= -1;
                 }
                 break;
             }
@@ -101,7 +98,7 @@ float TabularCFRM::train(size_t tpid, const Game& game, const std::vector<float>
         auto action = actions[0];
         Game next_game(game);
         next_game.playAction(action);
-        return train(tpid, next_game, reaches, rng);
+        return train(tpid, next_game, rng);
     }
 
     CFRMAbstraction abstraction(view);
@@ -119,34 +116,28 @@ float TabularCFRM::train(size_t tpid, const Game& game, const std::vector<float>
                   << std::flush;
     }
     auto& stats = stats_it->second;
-    auto strategy = stats.strategy(reaches[player]);
+    auto profile = stats.currentProfile();
 
+    // External sampling: opponents only follow one action
     if (player != tpid) {
-        auto action = sampleStrategy(strategy, rng);
+        auto action = sample(profile, rng);
         Game next_game(game);
         next_game.playAction(action);
-        std::vector<float> next_reaches(reaches);
-        next_reaches[player] *= strategy[action];
-        return train(tpid, next_game, next_reaches, rng);
+        return train(tpid, next_game, rng);
     }
 
+    // External sampling: walk every action for the current player
     std::unordered_map<Action, float> child_util;
     float total_util = 0.0f;
     for (auto& action : actions) {
         Game next_game(game);
         next_game.playAction(action);
-        std::vector<float> next_reaches(reaches);
-        next_reaches[player] *= strategy[action];
-        child_util[action] = train(tpid, next_game, next_reaches, rng);
-        total_util += strategy[action] * child_util[action];
+        child_util[action] = train(tpid, next_game, rng);
+        total_util += profile[action] * child_util[action];
     }
+    // Update cumulative counterfactual regrets based off of utilities
     for (auto& action : game.nextActions()) {
         float regret = child_util[action] - total_util;
-        for (size_t pid = 0; pid < reaches.size(); pid++) {
-            if (pid != tpid) {
-                regret *= reaches[pid];
-            }
-        }
         stats.addRegret(action, regret);
     }
     return total_util;
