@@ -19,7 +19,7 @@ TabularCFRM::TabularCFRM()
     }
 }
 
-void TabularCFRM::iterate(bool verbose)
+void TabularCFRM::iterate()
 {
     std::vector<std::thread> threads;
     for (size_t t = 0; t < CFRM_THREADS; t++) {
@@ -33,7 +33,7 @@ void TabularCFRM::iterate(bool verbose)
                     reaches.push_back(1.f);
                 }
                 for (size_t tpid = 0; tpid < num_players; tpid++) {
-                    train(verbose, tpid, game, reaches, d_rngs[0]);
+                    train(tpid, game, reaches, d_rngs[0]);
                 }
             }
         }));
@@ -74,23 +74,26 @@ Action TabularCFRM::sampleStrategy(const std::unordered_map<Action, float>& stra
     return chosen;
 }
 
-float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std::vector<float>& reaches, std::mt19937& rng)
+float TabularCFRM::train(size_t tpid, const Game& game, const std::vector<float>& reaches, std::mt19937& rng)
 {
-    // Return reward/utility from terminal node; this is the evaluation function
+    // Return utility from terminal node; this is the evaluation function
     if (game.finished()) {
+        float reward = 0;
         for (size_t i = 0; i < game.playerCount(); i++) {
             auto pid = game.winOrder()[i];
             if (pid == tpid) {
                 if (i < game.playerCount() - 1) {
-                    return -(game.playerCount() - 1 - i);
+                    reward = game.playerCount() - 1 - i;
                 } else {
-                    return game.playerCount() * (game.playerCount() - 1) / 2;
+                    reward = -(game.playerCount() * (game.playerCount() - 1) / 2);
                 }
+                break;
             }
         }
-        return 0;
+        return reward;
     }
 
+    // Skip over information sets where only one action is possible
     auto player = game.currentPlayerId();
     auto& actions = game.nextActions();
     auto view = game.currentPlayerView();
@@ -98,7 +101,7 @@ float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std:
         auto action = actions[0];
         Game next_game(game);
         next_game.playAction(action);
-        return train(verbose, tpid, next_game, reaches, rng);
+        return train(tpid, next_game, reaches, rng);
     }
 
     CFRMAbstraction abstraction(view);
@@ -118,31 +121,35 @@ float TabularCFRM::train(bool verbose, size_t tpid, const Game& game, const std:
     auto& stats = stats_it->second;
     auto strategy = stats.strategy(reaches[player]);
 
-    if (player == tpid) {
-        std::unordered_map<Action, float> child_util;
-        float total_util = 0.0f;
-        for (auto& action : actions) {
-            Game next_game(game);
-            next_game.playAction(action);
-            std::vector<float> next_reaches(reaches);
-            next_reaches[player] *= strategy[action];
-
-            child_util[action] = train(verbose, tpid, next_game, next_reaches, rng);
-            total_util += strategy[action] * child_util[action];
-        }
-        for (auto& action : game.nextActions()) {
-            float regret = child_util[action] - total_util;
-            stats.addRegret(action, reaches[player] * regret);
-        }
-        return total_util;
-    } else {
+    if (player != tpid) {
         auto action = sampleStrategy(strategy, rng);
         Game next_game(game);
         next_game.playAction(action);
         std::vector<float> next_reaches(reaches);
         next_reaches[player] *= strategy[action];
-        return train(verbose, tpid, next_game, next_reaches, rng);
+        return train(tpid, next_game, next_reaches, rng);
     }
+
+    std::unordered_map<Action, float> child_util;
+    float total_util = 0.0f;
+    for (auto& action : actions) {
+        Game next_game(game);
+        next_game.playAction(action);
+        std::vector<float> next_reaches(reaches);
+        next_reaches[player] *= strategy[action];
+        child_util[action] = train(tpid, next_game, next_reaches, rng);
+        total_util += strategy[action] * child_util[action];
+    }
+    for (auto& action : game.nextActions()) {
+        float regret = child_util[action] - total_util;
+        for (size_t pid = 0; pid < reaches.size(); pid++) {
+            if (pid != tpid) {
+                regret *= reaches[pid];
+            }
+        }
+        stats.addRegret(action, regret);
+    }
+    return total_util;
 }
 
 }

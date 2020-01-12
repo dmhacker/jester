@@ -23,14 +23,14 @@ public:
 
     Action bestAction(const GameView& view);
 
-    void iterate(bool verbose);
+    void iterate();
 
     template <class Archive>
     void serialize(Archive& archive);
 
 private:
     Action sampleStrategy(const std::unordered_map<Action, float>& strategy, std::mt19937& rng);
-    float train(bool verbose, size_t tpid, const Game& game, const std::vector<float>& reaches, std::mt19937& rng);
+    float train(size_t tpid, const Game& game, const std::vector<float>& reaches, std::mt19937& rng);
 };
 
 template <class Archive>

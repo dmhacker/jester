@@ -6,8 +6,8 @@ using namespace jester;
 int main() {
     CFRMStorage storage;
     std::cout << "Training is in progress." << std::endl;
-    for (size_t i = 0; i < 2000; i++) {
-        storage.cfrm().iterate(true);
+    for (size_t i = 0; i < 200; i++) {
+        storage.cfrm().iterate();
         storage.save();
         std::cout << std::endl << "Saved to disk!" << std::endl;
     }
