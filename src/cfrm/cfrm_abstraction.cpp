@@ -65,6 +65,21 @@ CFRMAbstraction::CFRMAbstraction(const GameView& view)
     for (auto& card : view.currentDefense()) {
         d_cardStates[card.index()] = CARD_IN_DEFENSE;
     }
+    // OPTIMIZATION: if there are only two players in the game and no
+    // cards in the deck, this means that all hidden cards must belong to
+    // the other player
+    if (view.playerCount() == 2 && view.deckSize() == 0) {
+        for (size_t rid = 0; rid < d_hiddenHands.size(); rid++) {
+            if (d_hiddenHands[rid] > 0) {
+                for (auto i = 0; i < MAX_CARDS; i++) {
+                    if (d_cardStates[i] == CARD_HIDDEN) {
+                        d_cardStates[i] = rid;
+                    }
+                }
+                break;
+            }
+        }
+    }
 }
 
 bool CFRMAbstraction::operator==(const CFRMAbstraction& abstraction) const

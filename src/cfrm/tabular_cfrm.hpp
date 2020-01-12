@@ -21,7 +21,7 @@ private:
 public:
     TabularCFRM();
 
-    Action bestAction(const GameView& view);
+    Action bestAction(const GameView& view, bool verbose);
 
     void iterate();
 

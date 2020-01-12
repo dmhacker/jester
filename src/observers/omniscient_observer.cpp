@@ -28,6 +28,8 @@ void OmniscientObserver::onGameStart(const Game& game)
     std::cout << "Trump card is "
               << game.trumpCard()
               << "." << std::endl;
+    std::cout << "The game state is: " << std::endl;
+    std::cout << game;
     printBarrier<true>();
 }
 

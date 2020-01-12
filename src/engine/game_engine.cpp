@@ -70,9 +70,8 @@ GameEngine::GameEngine()
         return std::make_shared<ISMCTSPlayer>(!has_human, cores, std::chrono::milliseconds(9000));
     }));
     d_options.push_back(PlayerOption("Prototype CFRM", [](bool has_human) {
-        return std::make_shared<CFRMPlayer>();
+        return std::make_shared<CFRMPlayer>(!has_human);
     }));
-
 }
 
 void GameEngine::shell() const

@@ -11,8 +11,11 @@ namespace jester {
 class CFRMPlayer : public Player {
 private:
     CFRMStorage d_cfrm;
+    bool d_verbose;
 
 public:
+    CFRMPlayer(bool verbose);
+
     Action nextAction(const GameView& view);
 };
 

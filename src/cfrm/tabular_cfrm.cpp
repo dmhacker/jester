@@ -39,15 +39,26 @@ void TabularCFRM::iterate()
     }
 }
 
-Action TabularCFRM::bestAction(const GameView& view)
+Action TabularCFRM::bestAction(const GameView& view, bool verbose)
 {
     CFRMAbstraction abstraction(view);
     auto it = d_stats.find(abstraction);
     if (it != d_stats.end()) {
-        std::cerr << "Found information set. Distribution = " << it->second.averageProfile() << std::endl;
+        if (verbose) {
+            std::cerr
+                << "[P" << view.playerId()
+                << "] CFRM found profile " 
+                << it->second.averageProfile()
+                << "." << std::endl;
+        }
         return sample(it->second.averageProfile(), d_rngs[0]);
     } else {
-        std::cerr << "Could not find information set. Selecting action randomly." << std::endl;
+        if (verbose) {
+            std::cerr
+                << "[P" << view.playerId()
+                << "] CFRM will choose a random action."
+                << std::endl;
+        }
         const auto& actions = view.nextActions();
         std::uniform_int_distribution<std::mt19937::result_type> dist(0, actions.size() - 1);
         return actions[dist(d_rngs[0])];
@@ -116,6 +127,8 @@ float TabularCFRM::train(size_t tpid, const Game& game, std::mt19937& rng)
                   << std::flush;
     }
     auto& stats = stats_it->second;
+
+    std::unique_lock<std::mutex> lck(stats.mutex());
     auto profile = stats.currentProfile();
 
     // External sampling: opponents only follow one action
@@ -123,10 +136,14 @@ float TabularCFRM::train(size_t tpid, const Game& game, std::mt19937& rng)
         auto action = sample(profile, rng);
         Game next_game(game);
         next_game.playAction(action);
-        return train(tpid, next_game, rng);
+        lck.unlock();
+        float result = train(tpid, next_game, rng);
+        lck.lock();
+        return result;
     }
 
     // External sampling: walk every action for the current player
+    lck.unlock();
     std::unordered_map<Action, float> child_util;
     float total_util = 0.0f;
     for (auto& action : actions) {
@@ -135,11 +152,13 @@ float TabularCFRM::train(size_t tpid, const Game& game, std::mt19937& rng)
         child_util[action] = train(tpid, next_game, rng);
         total_util += profile[action] * child_util[action];
     }
+    lck.lock();
     // Update cumulative counterfactual regrets based off of utilities
     for (auto& action : game.nextActions()) {
         float regret = child_util[action] - total_util;
         stats.addRegret(action, regret);
     }
+    stats.addProfile(profile);
     return total_util;
 }
 

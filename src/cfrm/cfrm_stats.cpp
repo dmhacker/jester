@@ -10,6 +10,12 @@ CFRMStats::CFRMStats(const std::vector<Action>& actions)
     }
 }
 
+CFRMStats::CFRMStats(const CFRMStats& stats)
+    : d_cumulProfile(stats.d_cumulProfile)
+    , d_cumulRegret(stats.d_cumulRegret)
+{
+}
+
 std::unordered_map<Action, float> CFRMStats::currentProfile() const
 {
     std::unordered_map<Action, float> profile(d_cumulProfile.size());
@@ -22,8 +28,7 @@ std::unordered_map<Action, float> CFRMStats::currentProfile() const
     for (auto& it : profile) {
         if (regret_sum > 0) {
             it.second /= regret_sum;
-        }
-        else {
+        } else {
             it.second = 1.f / d_cumulProfile.size();
         }
     }

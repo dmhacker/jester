@@ -6,6 +6,11 @@
 
 namespace jester {
 
+CFRMPlayer::CFRMPlayer(bool verbose)
+    : d_verbose(verbose)
+{
+}
+
 Action CFRMPlayer::nextAction(const GameView& view)
 {
     // If there is only one action then just take that action
@@ -13,7 +18,7 @@ Action CFRMPlayer::nextAction(const GameView& view)
     if (actions.size() == 1) {
         return actions[0];
     }
-    return d_cfrm.cfrm().bestAction(view);
+    return d_cfrm.cfrm().bestAction(view, d_verbose);
 }
 
 }
