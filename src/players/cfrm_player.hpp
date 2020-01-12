@@ -4,13 +4,13 @@
 #include <random>
 
 #include "player.hpp"
-#include "../cfrm/cfrm_storage.hpp"
+#include "../cfrm/cfrm_environment.hpp"
 
 namespace jester {
 
 class CFRMPlayer : public Player {
 private:
-    CFRMStorage d_cfrm;
+    CFRMEnvironment d_cfrm;
     bool d_verbose;
 
 public:

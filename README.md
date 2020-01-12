@@ -52,7 +52,7 @@ every simulation determinizes and then follows an appropriate path.
 Multiple trees can be compressed into one.
 * Tabulated CFRM — Counterfactual regret minimization with Monte Carlo 
 external sampling. The algorithm is implemented as listed in page 16
-of [Richard Gibson's PhD dissertation](poker.cs.ualberta.ca/publications/gibson.phd.pdf). 
+of [Richard Gibson's PhD dissertation](http://poker.cs.ualberta.ca/publications/gibson.phd.pdf). 
 There is an extreme amount of training required to get this algorithm working,
 which jester implements using the `-t` flag. The training can be parallelized
 across multiple CPUs, and tabulated information sets are stored in a single

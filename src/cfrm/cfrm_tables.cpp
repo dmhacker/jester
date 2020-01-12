@@ -1,45 +1,20 @@
-#include "tabular_cfrm.hpp"
+#include "cfrm_tables.hpp"
 #include "../rules/game.hpp"
 #include "../rules/game_view.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <iostream>
 #include <sstream>
 #include <thread>
 
 namespace jester {
 
-const static size_t CFRM_THREADS = std::max(1u, std::thread::hardware_concurrency());
-
-TabularCFRM::TabularCFRM()
+CFRMTables::CFRMTables()
+    : d_rng(std::random_device {}())
 {
-    for (size_t i = 0; i < CFRM_THREADS; i++) {
-        d_rngs.push_back(std::mt19937(std::random_device {}()));
-    }
 }
 
-void TabularCFRM::iterate()
-{
-    std::vector<std::thread> threads;
-    for (size_t t = 0; t < CFRM_THREADS; t++) {
-        threads.push_back(std::thread([&]() {
-            for (size_t a = 0; a < 100; a++) {
-                size_t num_players = 2;
-                std::vector<std::shared_ptr<Player>> players(num_players);
-                Game game(players);
-                for (size_t tpid = 0; tpid < num_players; tpid++) {
-                    train(tpid, game, d_rngs[0]);
-                }
-            }
-        }));
-    }
-    for (auto& thr : threads) {
-        thr.join();
-    }
-}
-
-Action TabularCFRM::bestAction(const GameView& view, bool verbose)
+Action CFRMTables::bestAction(const GameView& view, bool verbose)
 {
     CFRMAbstraction abstraction(view);
     auto it = d_stats.find(abstraction);
@@ -47,11 +22,11 @@ Action TabularCFRM::bestAction(const GameView& view, bool verbose)
         if (verbose) {
             std::cerr
                 << "[P" << view.playerId()
-                << "] CFRM found profile " 
+                << "] CFRM found profile "
                 << it->second.averageProfile()
                 << "." << std::endl;
         }
-        return sample(it->second.averageProfile(), d_rngs[0]);
+        return sample(it->second.averageProfile(), d_rng);
     } else {
         if (verbose) {
             std::cerr
@@ -61,11 +36,11 @@ Action TabularCFRM::bestAction(const GameView& view, bool verbose)
         }
         const auto& actions = view.nextActions();
         std::uniform_int_distribution<std::mt19937::result_type> dist(0, actions.size() - 1);
-        return actions[dist(d_rngs[0])];
+        return actions[dist(d_rng)];
     }
 }
 
-Action TabularCFRM::sample(const std::unordered_map<Action, float>& profile, std::mt19937& rng)
+Action CFRMTables::sample(const std::unordered_map<Action, float>& profile, std::mt19937& rng)
 {
     std::uniform_real_distribution<> dist(0, 1);
     float randf = dist(rng);
@@ -81,7 +56,7 @@ Action TabularCFRM::sample(const std::unordered_map<Action, float>& profile, std
     return chosen;
 }
 
-float TabularCFRM::train(size_t tpid, const Game& game, std::mt19937& rng)
+float CFRMTables::train(size_t tpid, const Game& game, std::mt19937& rng)
 {
     // Return utility from terminal node; this is the evaluation function
     if (game.finished()) {

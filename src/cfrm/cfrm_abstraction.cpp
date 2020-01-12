@@ -4,7 +4,6 @@
 namespace jester {
 
 constexpr static uint8_t MAX_CARDS = 36;
-constexpr static uint8_t MAX_PLAYERS = 6;
 constexpr static uint8_t CARD_HIDDEN = 6;
 constexpr static uint8_t CARD_DISCARDED = 7;
 constexpr static uint8_t CARD_DECK_BOTTOM = 8;

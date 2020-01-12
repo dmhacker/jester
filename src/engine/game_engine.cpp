@@ -56,18 +56,18 @@ GameEngine::GameEngine()
         return std::make_shared<GreedyPlayer>();
     }));
     d_options.push_back(PlayerOption("Weak DMCTS", [](bool has_human) {
-        return std::make_shared<DMCTSPlayer>(!has_human, 3, 1, std::chrono::milliseconds(4000));
+        return std::make_shared<DMCTSPlayer>(!has_human, 3, 1, std::chrono::seconds(4));
     }));
     d_options.push_back(PlayerOption("Weak ISMCTS", [](bool has_human) {
-        return std::make_shared<ISMCTSPlayer>(!has_human, 1, std::chrono::milliseconds(4000));
+        return std::make_shared<ISMCTSPlayer>(!has_human, 1, std::chrono::seconds(4));
     }));
     d_options.push_back(PlayerOption("Strong DMCTS", [](bool has_human) {
         auto cores = std::thread::hardware_concurrency();
-        return std::make_shared<DMCTSPlayer>(!has_human, cores + 2, cores, std::chrono::milliseconds(9000));
+        return std::make_shared<DMCTSPlayer>(!has_human, cores + 2, cores, std::chrono::seconds(9));
     }));
     d_options.push_back(PlayerOption("Strong ISMCTS", [](bool has_human) {
         auto cores = std::thread::hardware_concurrency();
-        return std::make_shared<ISMCTSPlayer>(!has_human, cores, std::chrono::milliseconds(9000));
+        return std::make_shared<ISMCTSPlayer>(!has_human, cores, std::chrono::seconds(9));
     }));
     d_options.push_back(PlayerOption("Prototype CFRM", [](bool has_human) {
         return std::make_shared<CFRMPlayer>(!has_human);

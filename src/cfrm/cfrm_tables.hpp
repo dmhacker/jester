@@ -1,5 +1,5 @@
-#ifndef JESTER_TABULAR_CFRM_HPP
-#define JESTER_TABULAR_CFRM_HPP
+#ifndef JESTER_CFRM_TABLES_HPP
+#define JESTER_CFRM_TABLES_HPP
 
 #include "cfrm_abstraction.hpp"
 #include "cfrm_stats.hpp"
@@ -12,31 +12,34 @@ namespace jester {
 
 class Game;
 
-class TabularCFRM {
+class CFRMTables {
 private:
     std::unordered_map<CFRMAbstraction, CFRMStats> d_stats;
-    std::vector<std::mt19937> d_rngs;
+    std::mt19937 d_rng;
     std::mutex d_mtx;
 
 public:
-    TabularCFRM();
+    CFRMTables();
 
     Action bestAction(const GameView& view, bool verbose);
 
-    void iterate();
+    Action sample(const std::unordered_map<Action, float>& profile, std::mt19937& rng);
+    float train(size_t tpid, const Game& game, std::mt19937& rng);
 
     template <class Archive>
     void serialize(Archive& archive);
 
-private:
-    Action sample(const std::unordered_map<Action, float>& profile, std::mt19937& rng);
-    float train(size_t tpid, const Game& game, std::mt19937& rng);
+    std::mutex& mutex();
 };
 
 template <class Archive>
-inline void TabularCFRM::serialize(Archive& archive)
+inline void CFRMTables::serialize(Archive& archive)
 {
     archive(d_stats);
+}
+    
+inline std::mutex& CFRMTables::mutex() {
+    return d_mtx;
 }
 
 }

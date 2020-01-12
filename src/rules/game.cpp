@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include "../constants.hpp"
 #include "../observers/observer.hpp"
 #include "../players/player.hpp"
 #include "game_view.hpp"
@@ -17,7 +18,8 @@ Game::Game(const Players& players)
     : d_players(players)
     , d_hands(players.size())
 {
-    assert(players.size() >= 2);
+    assert(players.size() >= Constants::instance().MIN_PLAYERS
+            && players.size() <= Constants::instance().MAX_PLAYERS);
     std::mt19937 rng(std::random_device {}());
     reset(rng);
 }
@@ -58,7 +60,9 @@ Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
     }
     // Put remaining hidden cards in the deck
     if (view.deckSize() > 0) {
-        d_deck.insert(d_deck.end(), hidden_cards.begin() + hidden_idx, hidden_cards.end());
+        d_deck.insert(d_deck.end(),
+            hidden_cards.begin() + hidden_idx,
+            hidden_cards.end());
         d_deck.push_back(d_trump);
     }
     assert(d_deck.size() == view.deckSize());
@@ -66,7 +70,8 @@ Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
 
 void Game::reset(std::mt19937& rng)
 {
-    for (size_t rank = 6; rank <= 7; rank++) {
+    for (size_t rank = Constants::instance().MIN_RANK;
+         rank <= Constants::instance().MAX_RANK; rank++) {
         d_deck.push_back(Card(rank, Suit::hearts));
         d_deck.push_back(Card(rank, Suit::diamonds));
         d_deck.push_back(Card(rank, Suit::spades));
@@ -77,7 +82,7 @@ void Game::reset(std::mt19937& rng)
     d_hidden.clear();
     d_hidden.insert(d_deck.begin(), d_deck.end());
     d_hidden.erase(d_trump);
-    for (size_t i = 0; i < 6; i++) {
+    for (size_t i = 0; i < Constants::instance().HAND_SIZE; i++) {
         for (auto& hand : d_hands) {
             if (d_deck.empty()) {
                 break;
@@ -210,7 +215,8 @@ void Game::playAction(const Action& action)
             d_currentDefense.push_back(defense_card);
             d_hidden.erase(defense_card);
             defense_hand.erase(defense_card);
-            if (defense_hand.empty() || attack_hand.empty() || d_currentAttack.size() == 6) {
+            if (defense_hand.empty() || attack_hand.empty()
+                || d_currentAttack.size() == Constants::instance().HAND_SIZE) {
                 finishGoodDefense();
             }
         }
@@ -228,8 +234,8 @@ void Game::finishGoodDefense()
     d_currentAttack.clear();
     d_currentDefense.clear();
     // Attacker and defender hands are replenished
-    replenishHand(attack_hand, 6);
-    replenishHand(defense_hand, 6);
+    replenishHand(attack_hand, Constants::instance().HAND_SIZE);
+    replenishHand(defense_hand, Constants::instance().HAND_SIZE);
     // Win and attack orders are updated
     d_attackOrder.pop_front();
     if (attack_hand.empty()) {
@@ -274,8 +280,8 @@ void Game::finishBadDefense()
     d_currentAttack.clear();
     d_currentDefense.clear();
     // Attacker and defender hands are replenished
-    replenishHand(attack_hand, 6);
-    replenishHand(defense_hand, 6);
+    replenishHand(attack_hand, Constants::instance().HAND_SIZE);
+    replenishHand(defense_hand, Constants::instance().HAND_SIZE);
     // Win and attack orders are updated
     d_attackOrder.pop_front();
     d_attackOrder.pop_front();
@@ -303,7 +309,7 @@ void Game::validateAction(const Action& action) const
     auto& attack_hand = d_hands[aid];
     auto& defense_hand = d_hands[did];
     if (attackerNext()) {
-        if (d_currentAttack.size() >= 6 || defense_hand.size() < 1) {
+        if (d_currentAttack.size() >= Constants::instance().HAND_SIZE || defense_hand.size() < 1) {
             throw GameException("Too many cards in attack or defense has no cards.");
         }
         if (action.empty()) {
@@ -342,7 +348,8 @@ void Game::validateAction(const Action& action) const
         if (!suit_match) {
             throw GameException("Defending card must be the same suit as the attack card");
         }
-        bool rank_match = defending.rank() > attacking.rank() || (defending.suit() == trumpSuit() && attacking.suit() != trumpSuit());
+        bool rank_match = defending.rank() > attacking.rank()
+            || (defending.suit() == trumpSuit() && attacking.suit() != trumpSuit());
         if (!rank_match) {
             throw GameException("Defending card must have a higher rank than the attack card");
         }
