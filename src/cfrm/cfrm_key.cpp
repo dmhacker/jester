@@ -33,8 +33,8 @@ CFRMKey::CFRMKey(const GameView& view)
     }
 
     // All cards are initially treated as if they are discarded
-    for (auto i = 0; i < MAX_CARDS; i++) {
-        d_cardStates[i] = CARD_DISCARDED;
+    for (auto cidx = 0; cidx < MAX_CARDS; cidx++) {
+        d_cardStates[cidx] = CARD_DISCARDED;
     }
     // Trump card receives a special marking if it's still in the deck
     if (view.deckSize() > 0) {
@@ -64,18 +64,23 @@ CFRMKey::CFRMKey(const GameView& view)
     for (auto& card : view.currentDefense()) {
         d_cardStates[card.index()] = CARD_IN_DEFENSE;
     }
-    // OPTIMIZATION: if there are only two players in the game and no
-    // cards in the deck, this means that all hidden cards must belong to
-    // the other player
-    if (view.playerCount() == 2 && view.deckSize() == 0) {
+    // OPTIMIZATION: if there are no cards in the deck and only one
+    // hand with hidden cards, then that hand must possess all hidden cards
+    if (view.deckSize() == 0) {
+        size_t holder = 0;
+        size_t nonzero_hands = 0;
         for (size_t rid = 0; rid < d_hiddenHands.size(); rid++) {
             if (d_hiddenHands[rid] > 0) {
-                for (auto i = 0; i < MAX_CARDS; i++) {
-                    if (d_cardStates[i] == CARD_HIDDEN) {
-                        d_cardStates[i] = rid;
-                    }
+                nonzero_hands++;
+                holder = rid;
+            }
+        }
+        if (nonzero_hands == 1) {
+            d_hiddenHands[holder] = 0;
+            for (size_t cidx = 0; cidx < MAX_CARDS; cidx++) {
+                if (d_cardStates[cidx] == CARD_HIDDEN) {
+                    d_cardStates[cidx] = holder;
                 }
-                break;
             }
         }
     }
