@@ -17,8 +17,8 @@ CFRMTable::CFRMTable()
 Action CFRMTable::bestAction(const GameView& view, bool verbose)
 {
     CFRMKey key(view);
-    auto it = d_strategy.find(key);
-    if (it != d_strategy.end()) {
+    auto it = d_table.find(key);
+    if (it != d_table.end()) {
         if (verbose) {
             std::cerr
                 << "[P" << view.playerId()
@@ -88,17 +88,17 @@ float CFRMTable::train(size_t tpid, const Game& game, std::mt19937& rng)
     }
 
     CFRMKey key(view);
-    decltype(d_strategy)::iterator stats_it;
+    decltype(d_table)::iterator stats_it;
     {
         std::lock_guard<std::mutex> lck(d_mtx);
-        stats_it = d_strategy.find(key);
-        if (stats_it == d_strategy.end()) {
-            auto new_stats = decltype(d_strategy)::value_type(
+        stats_it = d_table.find(key);
+        if (stats_it == d_table.end()) {
+            auto new_stats = decltype(d_table)::value_type(
                 key, CFRMStats(game.nextActions()));
-            stats_it = d_strategy.insert(new_stats).first;
+            stats_it = d_table.insert(new_stats).first;
         }
         std::cout << "\r"
-                  << d_strategy.size() << " information sets in storage."
+                  << d_table.size() << " information sets in storage."
                   << std::flush;
     }
     auto& stats = stats_it->second;

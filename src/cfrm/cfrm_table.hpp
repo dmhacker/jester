@@ -14,7 +14,7 @@ class Game;
 
 class CFRMTable {
 private:
-    std::unordered_map<CFRMKey, CFRMStats> d_strategy;
+    std::unordered_map<CFRMKey, CFRMStats> d_table;
     std::mt19937 d_rng;
     std::mutex d_mtx;
 
@@ -35,7 +35,7 @@ public:
 template <class Archive>
 inline void CFRMTable::serialize(Archive& archive)
 {
-    archive(d_strategy);
+    archive(d_table);
 }
     
 inline std::mutex& CFRMTable::mutex() {
