@@ -9,7 +9,7 @@ using namespace jester;
 int main(int argc, char** argv)
 {
     cxxopts::Options options("jester", "A suite of AI players for the card game Durak.");
-    options.add_options()("r,reduced", "Use reduced form of Durak with only 2 ranks");
+    options.add_options()("r,reduced", "Use an extremely reduced form of Durak for testing purposes");
     options.add_options()("t,train", "Train CFRM (max threads, 30 seconds save interval)");
     options.add_options()("h,help", "Print help message");
     auto result = options.parse(argc, argv);
