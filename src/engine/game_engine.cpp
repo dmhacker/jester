@@ -69,7 +69,7 @@ GameEngine::GameEngine()
         auto cores = std::thread::hardware_concurrency();
         return std::make_shared<ISMCTSPlayer>(!has_human, cores, std::chrono::seconds(9));
     }));
-    d_options.push_back(PlayerOption("Prototype CFRM", [](bool has_human) {
+    d_options.push_back(PlayerOption("Tabular CFRM", [](bool has_human) {
         return std::make_shared<CFRMPlayer>(!has_human);
     }));
 }

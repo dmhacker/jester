@@ -25,13 +25,11 @@ There are no plans to add a GUI.
 
 ## Strategic Choices
 
-jester's game-playing algorithm of choice is 
-[Monte Carlo tree search](https://en.wikipedia.org/wiki/Monte_Carlo_tree_search), 
-specifically variants such as determinized and 
-information-set MCTS that have been adapted
-for games with imperfect information. 
+Players in jester behave according to several pre-defined options.
+When running the game engine, you can choose which players to 
+instantiate in your games.
 
-In short, jester implements the following options for players:
+jester implements the following player types:
 
 * Minimal — The minimal player will only play a card on the
 on the first attack. On defense, they will always yield. 
