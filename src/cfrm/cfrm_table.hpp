@@ -1,7 +1,7 @@
-#ifndef JESTER_CFRM_TABLES_HPP
-#define JESTER_CFRM_TABLES_HPP
+#ifndef JESTER_CFRM_TABLE_HPP
+#define JESTER_CFRM_TABLE_HPP
 
-#include "cfrm_abstraction.hpp"
+#include "cfrm_key.hpp"
 #include "cfrm_stats.hpp"
 
 #include <mutex>
@@ -12,14 +12,14 @@ namespace jester {
 
 class Game;
 
-class CFRMTables {
+class CFRMTable {
 private:
-    std::unordered_map<CFRMAbstraction, CFRMStats> d_stats;
+    std::unordered_map<CFRMKey, CFRMStats> d_strategy;
     std::mt19937 d_rng;
     std::mutex d_mtx;
 
 public:
-    CFRMTables();
+    CFRMTable();
 
     Action bestAction(const GameView& view, bool verbose);
 
@@ -33,12 +33,12 @@ public:
 };
 
 template <class Archive>
-inline void CFRMTables::serialize(Archive& archive)
+inline void CFRMTable::serialize(Archive& archive)
 {
-    archive(d_stats);
+    archive(d_strategy);
 }
     
-inline std::mutex& CFRMTables::mutex() {
+inline std::mutex& CFRMTable::mutex() {
     return d_mtx;
 }
 

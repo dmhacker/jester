@@ -15,7 +15,7 @@ CFRMEnvironment::CFRMEnvironment(const std::string& filename)
     std::ifstream infile(filename);
     if (infile.good()) {
         cereal::PortableBinaryInputArchive iarchive(infile);
-        iarchive(d_cfrm);
+        iarchive(d_strategy);
     }
 }
 
@@ -30,12 +30,12 @@ void CFRMEnvironment::train()
 
 void CFRMEnvironment::save()
 {
-    std::lock_guard<std::mutex> lck(d_cfrm.mutex());
+    std::lock_guard<std::mutex> lck(d_strategy.mutex());
     std::cout << std::endl << "Saving in progress." << std::endl;
     std::ofstream outfile(d_filename);
     if (outfile.good()) {
         cereal::PortableBinaryOutputArchive oarchive(outfile);
-        oarchive(d_cfrm);
+        oarchive(d_strategy);
     } else {
         throw std::runtime_error("Unable to save CFRM to disk.");
     }
@@ -53,7 +53,7 @@ std::vector<std::thread> CFRMEnvironment::trainingThreads(size_t num_threads)
                 std::vector<std::shared_ptr<Player>> players(num_players);
                 Game game(players);
                 for (size_t tpid = 0; tpid < num_players; tpid++) {
-                    d_cfrm.train(tpid, game, rng);
+                    d_strategy.train(tpid, game, rng);
                 }
             }
         }));

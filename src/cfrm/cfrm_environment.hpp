@@ -1,7 +1,7 @@
 #ifndef JESTER_CFRM_ENVIRONMENT_HPP
 #define JESTER_CFRM_ENVIRONMENT_HPP
 
-#include "cfrm_tables.hpp"
+#include "cfrm_table.hpp"
 
 #include <chrono>
 
@@ -10,12 +10,12 @@ namespace jester {
 class CFRMEnvironment {
 private:
     std::string d_filename;
-    CFRMTables d_cfrm;
+    CFRMTable d_strategy;
 
 public:
     CFRMEnvironment(const std::string& filename = "cfrm.bin");
 
-    CFRMTables& cfrm();
+    CFRMTable& strategy();
 
     void train();
     void save();
@@ -25,9 +25,9 @@ private:
     std::thread savingThread(const std::chrono::milliseconds&);
 };
 
-inline CFRMTables& CFRMEnvironment::cfrm()
+inline CFRMTable& CFRMEnvironment::strategy()
 {
-    return d_cfrm;
+    return d_strategy;
 }
 
 }

@@ -18,7 +18,7 @@ Action CFRMPlayer::nextAction(const GameView& view)
     if (actions.size() == 1) {
         return actions[0];
     }
-    return d_cfrm.cfrm().bestAction(view, d_verbose);
+    return d_cfrm.strategy().bestAction(view, d_verbose);
 }
 
 }

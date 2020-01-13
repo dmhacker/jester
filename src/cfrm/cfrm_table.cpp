@@ -1,4 +1,4 @@
-#include "cfrm_tables.hpp"
+#include "cfrm_table.hpp"
 #include "../rules/game.hpp"
 #include "../rules/game_view.hpp"
 
@@ -9,16 +9,16 @@
 
 namespace jester {
 
-CFRMTables::CFRMTables()
+CFRMTable::CFRMTable()
     : d_rng(std::random_device {}())
 {
 }
 
-Action CFRMTables::bestAction(const GameView& view, bool verbose)
+Action CFRMTable::bestAction(const GameView& view, bool verbose)
 {
-    CFRMAbstraction abstraction(view);
-    auto it = d_stats.find(abstraction);
-    if (it != d_stats.end()) {
+    CFRMKey key(view);
+    auto it = d_strategy.find(key);
+    if (it != d_strategy.end()) {
         if (verbose) {
             std::cerr
                 << "[P" << view.playerId()
@@ -40,7 +40,7 @@ Action CFRMTables::bestAction(const GameView& view, bool verbose)
     }
 }
 
-Action CFRMTables::sample(const std::unordered_map<Action, float>& profile, std::mt19937& rng)
+Action CFRMTable::sample(const std::unordered_map<Action, float>& profile, std::mt19937& rng)
 {
     std::uniform_real_distribution<> dist(0, 1);
     float randf = dist(rng);
@@ -56,7 +56,7 @@ Action CFRMTables::sample(const std::unordered_map<Action, float>& profile, std:
     return chosen;
 }
 
-float CFRMTables::train(size_t tpid, const Game& game, std::mt19937& rng)
+float CFRMTable::train(size_t tpid, const Game& game, std::mt19937& rng)
 {
     // Return utility from terminal node; this is the evaluation function
     if (game.finished()) {
@@ -87,18 +87,18 @@ float CFRMTables::train(size_t tpid, const Game& game, std::mt19937& rng)
         return train(tpid, next_game, rng);
     }
 
-    CFRMAbstraction abstraction(view);
-    decltype(d_stats)::iterator stats_it;
+    CFRMKey key(view);
+    decltype(d_strategy)::iterator stats_it;
     {
         std::lock_guard<std::mutex> lck(d_mtx);
-        stats_it = d_stats.find(abstraction);
-        if (stats_it == d_stats.end()) {
-            auto new_stats = decltype(d_stats)::value_type(
-                abstraction, CFRMStats(game.nextActions()));
-            stats_it = d_stats.insert(new_stats).first;
+        stats_it = d_strategy.find(key);
+        if (stats_it == d_strategy.end()) {
+            auto new_stats = decltype(d_strategy)::value_type(
+                key, CFRMStats(game.nextActions()));
+            stats_it = d_strategy.insert(new_stats).first;
         }
         std::cout << "\r"
-                  << d_stats.size() << " information sets in storage."
+                  << d_strategy.size() << " information sets in storage."
                   << std::flush;
     }
     auto& stats = stats_it->second;

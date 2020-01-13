@@ -1,4 +1,4 @@
-#include "cfrm_abstraction.hpp"
+#include "cfrm_key.hpp"
 #include "../rules/game_view.hpp"
 
 namespace jester {
@@ -11,7 +11,7 @@ constexpr static uint8_t CARD_IN_ATTACK = 9;
 constexpr static uint8_t CARD_IN_DEFENSE = 10;
 constexpr static uint8_t CARD_LAST_IN_ATTACK = 11;
 
-CFRMAbstraction::CFRMAbstraction(const GameView& view)
+CFRMKey::CFRMKey(const GameView& view)
     : d_cardStates(MAX_CARDS)
     , d_hiddenHands(view.playerCount())
     , d_trump(view.trumpCard().index())
@@ -81,21 +81,21 @@ CFRMAbstraction::CFRMAbstraction(const GameView& view)
     }
 }
 
-bool CFRMAbstraction::operator==(const CFRMAbstraction& abstraction) const
+bool CFRMKey::operator==(const CFRMKey& abstraction) const
 {
     return d_trump == abstraction.d_trump
         && d_cardStates == abstraction.d_cardStates
         && d_hiddenHands == abstraction.d_hiddenHands;
 }
 
-std::ostream& operator<<(std::ostream& os, const CFRMAbstraction& abstraction)
+std::ostream& operator<<(std::ostream& os, const CFRMKey& key)
 {
-    std::vector<Hand> hands(abstraction.d_hiddenHands.size());
+    std::vector<Hand> hands(key.d_hiddenHands.size());
     Hand attack;
     Hand defense;
     for (uint8_t i = 0; i < MAX_CARDS; i++) {
         Card card = toCard(i);
-        auto state = abstraction.d_cardStates[i];
+        auto state = key.d_cardStates[i];
         if (state == CARD_IN_ATTACK) {
             attack.insert(card);
         } else if (state == CARD_LAST_IN_ATTACK) {
@@ -112,10 +112,10 @@ std::ostream& operator<<(std::ostream& os, const CFRMAbstraction& abstraction)
             hands[state].insert(card);
         }
     }
-    for (size_t pid = 0; pid < abstraction.d_hiddenHands.size(); pid++) {
+    for (size_t pid = 0; pid < key.d_hiddenHands.size(); pid++) {
         os << "  P" << pid << " -- " 
             << hands[pid] << " " 
-            << static_cast<size_t>(abstraction.d_hiddenHands[pid]) << std::endl;
+            << static_cast<size_t>(key.d_hiddenHands[pid]) << std::endl;
     }
     return os
         << "  CA -- " << attack << std::endl
