@@ -5,7 +5,6 @@
 #include "game_view.hpp"
 
 #include <algorithm>
-#include <cassert>
 
 namespace jester {
 
@@ -18,8 +17,6 @@ Game::Game(const Players& players)
     : d_players(players)
     , d_hands(players.size())
 {
-    assert(players.size() >= Constants::instance().MIN_PLAYERS
-            && players.size() <= Constants::instance().MAX_PLAYERS);
     std::mt19937 rng(std::random_device {}());
     reset(rng);
 }
@@ -35,7 +32,6 @@ Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
     , d_attackOrder(view.attackOrder())
     , d_nextActions(view.nextActions())
 {
-    assert(players.size() == view.playerCount());
     // Cards in hidden set may be in player hands or may be in the deck
     // Convert set into vector and then shuffle the vector
     std::vector<Card> hidden_cards;
@@ -65,7 +61,6 @@ Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
             hidden_cards.end());
         d_deck.push_back(d_trump);
     }
-    assert(d_deck.size() == view.deckSize());
 }
 
 void Game::reset(std::mt19937& rng)
@@ -156,7 +151,6 @@ void Game::calculateNextActions()
             }
         }
     }
-    std::sort(d_nextActions.begin(), d_nextActions.end());
 }
 
 void Game::play()

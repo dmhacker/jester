@@ -16,7 +16,6 @@ private:
 
 public:
     GameView(const Game& game, size_t pid);
-    ~GameView();
 
     // Information relative to the owning player
     size_t playerId() const;

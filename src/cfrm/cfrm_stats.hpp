@@ -3,29 +3,30 @@
 
 #include "../rules/card.hpp"
 
-#include <cereal/types/unordered_map.hpp>
 #include <mutex>
 
 namespace jester {
 
 class CFRMStats {
 private:
-    std::unordered_map<Action, float> d_cumulProfile;
-    std::unordered_map<Action, float> d_cumulRegret;
+    std::vector<float> d_cumulProfile;
+    std::vector<float> d_cumulRegret;
     std::mutex d_mtx;
 
 public:
+    std::vector<Action> d_actions;
+
     CFRMStats() = default;
-    CFRMStats(const std::vector<Action>& actions);
+    CFRMStats(size_t num_actions);
     CFRMStats(const CFRMStats& stats);
 
-    std::unordered_map<Action, float> currentProfile() const;
-    std::unordered_map<Action, float> averageProfile() const;
+    std::vector<float> currentProfile() const;
+    std::vector<float> averageProfile() const;
 
     std::mutex& mutex();
 
-    void addProfile(const std::unordered_map<Action, float>& profile);
-    void addRegret(const Action& action, float regret);
+    void addProfile(const std::vector<float>& profile);
+    void addRegret(size_t idx, float regret);
 
     template <class Archive>
     void serialize(Archive& archive);
@@ -34,16 +35,16 @@ private:
     friend std::ostream& operator<<(std::ostream&, const CFRMStats&);
 };
 
-inline void CFRMStats::addProfile(const std::unordered_map<Action, float>& profile)
+inline void CFRMStats::addProfile(const std::vector<float>& profile)
 {
-    for (auto& it : profile) {
-        d_cumulProfile[it.first] += it.second;
+    for (size_t i = 0; i < d_cumulProfile.size(); i++) {
+        d_cumulProfile[i] += profile[i];
     }
 }
 
-inline void CFRMStats::addRegret(const Action& action, float regret)
+inline void CFRMStats::addRegret(size_t idx, float regret)
 {
-    d_cumulRegret[action] += regret;
+    d_cumulRegret[idx] += regret;
 }
 
 template <class Archive>

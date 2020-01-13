@@ -41,7 +41,7 @@ public:
     std::unordered_map<Action, std::shared_ptr<MCTSNode>>& children();
     MCTSStats& stats();
 
-    virtual NodeExpansion tryExpand(const Game& game) = 0;
+    virtual NodeExpansion expand(const Game& game) = 0;
 
     std::ostream& print(std::ostream& os, size_t level = 0) const;
 };

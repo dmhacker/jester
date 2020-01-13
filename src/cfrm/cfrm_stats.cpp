@@ -2,12 +2,10 @@
 
 namespace jester {
 
-CFRMStats::CFRMStats(const std::vector<Action>& actions)
+CFRMStats::CFRMStats(size_t num_actions)
+    : d_cumulProfile(num_actions)
+    , d_cumulRegret(num_actions)
 {
-    for (auto& action : actions) {
-        d_cumulProfile[action] = 0;
-        d_cumulRegret[action] = 0;
-    }
 }
 
 CFRMStats::CFRMStats(const CFRMStats& stats)
@@ -16,38 +14,41 @@ CFRMStats::CFRMStats(const CFRMStats& stats)
 {
 }
 
-std::unordered_map<Action, float> CFRMStats::currentProfile() const
+std::vector<float> CFRMStats::currentProfile() const
 {
-    std::unordered_map<Action, float> profile(d_cumulProfile.size());
+    size_t num_actions = d_cumulProfile.size();
+    std::vector<float> profile(num_actions);
     float regret_sum = 0;
-    for (auto& it : d_cumulRegret) {
-        float positive_regret = std::max(it.second, 0.f);
-        profile[it.first] = positive_regret;
+    for (size_t idx = 0; idx < num_actions; idx++) {
+        float positive_regret = std::max(d_cumulRegret[idx], 0.f);
+        profile[idx] = positive_regret;
         regret_sum += positive_regret;
     }
-    for (auto& it : profile) {
+    for (size_t idx = 0; idx < num_actions; idx++) {
         if (regret_sum > 0) {
-            it.second /= regret_sum;
+            profile[idx] /= regret_sum;
         } else {
-            it.second = 1.f / d_cumulProfile.size();
+            profile[idx] = 1.f / num_actions;
         }
     }
     return profile;
 }
 
-std::unordered_map<Action, float> CFRMStats::averageProfile() const
+std::vector<float> CFRMStats::averageProfile() const
 {
-    std::unordered_map<Action, float> profile(d_cumulProfile.size());
+    size_t num_actions = d_cumulProfile.size();
+    std::vector<float> profile(num_actions);
     float profile_sum = 0;
-    for (auto& it : d_cumulProfile) {
-        profile_sum += it.second;
+    for (size_t idx = 0; idx < num_actions; idx++) {
+        profile_sum += d_cumulProfile[idx];
     }
-    for (auto& it : d_cumulProfile)
+    for (size_t idx = 0; idx < num_actions; idx++) {
         if (profile_sum > 0) {
-            profile[it.first] = it.second / profile_sum;
+            profile[idx] = d_cumulProfile[idx] / profile_sum;
         } else {
-            profile[it.first] = 1.f / d_cumulProfile.size();
+            profile[idx] = 1.f / d_cumulProfile.size();
         }
+    }
     return profile;
 }
 

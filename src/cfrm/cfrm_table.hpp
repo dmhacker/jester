@@ -8,6 +8,8 @@
 #include <random>
 #include <thread>
 
+#include <cereal/types/unordered_map.hpp>
+
 namespace jester {
 
 class Game;
@@ -23,7 +25,7 @@ public:
 
     Action bestAction(const GameView& view, bool verbose);
 
-    Action sample(const std::unordered_map<Action, float>& profile, std::mt19937& rng);
+    Action sample(const std::vector<Action>& actions, const std::vector<float>& profile, std::mt19937& rng);
     float train(size_t tpid, const Game& game, std::mt19937& rng);
 
     template <class Archive>

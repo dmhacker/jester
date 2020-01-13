@@ -11,7 +11,7 @@ ISMCTSNode::ISMCTSNode(size_t player)
 {
 }
 
-NodeExpansion ISMCTSNode::tryExpand(const Game& game)
+NodeExpansion ISMCTSNode::expand(const Game& game)
 {
     for (auto& action : game.nextActions()) {
         auto it = children().find(action);
@@ -50,7 +50,7 @@ void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>
     NodeExpansion expansion;
     while (true) {
         std::lock_guard<std::mutex> plck(selection->mutex());
-        expansion = selection->tryExpand(game);
+        expansion = selection->expand(game);
         if (!expansion.empty()) {
             break;
         }

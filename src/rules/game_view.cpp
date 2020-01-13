@@ -9,10 +9,6 @@ GameView::GameView(const Game& game, size_t pid)
 {
 }
 
-GameView::~GameView()
-{
-}
-
 Hand GameView::visibleHand(size_t pid) const
 {
     Hand hand;

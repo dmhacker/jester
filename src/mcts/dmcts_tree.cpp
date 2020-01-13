@@ -11,7 +11,7 @@ DMCTSNode::DMCTSNode(size_t player)
 {
 }
 
-NodeExpansion DMCTSNode::tryExpand(const Game& game)
+NodeExpansion DMCTSNode::expand(const Game& game)
 {
     if (game.finished()) {
         return NodeExpansion();
@@ -48,7 +48,7 @@ void DMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& 
     auto selection = d_root;
     path.push_back(selection);
     NodeExpansion expansion;
-    while ((expansion = selection->tryExpand(game)).empty()) {
+    while ((expansion = selection->expand(game)).empty()) {
         if (game.finished()) {
             return;
         }

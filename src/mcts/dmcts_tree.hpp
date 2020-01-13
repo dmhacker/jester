@@ -14,7 +14,7 @@ public:
     DMCTSNode(size_t player);
     ~DMCTSNode() = default;
 
-    NodeExpansion tryExpand(const Game& game);
+    NodeExpansion expand(const Game& game);
 };
 
 class DMCTSTree {
