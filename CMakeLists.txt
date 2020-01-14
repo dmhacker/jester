@@ -15,12 +15,11 @@ file(GLOB sources
 )
 list(REMOVE_ITEM sources "src/main.cpp")
 add_library(jester ${sources})
-target_include_directories(jester PRIVATE "include")
+target_include_directories(jester PUBLIC "include")
 target_link_libraries(jester Threads::Threads)
 
 # Main executable allows user to play the game/train CFRM
 add_executable(jrun "src/main.cpp")
-target_include_directories(jrun PRIVATE "include")
 target_link_libraries(jrun jester)
 
 # Test executable runs tests on the game logic
@@ -28,6 +27,5 @@ file(GLOB test_sources
     "test/*.cpp"
 )
 add_executable(jtests ${test_sources})
-target_include_directories(jtests PRIVATE "include")
 target_link_libraries(jtests jester)
 catch_discover_tests(jtests)

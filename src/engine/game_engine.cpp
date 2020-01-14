@@ -44,6 +44,7 @@ PlayerOption::PlayerOption(const std::string& name,
 }
 
 GameEngine::GameEngine()
+    : d_rng(std::random_device {}())
 {
     d_options.push_back(PlayerOption("Minimal", [](bool has_human) {
         return stda::make_erased<MinimalPlayer>();
@@ -73,7 +74,7 @@ GameEngine::GameEngine()
     }));
 }
 
-void GameEngine::shell() const
+void GameEngine::shell()
 {
     while (std::cin) {
         // Have the user choose the number of players in the game
@@ -153,7 +154,7 @@ void GameEngine::shell() const
         std::cout << std::endl;
 
         // Set up a game instance
-        GameState game(players.size());
+        GameState game(players.size(), d_rng);
         if (!has_humans) {
             game.setObserver(stda::make_erased<OmniscientObserver>());
         }

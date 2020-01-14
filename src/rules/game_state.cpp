@@ -7,15 +7,9 @@
 
 namespace jester {
 
-GameException::GameException(const std::string& message)
-    : d_message(message)
-{
-}
-
-GameState::GameState(size_t num_players)
+GameState::GameState(size_t num_players, std::mt19937& rng)
     : d_hands(num_players)
 {
-    std::mt19937 rng(std::random_device {}());
     reset(rng);
 }
 
@@ -304,7 +298,7 @@ void GameState::findNextActions()
 void GameState::validateAction(const Action& action) const
 {
     if (finished()) {
-        throw GameException("The game is finished.");
+        throw std::logic_error("The game is finished.");
     }
     auto aid = attackerId();
     auto did = defenderId();
@@ -312,16 +306,16 @@ void GameState::validateAction(const Action& action) const
     auto& defense_hand = d_hands[did];
     if (attackerNext()) {
         if (d_currentAttack.size() >= Constants::instance().HAND_SIZE || defense_hand.size() < 1) {
-            throw GameException("Too many cards in attack or defense has no cards.");
+            throw std::logic_error("Too many cards in attack or defense has no cards.");
         }
         if (action.empty()) {
             if (d_currentAttack.empty()) {
-                throw GameException("Player must play a card on their first attack.");
+                throw std::logic_error("Player must play a card on their first attack.");
             }
         } else {
             auto& attacking = action.card();
             if (attack_hand.find(attacking) == attack_hand.end()) {
-                throw GameException("Player must possess the card they are attacking with.");
+                throw std::logic_error("Player must possess the card they are attacking with.");
             }
             if (!d_currentAttack.empty()) {
                 std::unordered_set<size_t> valid_ranks;
@@ -332,7 +326,7 @@ void GameState::validateAction(const Action& action) const
                     valid_ranks.insert(card.rank());
                 }
                 if (valid_ranks.find(attacking.rank()) == valid_ranks.end()) {
-                    throw GameException("Attacking card rank must exist already.");
+                    throw std::logic_error("Attacking card rank must exist already.");
                 }
             }
         }
@@ -342,18 +336,18 @@ void GameState::validateAction(const Action& action) const
         }
         auto& defending = action.card();
         if (defense_hand.find(defending) == defense_hand.end()) {
-            throw GameException("Player must possess the card they are defending with.");
+            throw std::logic_error("Player must possess the card they are defending with.");
         }
         auto& attacking = d_currentAttack.back();
         bool suit_match = defending.suit() == trumpSuit()
             || defending.suit() == attacking.suit();
         if (!suit_match) {
-            throw GameException("Defending card must be the same suit as the attack card");
+            throw std::logic_error("Defending card must be the same suit as the attack card");
         }
         bool rank_match = defending.rank() > attacking.rank()
             || (defending.suit() == trumpSuit() && attacking.suit() != trumpSuit());
         if (!rank_match) {
-            throw GameException("Defending card must have a higher rank than the attack card");
+            throw std::logic_error("Defending card must have a higher rank than the attack card");
         }
     }
 }

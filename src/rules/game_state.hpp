@@ -9,15 +9,6 @@
 
 namespace jester {
 
-class GameException : public std::exception {
-private:
-    std::string d_message;
-
-public:
-    GameException(const std::string& message);
-    const char* what() const throw();
-};
-
 class GameView;
 class Observer;
 
@@ -37,7 +28,7 @@ private:
 
 public:
     GameState() = default;
-    GameState(size_t num_players);
+    GameState(size_t num_players, std::mt19937& rng);
     GameState(const GameView& view, std::mt19937& rng);
     GameState(const GameState& state);
 
@@ -80,11 +71,6 @@ private:
 private:
     friend std::ostream& operator<<(std::ostream& os, const GameState& state);
 };
-
-inline const char* GameException::what() const throw()
-{
-    return d_message.c_str();
-}
 
 inline void GameState::setObserver(stda::erased_ptr<Observer>&& observer)
 {

@@ -4,6 +4,7 @@
 #include "../players/player.hpp"
 
 #include <string>
+#include <random>
 #include <erased_ptr.hpp>
 
 namespace jester {
@@ -22,10 +23,11 @@ public:
 class GameEngine {
 private:
     std::vector<PlayerOption> d_options;
+    std::mt19937 d_rng;
 
 public:
     GameEngine();
-    void shell() const;
+    void shell();
 
 private:
     void printOptions() const;

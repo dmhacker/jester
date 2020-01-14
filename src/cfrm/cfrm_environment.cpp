@@ -50,7 +50,7 @@ std::vector<std::thread> CFRMEnvironment::trainingThreads(size_t num_threads)
             std::mt19937 rng(std::random_device {}());
             while (true) {
                 size_t num_players = 2;
-                GameState root(num_players);
+                GameState root(num_players, rng);
                 for (size_t tpid = 0; tpid < num_players; tpid++) {
                     d_strategy.train(tpid, root, rng);
                 }
