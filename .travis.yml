@@ -16,9 +16,7 @@ install:
 - "[ $CXX = g++ ] && export CXX=g++-6 || true"
 - "[ $CXX = clang++ ] && export CXX=clang++-3.8 || true"
 script:
-  - mkdir build
-  - cd build
-  - cmake -DCODE_COVREAGE=ON ..
+  - cmake -DCODE_COVREAGE=ON .
   - make -j4
   - ./jtests
 after_success:
