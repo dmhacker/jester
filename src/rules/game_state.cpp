@@ -129,8 +129,8 @@ void GameState::playAction(const Action& action)
             d_currentAttack.push_back(attack_card);
             d_hidden.erase(attack_card);
             attack_hand.erase(attack_card);
-            // End condition 1: defender is the losing player
-            if (attack_hand.empty() && d_deck.empty() && d_winOrder.size() + 2 == d_hands.size()) {
+            // End condition 1: successful attack leaves one remaining player
+            if (attack_hand.empty() && d_deck.empty() && d_attackOrder.size() == 2) {
                 d_attackOrder.clear();
                 d_winOrder.push_back(aid);
                 d_nextActions.clear();
@@ -192,13 +192,14 @@ void GameState::finishGoodDefense()
         if (d_observer != nullptr) {
             d_observer->onPlayerWin(*this, did, d_winOrder.size());
         }
-        // End condition 2: attacker is the losing player
-        if (d_winOrder.size() + 1 == d_hands.size()) {
+        // End condition 2: successful defense leaves one remaining player
+        if (d_attackOrder.size() == 1) {
+            auto lid = d_attackOrder.back();
             d_attackOrder.clear();
-            d_winOrder.push_back(aid);
+            d_winOrder.push_back(lid);
             d_nextActions.clear();
             if (d_observer != nullptr) {
-                d_observer->onPlayerWin(*this, aid, d_winOrder.size());
+                d_observer->onPlayerWin(*this, lid, d_winOrder.size());
                 d_observer->onGameEnd(*this);
             }
             return;
