@@ -1,7 +1,7 @@
 #include <catch.hpp>
 
 #include "../src/constants.hpp"
-#include "../src/players/random_player.hpp"
+#include "../src/players/greedy_player.hpp"
 #include "../src/rules/game_state.hpp"
 
 using namespace jester;
@@ -57,7 +57,7 @@ TEST_CASE("Game is in a reset state")
 
 TEST_CASE("Game is in a defending state")
 {
-    RandomPlayer player;
+    GreedyPlayer player;
     for (size_t pcnt = 2; pcnt < 6; pcnt++) {
         GameState state(pcnt, rng);
         // Playing 1 action results in a defender's turn
@@ -92,7 +92,7 @@ TEST_CASE("Game is in a defending state")
 
 TEST_CASE("Game is in an attacking state")
 {
-    RandomPlayer player;
+    GreedyPlayer player;
     for (size_t pcnt = 2; pcnt < 6; pcnt++) {
         GameState state(pcnt, rng);
         // Playing 2 actions results in an attacker's turn
@@ -126,7 +126,7 @@ TEST_CASE("Game is in an attacking state")
 
 TEST_CASE("Game is in a finished state")
 {
-    RandomPlayer player;
+    GreedyPlayer player;
     for (size_t pcnt = 2; pcnt < 6; pcnt++) {
         GameState state(pcnt, rng);
         while (!state.finished()) {

@@ -1,7 +1,7 @@
 #include <catch.hpp>
 
 #include "../src/constants.hpp"
-#include "../src/players/random_player.hpp"
+#include "../src/players/greedy_player.hpp"
 #include "../src/rules/game_state.hpp"
 #include "../src/rules/game_view.hpp"
 
@@ -11,7 +11,7 @@ static std::mt19937 rng;
 
 TEST_CASE("Game view reflects current game state")
 {
-    RandomPlayer player;
+    GreedyPlayer player;
     for (size_t pcnt = 2; pcnt < 6; pcnt++) {
         GameState state(pcnt, rng);
         while (!state.finished()) {
@@ -44,7 +44,7 @@ TEST_CASE("Game view reflects current game state")
 
 TEST_CASE("Hands are hidden correctly")
 {
-    RandomPlayer player;
+    GreedyPlayer player;
     for (size_t pcnt = 2; pcnt < 6; pcnt++) {
         GameState state(pcnt, rng);
         while (!state.finished()) {
