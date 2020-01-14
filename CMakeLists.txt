@@ -2,9 +2,15 @@ cmake_minimum_required (VERSION 3.7)
 project(jester)
 
 find_package(Threads REQUIRED)
-include(cmake/Catch.cmake)
-include(cmake/code-coverage.cmake)
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(CTest)
+include(cmake/Catch.cmake)
+
+option(COVERALLS "Generate coveralls data" OFF)
+if (COVERALLS)
+    include(Coveralls)
+    coveralls_turn_on_coverage()
+endif()
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -30,3 +36,7 @@ file(GLOB test_sources
 add_executable(jtests ${test_sources})
 target_link_libraries(jtests jester)
 catch_discover_tests(jtests)
+
+if (COVERALLS)
+    coveralls_setup("${sources}" ON)
+endif()

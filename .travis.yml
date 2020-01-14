@@ -16,7 +16,9 @@ install:
 - "[ $CXX = g++ ] && export CXX=g++-6 || true"
 - "[ $CXX = clang++ ] && export CXX=clang++-3.8 || true"
 script:
-  - cmake -DCODE_COVREAGE=ON .
+  - export COVERALLS_SERVICE_NAME=travis-ci
+  - export COVERALLS_REPO_TOKEN=Q7IRJzqV8gYttEKTjGk4gYEcN5eJCyufq
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON .
   - make -j4
   - ./jtests
 after_success:
