@@ -22,7 +22,7 @@ CFRMEnvironment::CFRMEnvironment(const std::string& filename)
 void CFRMEnvironment::train()
 {
     auto threads = trainingThreads(std::thread::hardware_concurrency());
-    threads.push_back(savingThread(std::chrono::seconds(30)));
+    threads.push_back(savingThread(std::chrono::seconds(120)));
     for (auto& thr : threads) {
         thr.join();
     }
