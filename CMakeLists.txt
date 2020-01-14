@@ -3,24 +3,31 @@ project(jester)
 
 find_package(Threads REQUIRED)
 include(cmake/Catch.cmake)
+include(CTest)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Main library encapsulates all game and player logic
 file(GLOB sources 
     "src/**/*.cpp"
 )
-add_executable(jester "src/main.cpp" ${sources})
+list(REMOVE_ITEM sources "src/main.cpp")
+add_library(jester ${sources})
 target_include_directories(jester PRIVATE "include")
 target_link_libraries(jester Threads::Threads)
 
+# Main executable allows user to play the game/train CFRM
+add_executable(jrun "src/main.cpp")
+target_include_directories(jrun PRIVATE "include")
+target_link_libraries(jrun jester)
+
+# Test executable runs tests on the game logic
 file(GLOB test_sources 
     "test/*.cpp"
 )
-add_executable(tests "test/main.cpp" ${test_sources})
-target_include_directories(tests PRIVATE "include")
-target_link_libraries(tests Threads::Threads)
-
-include(CTest)
-catch_discover_tests(tests)
+add_executable(jtests ${test_sources})
+target_include_directories(jtests PRIVATE "include")
+target_link_libraries(jtests jester)
+catch_discover_tests(jtests)
