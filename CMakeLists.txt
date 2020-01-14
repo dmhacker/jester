@@ -3,6 +3,7 @@ project(jester)
 
 find_package(Threads REQUIRED)
 include(cmake/Catch.cmake)
+include(cmake/code-coverage.cmake)
 include(CTest)
 
 set(CMAKE_CXX_STANDARD 11)
