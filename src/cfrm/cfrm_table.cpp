@@ -1,5 +1,5 @@
 #include "cfrm_table.hpp"
-#include "../rules/game.hpp"
+#include "../rules/game_state.hpp"
 #include "../rules/game_view.hpp"
 
 #include <algorithm>
@@ -58,18 +58,18 @@ Action CFRMTable::sample(const std::vector<Action>& actions, const std::vector<f
     throw std::logic_error(ss.str());
 }
 
-float CFRMTable::train(size_t tpid, const Game& game, std::mt19937& rng)
+float CFRMTable::train(size_t tpid, const GameState& state, std::mt19937& rng)
 {
     // Return utility from terminal node; this is the evaluation function
-    if (game.finished()) {
+    if (state.finished()) {
         float reward = 0;
-        for (size_t i = 0; i < game.playerCount(); i++) {
-            auto pid = game.winOrder()[i];
+        for (size_t i = 0; i < state.playerCount(); i++) {
+            auto pid = state.winOrder()[i];
             if (pid == tpid) {
-                if (i < game.playerCount() - 1) {
-                    reward = game.playerCount() - 1 - i;
+                if (i < state.playerCount() - 1) {
+                    reward = state.playerCount() - 1 - i;
                 } else {
-                    reward = game.playerCount() * (game.playerCount() - 1) / 2;
+                    reward = state.playerCount() * (state.playerCount() - 1) / 2;
                     reward *= -1;
                 }
                 break;
@@ -79,14 +79,14 @@ float CFRMTable::train(size_t tpid, const Game& game, std::mt19937& rng)
     }
 
     // Skip over information sets where only one action is possible
-    auto player = game.currentPlayerId();
-    auto actions = game.nextActions();
-    auto view = game.currentPlayerView();
+    auto player = state.currentPlayerId();
+    auto actions = state.nextActions();
+    auto view = state.currentPlayerView();
     if (actions.size() == 1) {
         auto action = actions[0];
-        Game next_game(game);
-        next_game.playAction(action);
-        return train(tpid, next_game, rng);
+        GameState next_state(state);
+        next_state.playAction(action);
+        return train(tpid, next_state, rng);
     }
     std::sort(actions.begin(), actions.end());
 
@@ -113,10 +113,10 @@ float CFRMTable::train(size_t tpid, const Game& game, std::mt19937& rng)
     // External sampling: opponents only follow one action
     if (player != tpid) {
         auto action = sample(actions, profile, rng);
-        Game next_game(game);
-        next_game.playAction(action);
+        GameState next_state(state);
+        next_state.playAction(action);
         lck.unlock();
-        float result = train(tpid, next_game, rng);
+        float result = train(tpid, next_state, rng);
         lck.lock();
         return result;
     }
@@ -126,9 +126,9 @@ float CFRMTable::train(size_t tpid, const Game& game, std::mt19937& rng)
     std::vector<float> child_util(actions.size());
     float total_util = 0.0f;
     for (size_t i = 0; i < actions.size(); i++) {
-        Game next_game(game);
-        next_game.playAction(actions[i]);
-        child_util[i] = train(tpid, next_game, rng);
+        GameState next_state(state);
+        next_state.playAction(actions[i]);
+        child_util[i] = train(tpid, next_state, rng);
         total_util += profile[i] * child_util[i];
     }
     lck.lock();

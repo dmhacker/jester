@@ -1,14 +1,13 @@
 #include "game_engine.hpp"
 
-#include "../rules/game.hpp"
-
 #include "../observers/omniscient_observer.hpp"
+#include "../players/cfrm_player.hpp"
 #include "../players/dmcts_player.hpp"
 #include "../players/greedy_player.hpp"
 #include "../players/ismcts_player.hpp"
 #include "../players/minimal_player.hpp"
 #include "../players/random_player.hpp"
-#include "../players/cfrm_player.hpp"
+#include "../rules/game_state.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -77,6 +76,7 @@ GameEngine::GameEngine()
 void GameEngine::shell() const
 {
     while (std::cin) {
+        // Have the user choose the number of players in the game
         size_t num_players;
         try {
             std::cout << "Number of players: ";
@@ -92,7 +92,7 @@ void GameEngine::shell() const
             continue;
         }
 
-        // Print
+        // Have the users choose which player types they will use
         std::cout << std::endl;
         std::cout << "Please choose strategies from the following list." << std::endl;
         printOptions();
@@ -152,12 +152,19 @@ void GameEngine::shell() const
         }
         std::cout << std::endl;
 
-        // Play out the game
-        Game game(players);
+        // Set up a game instance
+        GameState game(players.size());
         if (!has_humans) {
-            game.registerObserver(std::make_shared<OmniscientObserver>());
+            game.setObserver(stda::make_erased<OmniscientObserver>());
         }
-        game.play();
+
+        // Play out the game to conclusion
+        while (!game.finished()) {
+            auto& player = players[game.currentPlayerId()];
+            auto action = player->nextAction(game.currentPlayerView());
+            game.validateAction(action);
+            game.playAction(action);
+        }
 
         std::cout << std::endl;
         printBarrier<false>();

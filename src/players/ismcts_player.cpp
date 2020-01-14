@@ -1,10 +1,7 @@
 #include "ismcts_player.hpp"
 #include "../mcts/ismcts_tree.hpp"
-#include "../rules/game.hpp"
-#include "random_player.hpp"
 
 #include <iostream>
-#include <memory>
 #include <thread>
 
 namespace jester {

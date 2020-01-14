@@ -1,7 +1,7 @@
 #include "ismcts_tree.hpp"
 #include "../players/random_player.hpp"
+#include "../rules/game_state.hpp"
 
-#include <cassert>
 #include <cmath>
 
 namespace jester {
@@ -11,9 +11,9 @@ ISMCTSNode::ISMCTSNode(size_t player)
 {
 }
 
-NodeExpansion ISMCTSNode::expand(const Game& game)
+NodeExpansion ISMCTSNode::expand(const GameState& state)
 {
-    for (auto& action : game.nextActions()) {
+    for (auto& action : state.nextActions()) {
         auto it = children().find(action);
         if (it == children().end()) {
             return NodeExpansion(action);
@@ -28,21 +28,17 @@ ISMCTSTree::ISMCTSTree(const GameView& view)
     , d_rng(std::random_device {}())
 
 {
-    for (size_t i = 0; i < d_view.playerCount(); i++) {
-        d_players.push_back(std::make_shared<RandomPlayer>());
-    }
-    assert(!view.finished());
 }
 
 void ISMCTSTree::iterate()
 {
-    Game game(d_players, d_view, d_rng);
+    GameState state(d_view, d_rng);
     std::vector<std::shared_ptr<ISMCTSNode>> path;
-    selectPath(game, path);
-    rolloutPath(game, path);
+    selectPath(state, path);
+    rolloutPath(state, path);
 }
 
-void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>& path)
+void ISMCTSTree::selectPath(GameState& state, std::vector<std::shared_ptr<ISMCTSNode>>& path)
 {
 
     auto selection = d_root;
@@ -50,17 +46,17 @@ void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>
     NodeExpansion expansion;
     while (true) {
         std::lock_guard<std::mutex> plck(selection->mutex());
-        expansion = selection->expand(game);
+        expansion = selection->expand(state);
         if (!expansion.empty()) {
             break;
         }
-        if (game.finished()) {
+        if (state.finished()) {
             return;
         }
         Action best_action;
         std::shared_ptr<ISMCTSNode> best_node = nullptr;
         float best_score = -1;
-        for (auto& action : game.nextActions()) {
+        for (auto& action : state.nextActions()) {
             auto child = std::static_pointer_cast<ISMCTSNode>(
                 selection->children()[action]);
             std::lock_guard<std::mutex> clck(child->mutex());
@@ -75,15 +71,13 @@ void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>
                 best_score = score;
             }
         }
-        assert(best_node != nullptr);
-        game.playAction(best_action);
+        state.playAction(best_action);
         selection = best_node;
         path.push_back(selection);
     }
     auto& action = expansion.action();
-    game.playAction(action);
-    auto child = std::make_shared<ISMCTSNode>(
-        game.currentPlayerId());
+    state.playAction(action);
+    auto child = std::make_shared<ISMCTSNode>(state.currentPlayerId());
     path.push_back(child);
     {
         std::lock_guard<std::mutex> lck(selection->mutex());
@@ -91,10 +85,13 @@ void ISMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<ISMCTSNode>>
     }
 }
 
-void ISMCTSTree::rolloutPath(Game& game, const std::vector<std::shared_ptr<ISMCTSNode>>& path)
+void ISMCTSTree::rolloutPath(GameState& state, const std::vector<std::shared_ptr<ISMCTSNode>>& path)
 {
-    game.play();
-    auto& result = game.winOrder();
+    RandomPlayer player;
+    while (!state.finished()) {
+        state.playAction(player.nextAction(state.currentPlayerView()));
+    }
+    auto& result = state.winOrder();
     std::unordered_map<size_t, float> rewards;
     for (size_t widx = 0; widx < result.size(); widx++) {
         size_t pid = result[widx];

@@ -1,6 +1,7 @@
 #ifndef JESTER_DMCTS_TREE_HPP
 #define JESTER_DMCTS_TREE_HPP
 
+#include "../rules/game_state.hpp"
 #include "mcts_node.hpp"
 
 namespace jester {
@@ -14,16 +15,16 @@ public:
     DMCTSNode(size_t player);
     ~DMCTSNode() = default;
 
-    NodeExpansion expand(const Game& game);
+    NodeExpansion expand(const GameState& game);
 };
 
 class DMCTSTree {
 private:
     std::shared_ptr<DMCTSNode> d_root;
-    Game d_game;
+    GameState d_state;
 
 public:
-    DMCTSTree(const Game& game);
+    DMCTSTree(const GameState& state);
 
     // Disable copy and assignment operators
     DMCTSTree(const DMCTSTree& tree) = delete;
@@ -34,8 +35,8 @@ public:
     void iterate();
 
 private:
-    void selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& path);
-    void rolloutPath(Game& game, const std::vector<std::shared_ptr<DMCTSNode>>& path);
+    void selectPath(GameState& state, std::vector<std::shared_ptr<DMCTSNode>>& path);
+    void rolloutPath(GameState& state, const std::vector<std::shared_ptr<DMCTSNode>>& path);
 };
 
 inline const std::shared_ptr<DMCTSNode>& DMCTSTree::root() const

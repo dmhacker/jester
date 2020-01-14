@@ -118,9 +118,9 @@ std::ostream& operator<<(std::ostream& os, const CFRMKey& key)
         }
     }
     for (size_t pid = 0; pid < key.d_hiddenHands.size(); pid++) {
-        os << "  P" << pid << " -- " 
-            << hands[pid] << " " 
-            << static_cast<size_t>(key.d_hiddenHands[pid]) << std::endl;
+        os << "  P" << pid << " -- "
+           << hands[pid] << " "
+           << static_cast<size_t>(key.d_hiddenHands[pid]) << std::endl;
     }
     return os
         << "  CA -- " << attack << std::endl

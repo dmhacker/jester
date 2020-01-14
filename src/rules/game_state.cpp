@@ -1,7 +1,6 @@
-#include "game.hpp"
+#include "game_state.hpp"
 #include "../constants.hpp"
 #include "../observers/observer.hpp"
-#include "../players/player.hpp"
 #include "game_view.hpp"
 
 #include <algorithm>
@@ -13,17 +12,15 @@ GameException::GameException(const std::string& message)
 {
 }
 
-Game::Game(const Players& players)
-    : d_players(players)
-    , d_hands(players.size())
+GameState::GameState(size_t num_players)
+    : d_hands(num_players)
 {
     std::mt19937 rng(std::random_device {}());
     reset(rng);
 }
 
-Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
-    : d_players(players)
-    , d_hands(players.size())
+GameState::GameState(const GameView& view, std::mt19937& rng)
+    : d_hands(view.playerCount())
     , d_hidden(view.hiddenCards())
     , d_trump(view.trumpCard())
     , d_currentAttack(view.currentAttack())
@@ -31,6 +28,7 @@ Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
     , d_winOrder(view.winOrder())
     , d_attackOrder(view.attackOrder())
     , d_nextActions(view.nextActions())
+    , d_firstMove(view.firstMove())
 {
     // Cards in hidden set may be in player hands or may be in the deck
     // Convert set into vector and then shuffle the vector
@@ -42,13 +40,13 @@ Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
     }
     std::shuffle(hidden_cards.begin(), hidden_cards.end(), rng);
     // Populate player hands with their known cards
-    for (size_t pid = 0; pid < players.size(); pid++) {
+    for (size_t pid = 0; pid < view.playerCount(); pid++) {
         auto const& visible = view.visibleHand(pid);
         d_hands[pid].insert(visible.begin(), visible.end());
     }
     // Deal out hidden cards to player hands first
     size_t hidden_idx = 0;
-    for (size_t pid = 0; pid < players.size(); pid++) {
+    for (size_t pid = 0; pid < view.playerCount(); pid++) {
         auto& hand = d_hands[pid];
         for (size_t i = 0; i < view.hiddenHandSize(pid); i++) {
             hand.insert(hidden_cards[hidden_idx++]);
@@ -63,7 +61,21 @@ Game::Game(const Players& players, const GameView& view, std::mt19937& rng)
     }
 }
 
-void Game::reset(std::mt19937& rng)
+GameState::GameState(const GameState& state)
+    : d_hands(state.d_hands)
+    , d_deck(state.d_deck)
+    , d_hidden(state.d_hidden)
+    , d_trump(state.d_trump)
+    , d_currentAttack(state.d_currentAttack)
+    , d_currentDefense(state.d_currentDefense)
+    , d_winOrder(state.d_winOrder)
+    , d_attackOrder(state.d_attackOrder)
+    , d_nextActions(state.d_nextActions)
+    , d_firstMove(state.d_firstMove)
+{
+}
+
+void GameState::reset(std::mt19937& rng)
 {
     for (size_t rank = Constants::instance().MIN_RANK;
          rank <= Constants::instance().MAX_RANK; rank++) {
@@ -87,26 +99,162 @@ void Game::reset(std::mt19937& rng)
         }
     }
     d_attackOrder.clear();
-    for (size_t pid = 0; pid < d_players.size(); pid++) {
+    for (size_t pid = 0; pid < d_hands.size(); pid++) {
         d_attackOrder.push_back(pid);
     }
     d_winOrder.clear();
-    calculateNextActions();
+    d_firstMove = true;
+    findNextActions();
 }
 
-GameView Game::currentPlayerView() const
+GameView GameState::currentPlayerView() const
 {
     return GameView(*this, currentPlayerId());
 }
 
-Action Game::nextAction() const
+void GameState::playAction(const Action& action)
 {
-    auto& player = d_players[currentPlayerId()];
-    Action action = player->nextAction(currentPlayerView());
-    return action;
+    if (d_firstMove) {
+        if (d_observer != nullptr) {
+            d_observer->onGameStart(*this);
+        }
+        d_firstMove = false;
+    }
+    auto aid = attackerId();
+    auto did = defenderId();
+    auto& attack_hand = d_hands[aid];
+    auto& defense_hand = d_hands[did];
+    if (attackerNext()) {
+        if (d_observer != nullptr) {
+            d_observer->onPostAction(*this, action, true);
+        }
+        if (action.empty()) {
+            finishGoodDefense();
+        } else {
+            auto& attack_card = action.card();
+            d_currentAttack.push_back(attack_card);
+            d_hidden.erase(attack_card);
+            attack_hand.erase(attack_card);
+            // End condition 1: defender is the losing player
+            if (attack_hand.empty() && d_deck.empty() && d_winOrder.size() + 2 == d_hands.size()) {
+                d_attackOrder.clear();
+                d_winOrder.push_back(aid);
+                d_nextActions.clear();
+                if (d_observer != nullptr) {
+                    d_observer->onPlayerWin(*this, aid, d_winOrder.size());
+                }
+                d_winOrder.push_back(did);
+                if (d_observer != nullptr) {
+                    d_observer->onPlayerWin(*this, did, d_winOrder.size());
+                    d_observer->onGameEnd(*this);
+                }
+            }
+        }
+    } else {
+        if (d_observer != nullptr) {
+            d_observer->onPostAction(*this, action, false);
+        }
+        if (action.empty()) {
+            finishBadDefense();
+        } else {
+            auto& defense_card = action.card();
+            d_currentDefense.push_back(defense_card);
+            d_hidden.erase(defense_card);
+            defense_hand.erase(defense_card);
+            if (defense_hand.empty() || attack_hand.empty()
+                || d_currentAttack.size() == Constants::instance().HAND_SIZE) {
+                finishGoodDefense();
+            }
+        }
+    }
+    findNextActions();
 }
 
-void Game::calculateNextActions()
+void GameState::finishGoodDefense()
+{
+    auto aid = attackerId();
+    auto did = defenderId();
+    auto& attack_hand = d_hands[aid];
+    auto& defense_hand = d_hands[did];
+    // All attacking and defending cards are discarded
+    d_currentAttack.clear();
+    d_currentDefense.clear();
+    // Attacker and defender hands are replenished
+    replenishHand(attack_hand, Constants::instance().HAND_SIZE);
+    replenishHand(defense_hand, Constants::instance().HAND_SIZE);
+    // Win and attack orders are updated
+    d_attackOrder.pop_front();
+    if (attack_hand.empty()) {
+        d_winOrder.push_back(aid);
+        if (d_observer != nullptr) {
+            d_observer->onPlayerWin(*this, aid, d_winOrder.size());
+        }
+    } else {
+        d_attackOrder.push_back(aid);
+    }
+    if (defense_hand.empty()) {
+        d_attackOrder.pop_front();
+        d_winOrder.push_back(did);
+        if (d_observer != nullptr) {
+            d_observer->onPlayerWin(*this, did, d_winOrder.size());
+        }
+        // End condition 2: attacker is the losing player
+        if (d_winOrder.size() + 1 == d_hands.size()) {
+            d_attackOrder.clear();
+            d_winOrder.push_back(aid);
+            d_nextActions.clear();
+            if (d_observer != nullptr) {
+                d_observer->onPlayerWin(*this, aid, d_winOrder.size());
+                d_observer->onGameEnd(*this);
+            }
+            return;
+        }
+    }
+    if (d_observer != nullptr) {
+        d_observer->onTurnEnd(*this, true);
+    }
+}
+
+void GameState::finishBadDefense()
+{
+    auto aid = attackerId();
+    auto did = defenderId();
+    auto& attack_hand = d_hands[aid];
+    auto& defense_hand = d_hands[did];
+    // All attacking and defending cards go the defender
+    defense_hand.insert(d_currentAttack.begin(), d_currentAttack.end());
+    defense_hand.insert(d_currentDefense.begin(), d_currentDefense.end());
+    d_currentAttack.clear();
+    d_currentDefense.clear();
+    // Attacker and defender hands are replenished
+    replenishHand(attack_hand, Constants::instance().HAND_SIZE);
+    replenishHand(defense_hand, Constants::instance().HAND_SIZE);
+    // Win and attack orders are updated
+    d_attackOrder.pop_front();
+    d_attackOrder.pop_front();
+    if (attack_hand.empty()) {
+        d_winOrder.push_back(aid);
+        if (d_observer != nullptr) {
+            d_observer->onPlayerWin(*this, aid, d_winOrder.size());
+        }
+    } else {
+        d_attackOrder.push_back(aid);
+    }
+    d_attackOrder.push_back(did);
+    if (d_observer != nullptr) {
+        d_observer->onTurnEnd(*this, false);
+    }
+}
+
+void GameState::replenishHand(Hand& hand, size_t max_count)
+{
+    while (!d_deck.empty() && hand.size() < max_count) {
+        hand.insert(d_deck.front());
+        d_deck.pop_front();
+    }
+}
+
+void GameState::findNextActions()
 {
     d_nextActions.clear();
     if (finished()) {
@@ -153,147 +301,7 @@ void Game::calculateNextActions()
     }
 }
 
-void Game::play()
-{
-    for (auto& observer : d_observers) {
-        observer->onGameStart(*this);
-    }
-    while (!finished()) {
-        playAction(nextAction());
-    }
-    for (auto& observer : d_observers) {
-        observer->onGameEnd(*this);
-    }
-}
-
-void Game::playAction(const Action& action)
-{
-    validateAction(action);
-    auto aid = attackerId();
-    auto did = defenderId();
-    auto& attack_hand = d_hands[aid];
-    auto& defense_hand = d_hands[did];
-    if (attackerNext()) {
-        for (auto& observer : d_observers) {
-            observer->onPostAction(*this, action, true);
-        }
-        if (action.empty()) {
-            finishGoodDefense();
-        } else {
-            auto& attack_card = action.card();
-            d_currentAttack.push_back(attack_card);
-            d_hidden.erase(attack_card);
-            attack_hand.erase(attack_card);
-            // End condition 1: defender is the losing player
-            if (attack_hand.empty() && d_deck.empty() && d_winOrder.size() + 2 == d_players.size()) {
-                d_attackOrder.clear();
-                d_winOrder.push_back(aid);
-                d_nextActions.clear();
-                for (auto& observer : d_observers) {
-                    observer->onPlayerWin(*this, aid, d_winOrder.size());
-                }
-                d_winOrder.push_back(did);
-                for (auto& observer : d_observers) {
-                    observer->onPlayerWin(*this, did, d_winOrder.size());
-                }
-            }
-        }
-    } else {
-        for (auto& observer : d_observers) {
-            observer->onPostAction(*this, action, false);
-        }
-        if (action.empty()) {
-            finishBadDefense();
-        } else {
-            auto& defense_card = action.card();
-            d_currentDefense.push_back(defense_card);
-            d_hidden.erase(defense_card);
-            defense_hand.erase(defense_card);
-            if (defense_hand.empty() || attack_hand.empty()
-                || d_currentAttack.size() == Constants::instance().HAND_SIZE) {
-                finishGoodDefense();
-            }
-        }
-    }
-    calculateNextActions();
-}
-
-void Game::finishGoodDefense()
-{
-    auto aid = attackerId();
-    auto did = defenderId();
-    auto& attack_hand = d_hands[aid];
-    auto& defense_hand = d_hands[did];
-    // All attacking and defending cards are discarded
-    d_currentAttack.clear();
-    d_currentDefense.clear();
-    // Attacker and defender hands are replenished
-    replenishHand(attack_hand, Constants::instance().HAND_SIZE);
-    replenishHand(defense_hand, Constants::instance().HAND_SIZE);
-    // Win and attack orders are updated
-    d_attackOrder.pop_front();
-    if (attack_hand.empty()) {
-        d_winOrder.push_back(aid);
-        for (auto& observer : d_observers) {
-            observer->onPlayerWin(*this, aid, d_winOrder.size());
-        }
-    } else {
-        d_attackOrder.push_back(aid);
-    }
-    if (defense_hand.empty()) {
-        d_attackOrder.pop_front();
-        d_winOrder.push_back(did);
-        for (auto& observer : d_observers) {
-            observer->onPlayerWin(*this, did, d_winOrder.size());
-        }
-        // End condition 2: attacker is the losing player
-        if (d_winOrder.size() + 1 == d_players.size()) {
-            d_attackOrder.clear();
-            d_winOrder.push_back(aid);
-            d_nextActions.clear();
-            for (auto& observer : d_observers) {
-                observer->onPlayerWin(*this, aid, d_winOrder.size());
-            }
-            return;
-        }
-    }
-    for (auto& observer : d_observers) {
-        observer->onTurnEnd(*this, true);
-    }
-}
-
-void Game::finishBadDefense()
-{
-    auto aid = attackerId();
-    auto did = defenderId();
-    auto& attack_hand = d_hands[aid];
-    auto& defense_hand = d_hands[did];
-    // All attacking and defending cards go the defender
-    defense_hand.insert(d_currentAttack.begin(), d_currentAttack.end());
-    defense_hand.insert(d_currentDefense.begin(), d_currentDefense.end());
-    d_currentAttack.clear();
-    d_currentDefense.clear();
-    // Attacker and defender hands are replenished
-    replenishHand(attack_hand, Constants::instance().HAND_SIZE);
-    replenishHand(defense_hand, Constants::instance().HAND_SIZE);
-    // Win and attack orders are updated
-    d_attackOrder.pop_front();
-    d_attackOrder.pop_front();
-    if (attack_hand.empty()) {
-        d_winOrder.push_back(aid);
-        for (auto& observer : d_observers) {
-            observer->onPlayerWin(*this, aid, d_winOrder.size());
-        }
-    } else {
-        d_attackOrder.push_back(aid);
-    }
-    d_attackOrder.push_back(did);
-    for (auto& observer : d_observers) {
-        observer->onTurnEnd(*this, false);
-    }
-}
-
-void Game::validateAction(const Action& action) const
+void GameState::validateAction(const Action& action) const
 {
     if (finished()) {
         throw GameException("The game is finished.");
@@ -350,29 +358,21 @@ void Game::validateAction(const Action& action) const
     }
 }
 
-void Game::replenishHand(Hand& hand, size_t max_count)
+std::ostream& operator<<(std::ostream& os, const GameState& state)
 {
-    while (!d_deck.empty() && hand.size() < max_count) {
-        hand.insert(d_deck.front());
-        d_deck.pop_front();
-    }
-}
-
-std::ostream& operator<<(std::ostream& os, const Game& game)
-{
-    for (size_t pid = 0; pid < game.playerCount(); pid++) {
+    for (size_t pid = 0; pid < state.playerCount(); pid++) {
         os << "  P" << pid << " -- "
-           << game.d_hands[pid]
+           << state.d_hands[pid]
            << std::endl;
     }
     os << "  DK -- "
-       << game.d_deck
+       << state.d_deck
        << std::endl;
     os << "  CA -- "
-       << game.d_currentAttack
+       << state.d_currentAttack
        << std::endl;
     os << "  CD -- "
-       << game.d_currentDefense
+       << state.d_currentDefense
        << std::endl;
     return os;
 }

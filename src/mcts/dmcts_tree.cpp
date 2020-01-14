@@ -1,6 +1,6 @@
 #include "dmcts_tree.hpp"
+#include "../players/random_player.hpp"
 
-#include <cassert>
 #include <cmath>
 
 namespace jester {
@@ -11,7 +11,7 @@ DMCTSNode::DMCTSNode(size_t player)
 {
 }
 
-NodeExpansion DMCTSNode::expand(const Game& game)
+NodeExpansion DMCTSNode::expand(const GameState& game)
 {
     if (game.finished()) {
         return NodeExpansion();
@@ -28,28 +28,27 @@ NodeExpansion DMCTSNode::expand(const Game& game)
     return expansion;
 }
 
-DMCTSTree::DMCTSTree(const Game& game)
-    : d_root(new DMCTSNode(game.currentPlayerId()))
-    , d_game(game)
+DMCTSTree::DMCTSTree(const GameState& state)
+    : d_root(new DMCTSNode(state.currentPlayerId()))
+    , d_state(state)
 {
-    assert(!game.finished());
 }
 
 void DMCTSTree::iterate()
 {
-    Game game(d_game);
+    GameState state(d_state);
     std::vector<std::shared_ptr<DMCTSNode>> path;
-    selectPath(game, path);
-    rolloutPath(game, path);
+    selectPath(state, path);
+    rolloutPath(state, path);
 }
 
-void DMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& path)
+void DMCTSTree::selectPath(GameState& state, std::vector<std::shared_ptr<DMCTSNode>>& path)
 {
     auto selection = d_root;
     path.push_back(selection);
     NodeExpansion expansion;
-    while ((expansion = selection->expand(game)).empty()) {
-        if (game.finished()) {
+    while ((expansion = selection->expand(state)).empty()) {
+        if (state.finished()) {
             return;
         }
         Action best_action;
@@ -68,22 +67,24 @@ void DMCTSTree::selectPath(Game& game, std::vector<std::shared_ptr<DMCTSNode>>& 
                 best_score = score;
             }
         }
-        assert(best_node != nullptr);
-        game.playAction(best_action);
+        state.playAction(best_action);
         selection = best_node;
         path.push_back(selection);
     }
     auto& action = expansion.action();
-    game.playAction(action);
-    auto child = std::make_shared<DMCTSNode>(game.currentPlayerId());
+    state.playAction(action);
+    auto child = std::make_shared<DMCTSNode>(state.currentPlayerId());
     path.push_back(child);
     selection->children()[action] = child;
 }
 
-void DMCTSTree::rolloutPath(Game& game, const std::vector<std::shared_ptr<DMCTSNode>>& path)
+void DMCTSTree::rolloutPath(GameState& state, const std::vector<std::shared_ptr<DMCTSNode>>& path)
 {
-    game.play();
-    auto& result = game.winOrder();
+    RandomPlayer player;
+    while (!state.finished()) {
+        state.playAction(player.nextAction(state.currentPlayerView()));
+    }
+    auto& result = state.winOrder();
     std::unordered_map<size_t, float> rewards;
     for (size_t widx = 0; widx < result.size(); widx++) {
         size_t pid = result[widx];

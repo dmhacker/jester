@@ -1,6 +1,6 @@
 #include "cfrm_environment.hpp"
 
-#include "../rules/game.hpp"
+#include "../rules/game_state.hpp"
 #include "../rules/game_view.hpp"
 
 #include <cereal/archives/portable_binary.hpp>
@@ -50,10 +50,9 @@ std::vector<std::thread> CFRMEnvironment::trainingThreads(size_t num_threads)
             std::mt19937 rng(std::random_device {}());
             while (true) {
                 size_t num_players = 2;
-                std::vector<std::shared_ptr<Player>> players(num_players);
-                Game game(players);
+                GameState root(num_players);
                 for (size_t tpid = 0; tpid < num_players; tpid++) {
-                    d_strategy.train(tpid, game, rng);
+                    d_strategy.train(tpid, root, rng);
                 }
             }
         }));

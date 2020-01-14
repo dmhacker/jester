@@ -7,15 +7,15 @@
 
 namespace jester {
 
-class Game;
+class GameState;
 
 class GameView {
 private:
-    const Game& d_game;
+    const GameState& d_state;
     size_t d_pid;
 
 public:
-    GameView(const Game& game, size_t pid);
+    GameView(const GameState& state, size_t pid);
 
     // Information relative to the owning player
     size_t playerId() const;
@@ -25,6 +25,7 @@ public:
     size_t hiddenHandSize(size_t pid) const;
 
     // Information available to all players about the game
+    bool firstMove() const;
     bool finished() const;
     bool attackerNext() const;
     size_t playerCount() const;

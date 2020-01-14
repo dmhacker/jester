@@ -7,11 +7,11 @@ namespace jester {
 
 class OmniscientObserver : public Observer {
 public:
-    void onGameStart(const Game& game);
-    void onPostAction(const Game& game, const Action& action, bool was_attack);
-    void onTurnEnd(const Game& game, bool defense_success);
-    void onPlayerWin(const Game& game, size_t player_id, size_t win_position);
-    void onGameEnd(const Game& game);
+    void onGameStart(const GameState& state);
+    void onPostAction(const GameState& state, const Action& action, bool was_attack);
+    void onTurnEnd(const GameState& state, bool defense_success);
+    void onPlayerWin(const GameState& state, size_t player_id, size_t win_position);
+    void onGameEnd(const GameState& state);
 };
 
 }

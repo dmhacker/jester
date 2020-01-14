@@ -12,7 +12,7 @@
 
 namespace jester {
 
-class Game;
+class GameState;
 
 class CFRMTable {
 private:
@@ -26,7 +26,7 @@ public:
     Action bestAction(const GameView& view, bool verbose);
 
     Action sample(const std::vector<Action>& actions, const std::vector<float>& profile, std::mt19937& rng);
-    float train(size_t tpid, const Game& game, std::mt19937& rng);
+    float train(size_t tpid, const GameState& game, std::mt19937& rng);
 
     template <class Archive>
     void serialize(Archive& archive);

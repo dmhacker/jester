@@ -1,10 +1,8 @@
 #include "dmcts_player.hpp"
 #include "../mcts/dmcts_tree.hpp"
-#include "../rules/game.hpp"
-#include "random_player.hpp"
+#include "../rules/game_state.hpp"
 
 #include <iostream>
-#include <memory>
 #include <mutex>
 #include <thread>
 
@@ -38,14 +36,9 @@ Action DMCTSPlayer::nextAction(const GameView& view)
     std::vector<std::unique_ptr<DMCTSTree>> trees;
     std::deque<size_t> available;
     for (size_t i = 0; i < d_determinizationCount; i++) {
-        std::vector<std::shared_ptr<Player>> players;
-        for (size_t pid = 0; pid < view.playerCount(); pid++) {
-            auto player = std::make_shared<RandomPlayer>();
-            players.push_back(player);
-        }
         std::mt19937 rng(std::random_device {}());
-        Game game(players, view, rng);
-        trees.push_back(std::unique_ptr<DMCTSTree>(new DMCTSTree(game)));
+        GameState state(view, rng);
+        trees.push_back(std::unique_ptr<DMCTSTree>(new DMCTSTree(state)));
         available.push_back(i);
     }
 

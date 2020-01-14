@@ -1,13 +1,14 @@
 #ifndef JESTER_MCTS_NODE_HPP
 #define JESTER_MCTS_NODE_HPP
 
-#include "../rules/game.hpp"
-#include "../rules/game_view.hpp"
+#include "../rules/card.hpp"
 #include "mcts_stats.hpp"
 
 #include <unordered_map>
 
 namespace jester {
+
+class GameState;
 
 class NodeExpansion {
 private:
@@ -41,7 +42,7 @@ public:
     std::unordered_map<Action, std::shared_ptr<MCTSNode>>& children();
     MCTSStats& stats();
 
-    virtual NodeExpansion expand(const Game& game) = 0;
+    virtual NodeExpansion expand(const GameState& state) = 0;
 
     std::ostream& print(std::ostream& os, size_t level = 0) const;
 };
