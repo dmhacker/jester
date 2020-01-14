@@ -23,14 +23,14 @@ namespace {
             << std::endl;
     }
 
-    size_t readInteger()
+    int readInteger()
     {
         std::string line;
         std::getline(std::cin, line);
         if (line.empty()) {
             throw std::invalid_argument("Please enter a number.");
         }
-        size_t num;
+        int num;
         std::istringstream(line) >> num;
         return num;
     }
@@ -108,7 +108,7 @@ void GameEngine::shell()
             std::cout << "Player " << (i - 1) << "'s strategy: ";
             try {
                 auto selection = readInteger();
-                if (selection < 0 || selection >= d_options.size()) {
+                if (selection < 0 || selection >= static_cast<int>(d_options.size())) {
                     throw std::invalid_argument("Please choose a number representing a valid strategy.");
                 }
                 selections.push_back(selection);
