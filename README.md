@@ -48,8 +48,8 @@ determinizations and then run MCTS on each state.
 Rather than associating a single determinization with an entire MCTS tree,
 every simulation determinizes and then follows an appropriate path. 
 Multiple trees can be compressed into one.
-* Tabulated CFRM — Counterfactual regret minimization with Monte Carlo 
-external sampling. The algorithm is implemented as listed in page 16
+* Tabulated CFRM — Counterfactual regret minimization with external sampling. 
+The algorithm is implemented as listed on page 16
 of [Richard Gibson's PhD dissertation](http://poker.cs.ualberta.ca/publications/gibson.phd.pdf). 
 
 Work-in-progress options are:
