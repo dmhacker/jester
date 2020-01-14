@@ -7,7 +7,7 @@
 
 using namespace jester;
 
-static std::mt19937 rng;
+static std::mt19937 rng(123);
 
 TEST_CASE("Game view reflects current game state")
 {
