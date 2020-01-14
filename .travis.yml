@@ -20,5 +20,5 @@ script:
   - export COVERALLS_REPO_TOKEN=Q7IRJzqV8gYttEKTjGk4gYEcN5eJCyufq
   - cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON .
   - make -j4
-  - ./jtests
+  - ./tests
   - make coveralls

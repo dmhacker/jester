@@ -109,7 +109,9 @@ void GameEngine::shell()
             try {
                 auto selection = readInteger();
                 if (selection < 0 || selection >= static_cast<int>(d_options.size())) {
-                    throw std::invalid_argument("Please choose a number representing a valid strategy.");
+                    std::stringstream ss;
+                    ss << "Selection " << selection << " is invalid.";
+                    throw std::invalid_argument(ss.str());
                 }
                 selections.push_back(selection);
             } catch (std::exception& ex) {
@@ -124,23 +126,14 @@ void GameEngine::shell()
             break;
         }
 
-        // Parse the selections into player objects
+        // Convert selections into player objects
         bool has_humans = false;
-        bool invalid_player = false;
         std::vector<stda::erased_ptr<Player>> players;
         std::vector<std::string> player_types;
         for (auto& selection : selections) {
-            if (selection < 0 || selection >= d_options.size()) {
-                std::cerr << "Selection " << selection << " is invalid." << std::endl;
-                invalid_player = true;
-                break;
-            }
             auto& option = d_options[selection];
             players.push_back(option.produce(has_humans));
             player_types.push_back(option.name());
-        }
-        if (invalid_player) {
-            continue;
         }
 
         // Print out table mapping IDs to player types

@@ -26,16 +26,16 @@ target_include_directories(jester PUBLIC "include")
 target_link_libraries(jester Threads::Threads)
 
 # Main executable allows user to play the game/train CFRM
-add_executable(jrun "src/main.cpp")
-target_link_libraries(jrun jester)
+add_executable(play "src/main.cpp")
+target_link_libraries(play jester)
 
 # Test executable runs tests on the game logic
 file(GLOB test_sources 
     "test/*.cpp"
 )
-add_executable(jtests ${test_sources})
-target_link_libraries(jtests jester)
-catch_discover_tests(jtests)
+add_executable(tests ${test_sources})
+target_link_libraries(tests jester)
+catch_discover_tests(tests)
 
 if (COVERALLS)
     coveralls_setup("${sources}" ON)
