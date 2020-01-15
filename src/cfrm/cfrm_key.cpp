@@ -1,7 +1,15 @@
 #include "cfrm_key.hpp"
+#include "../constants.hpp"
 #include "../rules/game_view.hpp"
 
 namespace jester {
+
+namespace {
+    size_t shiftedIndex(const Card& card)
+    {
+        return card.index() - Constants::instance().MIN_RANK * 4;
+    }
+}
 
 constexpr static uint8_t MAX_CARDS = 36;
 constexpr static uint8_t CARD_HIDDEN = 6;
@@ -14,7 +22,7 @@ constexpr static uint8_t CARD_LAST_IN_ATTACK = 11;
 CFRMKey::CFRMKey(const GameView& view)
     : d_cardStates(MAX_CARDS)
     , d_hiddenHands(view.playerCount())
-    , d_trump(view.trumpCard().index())
+    , d_trump(shiftedIndex(view.trumpCard()))
 
 {
     // Remap player IDs to their attack order positions
@@ -42,27 +50,27 @@ CFRMKey::CFRMKey(const GameView& view)
     }
     // Mark cards that are hidden
     for (auto& card : view.hiddenCards()) {
-        d_cardStates[card.index()] = CARD_HIDDEN;
+        d_cardStates[shiftedIndex(card)] = CARD_HIDDEN;
     }
     // Mark which cards belong to which player hands
     for (size_t pid = 0; pid < view.playerCount(); pid++) {
         auto rid = remapping[pid];
         for (auto& card : view.visibleHand(pid)) {
-            d_cardStates[card.index()] = rid;
+            d_cardStates[shiftedIndex(card)] = rid;
         }
     }
     // Mark cards currently used in the attack
     for (auto& card : view.currentAttack()) {
-        d_cardStates[card.index()] = CARD_IN_ATTACK;
+        d_cardStates[shiftedIndex(card)] = CARD_IN_ATTACK;
     }
     // If it is the defender's turn, then save the last attacking card
     if (!view.attackerNext()) {
         auto& card = view.currentAttack().back();
-        d_cardStates[card.index()] = CARD_LAST_IN_ATTACK;
+        d_cardStates[shiftedIndex(card)] = CARD_LAST_IN_ATTACK;
     }
     // Mark cards currently used in the defense
     for (auto& card : view.currentDefense()) {
-        d_cardStates[card.index()] = CARD_IN_DEFENSE;
+        d_cardStates[shiftedIndex(card)] = CARD_IN_DEFENSE;
     }
     // OPTIMIZATION: if there are no cards in the deck and only one
     // hand with hidden cards, then that hand must possess all hidden cards

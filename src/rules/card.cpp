@@ -1,4 +1,5 @@
 #include "card.hpp"
+#include "../constants.hpp"
 
 namespace jester {
 
@@ -74,7 +75,8 @@ std::string toString(Suit suit)
 
 Card toCard(uint8_t index)
 {
-    return Card(index / 4 + 6, static_cast<Suit>(index % 4));
+    return Card(index / 4 + Constants::instance().MIN_RANK,
+        static_cast<Suit>(index % 4));
 }
 
 }

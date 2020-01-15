@@ -20,9 +20,7 @@ enum Suit : uint8_t {
 using Rank = uint8_t;
 
 class Card {
-private:
-    Rank d_rank;
-    Suit d_suit;
+private: Rank d_rank; Suit d_suit;
 
 public:
     Card();
@@ -32,6 +30,7 @@ public:
     Rank rank() const;
     Suit suit() const;
     bool operator==(const Card& card) const;
+    bool operator<(const Card& card) const;
 
     template <class Archive>
     void serialize(Archive& archive);
@@ -81,12 +80,17 @@ inline Suit Card::suit() const
 
 inline uint8_t Card::index() const
 {
-    return (d_rank - 6) * 4 + d_suit;
+    return d_rank * 4 + d_suit;
 }
 
 inline bool Card::operator==(const Card& card) const
 {
     return d_rank == card.d_rank && d_suit == card.d_suit;
+}
+
+inline bool Card::operator<(const Card& card) const
+{
+    return index() < card.index();
 }
 
 template <class Archive>
@@ -118,9 +122,7 @@ inline bool Action::operator==(const Action& action) const
 
 inline bool Action::operator<(const Action& action) const
 {
-    size_t i =  d_card.rank() * 4 + d_card.suit();
-    size_t j =  action.d_card.rank() * 4 + action.d_card.suit();
-    return i < j;
+    return d_card.index() < action.d_card.index();
 }
 
 template <class Archive>
@@ -197,7 +199,7 @@ template <>
 struct hash<jester::Card> {
     size_t operator()(const jester::Card& card) const
     {
-        return hash<int>()(card.rank() * 4 + card.suit() + 1);
+        return hash<int>()(card.index() + 1);
     }
 };
 
