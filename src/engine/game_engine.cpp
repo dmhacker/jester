@@ -1,5 +1,6 @@
 #include "game_engine.hpp"
 
+#include "../constants.hpp"
 #include "../observers/omniscient_observer.hpp"
 #include "../players/cfrm_player.hpp"
 #include "../players/dmcts_player.hpp"
@@ -82,8 +83,15 @@ void GameEngine::shell()
         try {
             std::cout << "Number of players: ";
             num_players = readInteger();
-            if (num_players < 2 || num_players > 6) {
-                throw std::invalid_argument("The number of players must be between 2 and 6.");
+            if (num_players < Constants::instance().MIN_PLAYERS
+                || num_players > Constants::instance().MAX_PLAYERS) {
+                std::stringstream ss;
+                ss << "The number of players must be between ";
+                ss << Constants::instance().MIN_PLAYERS;
+                ss << " and ";
+                ss << Constants::instance().MAX_PLAYERS;
+                ss << ".";
+                throw std::invalid_argument(ss.str());
             }
         } catch (std::exception& ex) {
             if (!std::cin) {

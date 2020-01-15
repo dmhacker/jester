@@ -16,7 +16,6 @@ private:
 
 public:
     ISMCTSNode(size_t player);
-    ~ISMCTSNode() = default;
 
     NodeExpansion expand(const GameState& game);
 

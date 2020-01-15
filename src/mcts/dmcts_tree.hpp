@@ -13,7 +13,6 @@ private:
 
 public:
     DMCTSNode(size_t player);
-    ~DMCTSNode() = default;
 
     NodeExpansion expand(const GameState& game);
 };

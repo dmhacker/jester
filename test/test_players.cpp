@@ -1,12 +1,12 @@
 #include <catch.hpp>
 
 #include "../src/constants.hpp"
+#include "../src/players/cfrm_player.hpp"
+#include "../src/players/dmcts_player.hpp"
+#include "../src/players/greedy_player.hpp"
+#include "../src/players/ismcts_player.hpp"
 #include "../src/players/minimal_player.hpp"
 #include "../src/players/random_player.hpp"
-#include "../src/players/greedy_player.hpp"
-#include "../src/players/dmcts_player.hpp"
-#include "../src/players/ismcts_player.hpp"
-#include "../src/players/cfrm_player.hpp"
 #include "../src/rules/game_state.hpp"
 
 using namespace jester;
@@ -31,7 +31,8 @@ TEST_CASE("Minimal player works correctly")
 {
     MinimalPlayer player;
     GreedyPlayer opponent;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         playGame(player, opponent, state);
     }
@@ -41,7 +42,8 @@ TEST_CASE("Random player works correctly")
 {
     RandomPlayer player;
     GreedyPlayer opponent;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         playGame(player, opponent, state);
     }
@@ -51,7 +53,8 @@ TEST_CASE("Greedy player works correctly")
 {
     GreedyPlayer player;
     GreedyPlayer opponent;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         playGame(player, opponent, state);
     }
@@ -61,7 +64,8 @@ TEST_CASE("CFRM player works correctly")
 {
     CFRMPlayer player(false);
     GreedyPlayer opponent;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         playGame(player, opponent, state);
     }
@@ -71,7 +75,8 @@ TEST_CASE("DMCTS player works correctly")
 {
     DMCTSPlayer player(false, 2, 1, std::chrono::milliseconds(10));
     GreedyPlayer opponent;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         playGame(player, opponent, state);
     }
@@ -81,7 +86,8 @@ TEST_CASE("ISMCTS player works correctly")
 {
     ISMCTSPlayer player(false, 1, std::chrono::milliseconds(10));
     GreedyPlayer opponent;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         playGame(player, opponent, state);
     }

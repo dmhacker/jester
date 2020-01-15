@@ -43,8 +43,6 @@ public:
     MCTSStats& stats();
 
     virtual NodeExpansion expand(const GameState& state) = 0;
-
-    std::ostream& print(std::ostream& os, size_t level = 0) const;
 };
 
 inline bool NodeExpansion::empty() const

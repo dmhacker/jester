@@ -13,7 +13,8 @@ TEST_CASE("Game is in a reset state")
     size_t card_count = (Constants::instance().MAX_RANK
                             - Constants::instance().MIN_RANK + 1)
         * 4;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         // Check sizes for common methods
         REQUIRE(state.playerCount() == pcnt);
@@ -31,7 +32,9 @@ TEST_CASE("Game is in a reset state")
         REQUIRE(state.winOrder().empty());
         REQUIRE(state.attackOrder().size() == pcnt);
         REQUIRE(!state.finished());
-        REQUIRE(state.deck().back() == state.trumpCard());
+        if (!state.deck().empty()) {
+            REQUIRE(state.deck().back() == state.trumpCard());
+        }
         REQUIRE(state.trumpSuit() == state.trumpCard().suit());
         REQUIRE(state.nextActions().size() == state.hand(0).size());
         REQUIRE(std::find(state.nextActions().begin(),
@@ -57,8 +60,12 @@ TEST_CASE("Game is in a reset state")
 
 TEST_CASE("Game is in a defending state")
 {
+    size_t card_count = (Constants::instance().MAX_RANK
+                            - Constants::instance().MIN_RANK + 1)
+        * 4;
     GreedyPlayer player;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         // Playing 1 action results in a defender's turn
         for (size_t a = 0; a < 1; a++) {
@@ -80,8 +87,11 @@ TEST_CASE("Game is in a defending state")
         REQUIRE(!state.nextActions().empty());
         REQUIRE(state.winOrder().empty());
         REQUIRE(state.attackOrder().size() == pcnt);
-        REQUIRE(!state.deck().empty());
-        REQUIRE(state.deck().back() == state.trumpCard());
+        REQUIRE(state.deck().size()
+            == card_count - Constants::instance().HAND_SIZE * pcnt);
+        if (!state.deck().empty()) {
+            REQUIRE(state.deck().back() == state.trumpCard());
+        }
         for (size_t pid = 0; pid < pcnt; pid++) {
             REQUIRE(std::find(state.attackOrder().begin(),
                         state.attackOrder().end(), pid)
@@ -93,7 +103,8 @@ TEST_CASE("Game is in a defending state")
 TEST_CASE("Game is in an attacking state")
 {
     GreedyPlayer player;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         // Playing 2 actions results in an attacker's turn
         for (size_t a = 0; a < 2; a++) {
@@ -114,8 +125,9 @@ TEST_CASE("Game is in an attacking state")
         REQUIRE(!state.nextActions().empty());
         REQUIRE(state.winOrder().empty());
         REQUIRE(state.attackOrder().size() == pcnt);
-        REQUIRE(!state.deck().empty());
-        REQUIRE(state.deck().back() == state.trumpCard());
+        if (!state.deck().empty()) {
+            REQUIRE(state.deck().back() == state.trumpCard());
+        }
         for (size_t pid = 0; pid < pcnt; pid++) {
             REQUIRE(std::find(state.attackOrder().begin(),
                         state.attackOrder().end(), pid)
@@ -127,7 +139,8 @@ TEST_CASE("Game is in an attacking state")
 TEST_CASE("Game is in a finished state")
 {
     GreedyPlayer player;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         while (!state.finished()) {
             // Check to make sure all players are accounted for
@@ -139,18 +152,17 @@ TEST_CASE("Game is in a finished state")
                         REQUIRE(state.hand(pid).size() >= Constants::instance().HAND_SIZE);
                     }
                 }
-                REQUIRE(state.hand(state.attackerId()).size() 
-                        + state.currentAttack().size() 
-                        >= Constants::instance().HAND_SIZE);
-                REQUIRE(state.hand(state.defenderId()).size() 
-                        + state.currentDefense().size() 
-                        >= Constants::instance().HAND_SIZE);
+                REQUIRE(state.hand(state.attackerId()).size()
+                        + state.currentAttack().size()
+                    >= Constants::instance().HAND_SIZE);
+                REQUIRE(state.hand(state.defenderId()).size()
+                        + state.currentDefense().size()
+                    >= Constants::instance().HAND_SIZE);
             }
             // Check to make sure current attack and defense have correct sizes
             if (state.attackerNext()) {
                 REQUIRE(state.currentAttack().size() == state.currentDefense().size());
-            }
-            else {
+            } else {
                 REQUIRE(state.currentAttack().size() == state.currentDefense().size() + 1);
             }
             auto action = player.nextAction(
@@ -177,7 +189,8 @@ TEST_CASE("Game is in a finished state")
 
 TEST_CASE("Invalid yield is caught by validate")
 {
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         // Player should not be able to yield (first attack)
         try {

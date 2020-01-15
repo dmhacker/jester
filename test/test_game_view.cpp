@@ -12,7 +12,8 @@ static std::mt19937 rng(123);
 TEST_CASE("Game view reflects current game state")
 {
     GreedyPlayer player;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         while (!state.finished()) {
             for (size_t pid = 0; pid < pcnt; pid++) {
@@ -45,7 +46,8 @@ TEST_CASE("Game view reflects current game state")
 TEST_CASE("Hands are hidden correctly")
 {
     GreedyPlayer player;
-    for (size_t pcnt = 2; pcnt < 6; pcnt++) {
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
         GameState state(pcnt, rng);
         while (!state.finished()) {
             for (size_t pid = 0; pid < pcnt; pid++) {

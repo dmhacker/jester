@@ -13,7 +13,7 @@ std::ostream& operator<<(std::ostream& os, const MCTSStats& stats)
     return os 
         << stats.d_reward << " / "
         << stats.d_playouts << " / "
-        << stats.rewardRatio() << "";
+        << stats.rewardRatio();
 }
 
 }
