@@ -8,6 +8,7 @@
 #include "../players/ismcts_player.hpp"
 #include "../players/minimal_player.hpp"
 #include "../players/random_player.hpp"
+#include "../players/human_player.hpp"
 #include "../rules/game_state.hpp"
 
 #include <iostream>
@@ -47,6 +48,9 @@ PlayerOption::PlayerOption(const std::string& name,
 GameEngine::GameEngine()
     : d_rng(std::random_device {}())
 {
+    d_options.push_back(PlayerOption("Human", [](bool has_human) {
+        return stda::make_erased<HumanPlayer>();
+    }));
     d_options.push_back(PlayerOption("Minimal", [](bool has_human) {
         return stda::make_erased<MinimalPlayer>();
     }));
@@ -142,6 +146,9 @@ void GameEngine::shell()
             auto& option = d_options[selection];
             players.push_back(option.produce(has_humans));
             player_types.push_back(option.name());
+            if (option.name() == "Human") {
+                has_humans = false;
+            }
         }
 
         // Print out table mapping IDs to player types
