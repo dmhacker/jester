@@ -1,5 +1,6 @@
 #include "cfrm_key.hpp"
 #include "../constants.hpp"
+#include "../printing.hpp"
 #include "../rules/game_view.hpp"
 
 namespace jester {
@@ -8,6 +9,12 @@ namespace {
     size_t shiftedIndex(const Card& card)
     {
         return card.index() - Constants::instance().MIN_RANK * 4;
+    }
+
+    Card fromIndex(uint8_t index)
+    {
+        return Card(index / 4 + Constants::instance().MIN_RANK,
+            static_cast<Suit>(index % 4));
     }
 }
 
@@ -107,7 +114,7 @@ std::ostream& operator<<(std::ostream& os, const CFRMKey& key)
     Hand attack;
     Hand defense;
     for (uint8_t i = 0; i < MAX_CARDS; i++) {
-        Card card = toCard(i);
+        Card card = fromIndex(i);
         auto state = key.d_cardStates[i];
         if (state == CARD_IN_ATTACK) {
             attack.insert(card);

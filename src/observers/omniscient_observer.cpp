@@ -1,8 +1,7 @@
 #include "omniscient_observer.hpp"
-
+#include "../printing.hpp"
 #include "../rules/game_state.hpp"
 
-#include <iostream>
 #include <sstream>
 
 namespace jester {

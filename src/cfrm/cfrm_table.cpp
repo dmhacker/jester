@@ -1,6 +1,7 @@
 #include "cfrm_table.hpp"
 #include "../rules/game_state.hpp"
 #include "../rules/game_view.hpp"
+#include "../printing.hpp"
 
 #include <algorithm>
 #include <iostream>

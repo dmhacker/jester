@@ -64,10 +64,6 @@ using Hand = std::unordered_set<Card>;
 using CardPile = std::unordered_set<Card>;
 using CardSequence = std::vector<Card>;
 
-std::string toString(Rank rank);
-std::string toString(Suit rank);
-Card toCard(uint8_t index);
-
 inline Rank Card::rank() const
 {
     return d_rank;
@@ -129,66 +125,6 @@ template <class Archive>
 inline void Action::serialize(Archive& archive)
 {
     archive(d_card);
-}
-
-template <class T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& container)
-{
-    os << "[";
-    for (size_t i = 0; i < container.size(); i++) {
-        os << container[i];
-        if (i < container.size() - 1) {
-            os << ", ";
-        }
-    }
-    os << "]";
-    return os;
-}
-
-template <class T>
-std::ostream& operator<<(std::ostream& os, const std::deque<T>& container)
-{
-    os << "[";
-    for (size_t i = 0; i < container.size(); i++) {
-        os << container[i];
-        if (i < container.size() - 1) {
-            os << ", ";
-        }
-    }
-    os << "]";
-    return os;
-}
-
-template <class T>
-std::ostream& operator<<(std::ostream& os, const std::unordered_set<T>& container)
-{
-    os << "{";
-    size_t i = 0;
-    for (auto& item : container) {
-        os << item;
-        if (i < container.size() - 1) {
-            os << ", ";
-        }
-        i++;
-    }
-    os << "}";
-    return os;
-}
-
-template <class K, class V>
-std::ostream& operator<<(std::ostream& os, const std::unordered_map<K, V>& container)
-{
-    os << "{";
-    size_t i = 0;
-    for (auto& item : container) {
-        os << item.first << " : " << item.second;
-        if (i < container.size() - 1) {
-            os << ", ";
-        }
-        i++;
-    }
-    os << "}";
-    return os;
 }
 
 }

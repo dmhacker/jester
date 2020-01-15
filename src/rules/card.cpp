@@ -1,5 +1,4 @@
 #include "card.hpp"
-#include "../constants.hpp"
 
 namespace jester {
 
@@ -27,7 +26,34 @@ Action::Action(const Card& card)
 
 std::ostream& operator<<(std::ostream& os, const Card& card)
 {
-    return os << toString(card.d_rank) << toString(card.d_suit);
+    auto rank = card.d_rank;
+    if (rank == 11) {
+        os << "J";
+    } else if (rank == 12) {
+        os << "Q";
+    } else if (rank == 13) {
+        os << "K";
+    } else if (rank == 14) {
+        os << "A";
+    } else {
+        os << rank;
+    }
+
+    switch (card.d_suit) {
+    case Suit::hearts: {
+        os << "♥️";
+    }
+    case Suit::diamonds: {
+        os << "♦️";
+    }
+    case Suit::spades: {
+        os << "♠️";
+    }
+    case Suit::clubs: {
+        os << "♣️";
+    }
+    }
+    return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const Action& action)
@@ -37,46 +63,6 @@ std::ostream& operator<<(std::ostream& os, const Action& action)
     } else {
         return os << "Use " << action.card();
     }
-}
-
-std::string toString(Rank rank)
-{
-    if (rank == 11) {
-        return "J";
-    } else if (rank == 12) {
-        return "Q";
-    } else if (rank == 13) {
-        return "K";
-    } else if (rank == 14) {
-        return "A";
-    } else {
-        return std::to_string(rank);
-    }
-}
-
-std::string toString(Suit suit)
-{
-    switch (suit) {
-    case Suit::hearts: {
-        return "♥️";
-    }
-    case Suit::diamonds: {
-        return "♦️";
-    }
-    case Suit::spades: {
-        return "♠️";
-    }
-    case Suit::clubs: {
-        return "♣️";
-    }
-    }
-    return std::string();
-}
-
-Card toCard(uint8_t index)
-{
-    return Card(index / 4 + Constants::instance().MIN_RANK,
-        static_cast<Suit>(index % 4));
 }
 
 }

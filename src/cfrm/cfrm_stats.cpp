@@ -1,4 +1,5 @@
 #include "cfrm_stats.hpp"
+#include "../printing.hpp"
 
 namespace jester {
 
@@ -54,9 +55,8 @@ std::vector<float> CFRMStats::averageProfile() const
 
 std::ostream& operator<<(std::ostream& os, const CFRMStats& stats)
 {
-    return os
-        << stats.d_cumulProfile << std::endl
-        << stats.d_cumulRegret << std::endl;
+    return os << "{profile = " << stats.d_cumulProfile 
+        << ", regret = " << stats.d_cumulRegret << "}";
 }
 
 }
