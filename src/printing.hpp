@@ -3,10 +3,9 @@
 
 #include <iostream>
 #include <deque>
-
-#include <cereal/types/vector.hpp>
-#include <cereal/types/unordered_map.hpp>
-#include <cereal/types/unordered_set.hpp>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace jester {
 
