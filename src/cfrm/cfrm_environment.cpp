@@ -9,8 +9,8 @@
 
 namespace jester {
 
-CFRMEnvironment::CFRMEnvironment(const std::string& filename)
-    : d_filename(filename)
+CFRMEnvironment::CFRMEnvironment(bool verbose, const std::string& filename)
+    : d_filename(filename), d_strategy(verbose)
 {
     std::ifstream infile(filename);
     if (infile.good()) {

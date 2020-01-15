@@ -11,7 +11,7 @@ namespace jester {
 class CFRMPlayer : public Player {
 private:
     CFRMEnvironment d_cfrm;
-    bool d_verbose;
+    std::mt19937 d_rng;
 
 public:
     CFRMPlayer(bool verbose);

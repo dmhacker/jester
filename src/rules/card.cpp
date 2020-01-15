@@ -36,21 +36,24 @@ std::ostream& operator<<(std::ostream& os, const Card& card)
     } else if (rank == 14) {
         os << "A";
     } else {
-        os << rank;
+        os << static_cast<size_t>(rank);
     }
-
     switch (card.d_suit) {
     case Suit::hearts: {
         os << "♥️";
+        break;
     }
     case Suit::diamonds: {
         os << "♦️";
+        break;
     }
     case Suit::spades: {
         os << "♠️";
+        break;
     }
     case Suit::clubs: {
         os << "♣️";
+        break;
     }
     }
     return os;

@@ -7,7 +7,8 @@
 namespace jester {
 
 CFRMPlayer::CFRMPlayer(bool verbose)
-    : d_verbose(verbose)
+    : d_cfrm(verbose)
+    , d_rng(std::random_device {}())
 {
 }
 
@@ -18,7 +19,7 @@ Action CFRMPlayer::nextAction(const GameView& view)
     if (actions.size() == 1) {
         return actions[0];
     }
-    return d_cfrm.strategy().bestAction(view, d_verbose);
+    return d_cfrm.strategy().bestAction(view, d_rng);
 }
 
 }

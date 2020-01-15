@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     }
 
     if (result.count("train") > 0) {
-        CFRMEnvironment env;
+        CFRMEnvironment env(true);
         env.train();
     } else {
         GameEngine engine;

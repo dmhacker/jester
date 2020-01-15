@@ -5,9 +5,9 @@
 #include <deque>
 #include <functional>
 
-#include <cereal/types/vector.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/unordered_set.hpp>
+#include <cereal/types/vector.hpp>
 
 namespace jester {
 
@@ -20,7 +20,9 @@ enum Suit : uint8_t {
 using Rank = uint8_t;
 
 class Card {
-private: Rank d_rank; Suit d_suit;
+private:
+    Rank d_rank;
+    Suit d_suit;
 
 public:
     Card();

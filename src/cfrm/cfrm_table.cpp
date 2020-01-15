@@ -1,7 +1,7 @@
 #include "cfrm_table.hpp"
+#include "../printing.hpp"
 #include "../rules/game_state.hpp"
 #include "../rules/game_view.hpp"
-#include "../printing.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -9,12 +9,12 @@
 
 namespace jester {
 
-CFRMTable::CFRMTable()
-    : d_rng(std::random_device {}())
+CFRMTable::CFRMTable(bool verbose)
+    : d_verbose(verbose)
 {
 }
 
-Action CFRMTable::bestAction(const GameView& view, bool verbose)
+Action CFRMTable::bestAction(const GameView& view, std::mt19937& rng)
 {
     CFRMKey key(view);
     auto it = d_table.find(key);
@@ -22,16 +22,16 @@ Action CFRMTable::bestAction(const GameView& view, bool verbose)
         auto actions = view.nextActions();
         std::sort(actions.begin(), actions.end());
         auto profile = it->second.averageProfile();
-        if (verbose) {
+        if (d_verbose) {
             std::cerr
                 << "[P" << view.playerId()
                 << "] CFRM found distribution " << profile
                 << " for actions " << actions
                 << "." << std::endl;
         }
-        return sample(actions, profile, d_rng);
+        return sampleAction(actions, profile, rng);
     } else {
-        if (verbose) {
+        if (d_verbose) {
             std::cerr
                 << "[P" << view.playerId()
                 << "] CFRM will choose a random action."
@@ -39,11 +39,11 @@ Action CFRMTable::bestAction(const GameView& view, bool verbose)
         }
         const auto& actions = view.nextActions();
         std::uniform_int_distribution<std::mt19937::result_type> dist(0, actions.size() - 1);
-        return actions[dist(d_rng)];
+        return actions[dist(rng)];
     }
 }
 
-Action CFRMTable::sample(const std::vector<Action>& actions, const std::vector<float>& profile, std::mt19937& rng)
+Action CFRMTable::sampleAction(const std::vector<Action>& actions, const std::vector<float>& profile, std::mt19937& rng)
 {
     std::uniform_real_distribution<> dist(0, 1);
     float randf = dist(rng);
@@ -102,9 +102,11 @@ float CFRMTable::train(size_t tpid, const GameState& state, std::mt19937& rng)
             stats_it = d_table.insert(new_stats).first;
             stats_it->second.d_actions = actions;
         }
-        std::cout << "\r"
-                  << d_table.size() << " information sets in storage."
-                  << std::flush;
+        if (d_verbose) {
+            std::cout << "\r"
+                      << d_table.size() << " information sets in storage."
+                      << std::flush;
+        }
     }
     auto& stats = stats_it->second;
 
@@ -113,7 +115,7 @@ float CFRMTable::train(size_t tpid, const GameState& state, std::mt19937& rng)
 
     // External sampling: opponents only follow one action
     if (player != tpid) {
-        auto action = sample(actions, profile, rng);
+        auto action = sampleAction(actions, profile, rng);
         GameState next_state(state);
         next_state.playAction(action);
         lck.unlock();

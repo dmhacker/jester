@@ -13,7 +13,7 @@ private:
     CFRMTable d_strategy;
 
 public:
-    CFRMEnvironment(const std::string& filename = "cfrm.bin");
+    CFRMEnvironment(bool verbose, const std::string& filename = "cfrm.bin");
 
     CFRMTable& strategy();
 
