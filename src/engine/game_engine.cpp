@@ -2,13 +2,14 @@
 
 #include "../constants.hpp"
 #include "../observers/omniscient_observer.hpp"
+#include "../observers/reduced_observer.hpp"
 #include "../players/cfrm_player.hpp"
 #include "../players/dmcts_player.hpp"
 #include "../players/greedy_player.hpp"
+#include "../players/human_player.hpp"
 #include "../players/ismcts_player.hpp"
 #include "../players/minimal_player.hpp"
 #include "../players/random_player.hpp"
-#include "../players/human_player.hpp"
 #include "../rules/game_state.hpp"
 
 #include <iostream>
@@ -25,15 +26,26 @@ namespace {
             << std::endl;
     }
 
-    int readInteger()
+    int readInteger(int minimum, int maximum)
     {
         std::string line;
         std::getline(std::cin, line);
         if (line.empty()) {
-            throw std::invalid_argument("Please enter a number.");
+            std::stringstream ess;
+            ess << "Please enter a number between " 
+                << minimum << " and " 
+                << maximum << ".";
+            throw std::invalid_argument(ess.str());
         }
         int num;
         std::istringstream(line) >> num;
+        if (num < minimum || num > maximum) {
+            std::stringstream ess;
+            ess << "Please enter a number between " 
+                << minimum << " and " 
+                << maximum << ".";
+            throw std::invalid_argument(ess.str());
+        }
         return num;
     }
 }
@@ -86,17 +98,8 @@ void GameEngine::shell()
         size_t num_players;
         try {
             std::cout << "Number of players: ";
-            num_players = readInteger();
-            if (num_players < Constants::instance().MIN_PLAYERS
-                || num_players > Constants::instance().MAX_PLAYERS) {
-                std::stringstream ss;
-                ss << "The number of players must be between ";
-                ss << Constants::instance().MIN_PLAYERS;
-                ss << " and ";
-                ss << Constants::instance().MAX_PLAYERS;
-                ss << ".";
-                throw std::invalid_argument(ss.str());
-            }
+            num_players = readInteger(Constants::instance().MIN_PLAYERS, 
+                    Constants::instance().MAX_PLAYERS);
         } catch (std::exception& ex) {
             if (!std::cin) {
                 break;
@@ -119,12 +122,7 @@ void GameEngine::shell()
             }
             std::cout << "Player " << (i - 1) << "'s strategy: ";
             try {
-                auto selection = readInteger();
-                if (selection < 0 || selection >= static_cast<int>(d_options.size())) {
-                    std::stringstream ss;
-                    ss << "Selection " << selection << " is invalid.";
-                    throw std::invalid_argument(ss.str());
-                }
+                auto selection = readInteger(0, d_options.size() - 1);
                 selections.push_back(selection);
             } catch (std::exception& ex) {
                 if (!std::cin) {
@@ -147,7 +145,7 @@ void GameEngine::shell()
             players.push_back(option.produce());
             player_types.push_back(option.name());
             if (option.name() == "Human") {
-                has_humans = false;
+                has_humans = true;
             }
         }
 
@@ -163,19 +161,22 @@ void GameEngine::shell()
 
         // Set up a game instance
         GameState game(players.size(), d_rng);
-        if (!has_humans) {
+        if (has_humans) {
+            game.setObserver(stda::make_erased<ReducedObserver>());
+        }
+        else {
             game.setObserver(stda::make_erased<OmniscientObserver>());
         }
 
         // Play out the game to conclusion
-        game.observer()->onGameStart(game); 
+        game.observer()->onGameStart(game);
         while (!game.finished()) {
             auto& player = players[game.currentPlayerId()];
             auto action = player->nextAction(game.currentPlayerView());
             game.validateAction(action);
             game.playAction(action);
         }
-        game.observer()->onGameEnd(game); 
+        game.observer()->onGameEnd(game);
 
         std::cout << std::endl;
         printBarrier<false>();

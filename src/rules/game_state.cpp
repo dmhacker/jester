@@ -169,8 +169,8 @@ void GameState::finishGoodDefense()
     d_currentAttack.clear();
     d_currentDefense.clear();
     // Attacker and defender hands are replenished
-    replenishHand(attack_hand, Constants::instance().HAND_SIZE);
-    replenishHand(defense_hand, Constants::instance().HAND_SIZE);
+    replenishHand(aid, attack_hand, Constants::instance().HAND_SIZE);
+    replenishHand(did, defense_hand, Constants::instance().HAND_SIZE);
     // Win and attack orders are updated
     d_attackOrder.pop_front();
     if (attack_hand.empty()) {
@@ -218,8 +218,8 @@ void GameState::finishBadDefense()
     d_currentAttack.clear();
     d_currentDefense.clear();
     // Attacker and defender hands are replenished
-    replenishHand(attack_hand, Constants::instance().HAND_SIZE);
-    replenishHand(defense_hand, Constants::instance().HAND_SIZE);
+    replenishHand(aid, attack_hand, Constants::instance().HAND_SIZE);
+    replenishHand(did, defense_hand, Constants::instance().HAND_SIZE);
     // Win and attack orders are updated
     d_attackOrder.pop_front();
     d_attackOrder.pop_front();
@@ -238,10 +238,13 @@ void GameState::finishBadDefense()
     }
 }
 
-void GameState::replenishHand(Hand& hand, size_t max_count)
+void GameState::replenishHand(size_t pid, Hand& hand, size_t max_count)
 {
     while (!d_deck.empty() && hand.size() < max_count) {
         hand.insert(d_deck.front());
+        if (d_observer != nullptr) {
+            d_observer->onHandReplenish(*this, pid, d_deck.front());
+        }
         d_deck.pop_front();
     }
 }

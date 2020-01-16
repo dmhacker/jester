@@ -66,7 +66,7 @@ public:
 private:
     void finishGoodDefense();
     void finishBadDefense();
-    void replenishHand(Hand& hand, size_t max_count);
+    void replenishHand(size_t pid, Hand& hand, size_t max_count);
     void findNextActions();
 
 private:

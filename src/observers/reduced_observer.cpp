@@ -1,4 +1,4 @@
-#include "omniscient_observer.hpp"
+#include "reduced_observer.hpp"
 #include "../logging.hpp"
 #include "../rules/game_state.hpp"
 
@@ -23,7 +23,7 @@ namespace {
     }
 }
 
-void OmniscientObserver::onGameStart(const GameState& state)
+void ReducedObserver::onGameStart(const GameState& state)
 {
     printMainBarrier();
     std::cout << "A new game is beginning!" << std::endl;
@@ -33,12 +33,10 @@ void OmniscientObserver::onGameStart(const GameState& state)
     std::cout << "Trump card is "
               << state.trumpCard()
               << "." << std::endl;
-    std::cout << "The game state is: " << std::endl;
-    std::cout << state;
     printTurnBarrier(state.turn());
 }
 
-void OmniscientObserver::onPostAction(const GameState& state, const Action& action, bool was_attack)
+void ReducedObserver::onPostAction(const GameState& state, const Action& action, bool was_attack)
 {
     auto pid = was_attack ? state.attackerId() : state.defenderId();
     std::cout << "[P" << pid << "] ";
@@ -57,18 +55,16 @@ void OmniscientObserver::onPostAction(const GameState& state, const Action& acti
     }
 }
 
-void OmniscientObserver::onHandReplenish(const GameState& state, size_t pid, const Card& card) {
-    std::cout << "[P" << pid << "] Drew card " << card << "." << std::endl;
+void ReducedObserver::onHandReplenish(const GameState& state, size_t pid, const Card& card)
+{
 }
 
-void OmniscientObserver::onTurnEnd(const GameState& state, bool defense_success)
+void ReducedObserver::onTurnEnd(const GameState& state, bool defense_success)
 {
-    std::cout << "The game state is now: " << std::endl;
-    std::cout << state;
     printTurnBarrier(state.turn());
 }
 
-void OmniscientObserver::onPlayerWin(const GameState& state, size_t player_id, size_t win_position)
+void ReducedObserver::onPlayerWin(const GameState& state, size_t player_id, size_t win_position)
 {
     std::cout << "[P" << player_id
               << "] finished game in " << win_position;
@@ -84,7 +80,7 @@ void OmniscientObserver::onPlayerWin(const GameState& state, size_t player_id, s
     std::cout << std::endl;
 }
 
-void OmniscientObserver::onGameEnd(const GameState& state)
+void ReducedObserver::onGameEnd(const GameState& state)
 {
     printTurnBarrier(state.turn());
     std::cout

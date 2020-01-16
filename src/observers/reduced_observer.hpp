@@ -1,11 +1,11 @@
-#ifndef JESTER_OMNISCIENT_OBSERVER_HPP
-#define JESTER_OMNISCIENT_OBSERVER_HPP
+#ifndef JESTER_REDUCED_OBSERVER_HPP
+#define JESTER_REDUCED_OBSERVER_HPP
 
 #include "observer.hpp"
 
 namespace jester {
 
-class OmniscientObserver : public Observer {
+class ReducedObserver : public Observer {
 public:
     void onGameStart(const GameState& state);
     void onPostAction(const GameState& state, const Action& action, bool was_attack);

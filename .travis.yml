@@ -20,6 +20,6 @@ script:
   - export COVERALLS_REPO_TOKEN=Q7IRJzqV8gYttEKTjGk4gYEcN5eJCyufq
   - "[ $CXX = g++-6 ] && cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON . || true"
   - "[ $CXX = clang++-3.8 ] && cmake -DCMAKE_BUILD_TYPE=Debug . || true"
-  - make -j4
+  - make tests -j4
   - ./tests
   - "[ $CXX = g++-6 ] && make coveralls || true"

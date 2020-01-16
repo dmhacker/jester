@@ -6,15 +6,26 @@
 namespace jester {
 
 namespace {
-    int readInteger()
+    int readInteger(int minimum, int maximum)
     {
         std::string line;
         std::getline(std::cin, line);
         if (line.empty()) {
-            throw std::invalid_argument("Please enter a number.");
+            std::stringstream ess;
+            ess << "Please enter a number between " 
+                << minimum << " and " 
+                << maximum << ".";
+            throw std::invalid_argument(ess.str());
         }
         int num;
         std::istringstream(line) >> num;
+        if (num < minimum || num > maximum) {
+            std::stringstream ess;
+            ess << "Please enter a number between " 
+                << minimum << " and " 
+                << maximum << ".";
+            throw std::invalid_argument(ess.str());
+        }
         return num;
     }
 }
@@ -27,24 +38,20 @@ Action HumanPlayer::nextAction(const GameView& view)
     int selection = 0;
     if (std::cin) {
         while (true) {
-            std::cout << "Enter your desired action: ";
+            std::cout << "Your desired action: ";
             try {
-                selection = readInteger();
+                selection = readInteger(0, view.nextActions().size() - 1);
+                break;
             } catch (std::exception& ex) {
                 if (!std::cin) {
                     break;
                 }
                 std::cerr << ex.what() << std::endl;
             }
-            if (selection < static_cast<int>(view.nextActions().size())
-                && selection >= 0) {
-                break;
-            }
         }
     }
     if (!std::cin) {
-        std::cout << "Defaulting to choice 0." << std::endl;
-        return view.nextActions()[0];
+        exit(EXIT_SUCCESS);
     }
     return view.nextActions()[selection];
 }
