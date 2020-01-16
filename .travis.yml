@@ -22,4 +22,4 @@ script:
   - "[ $CXX = clang++-3.8 ] && cmake -DCMAKE_BUILD_TYPE=Debug . || true"
   - make -j4
   - ./tests
-  - make coveralls
+  - "[ $CXX = g++-6 ] && make coveralls || true"
