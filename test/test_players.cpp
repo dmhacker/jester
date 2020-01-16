@@ -73,7 +73,7 @@ TEST_CASE("CFRM player works correctly")
 
 TEST_CASE("DMCTS player works correctly")
 {
-    DMCTSPlayer player(false, 2, 1, std::chrono::milliseconds(10));
+    DMCTSPlayer player(2, 1, std::chrono::milliseconds(10));
     GreedyPlayer opponent;
     for (size_t pcnt = Constants::instance().MIN_PLAYERS;
          pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
@@ -84,7 +84,7 @@ TEST_CASE("DMCTS player works correctly")
 
 TEST_CASE("ISMCTS player works correctly")
 {
-    ISMCTSPlayer player(false, 1, std::chrono::milliseconds(10));
+    ISMCTSPlayer player(1, std::chrono::milliseconds(10));
     GreedyPlayer opponent;
     for (size_t pcnt = Constants::instance().MIN_PLAYERS;
          pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {

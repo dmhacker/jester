@@ -1,13 +1,17 @@
-#ifndef JESTER_PRINTING_HPP
-#define JESTER_PRINTING_HPP
+#ifndef JESTER_LOGGING_HPP
+#define JESTER_LOGGING_HPP
 
-#include <iostream>
 #include <deque>
-#include <vector>
+#include <iostream>
+#include <spdlog/spdlog.h>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 namespace jester {
+
+extern std::shared_ptr<spdlog::logger> bots_logger;
+extern std::shared_ptr<spdlog::logger> training_logger;
 
 template <class T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& container)

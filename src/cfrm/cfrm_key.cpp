@@ -1,6 +1,6 @@
 #include "cfrm_key.hpp"
 #include "../constants.hpp"
-#include "../printing.hpp"
+#include "../logging.hpp"
 #include "../rules/game_view.hpp"
 
 namespace jester {

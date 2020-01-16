@@ -1,5 +1,5 @@
 #include "omniscient_observer.hpp"
-#include "../printing.hpp"
+#include "../logging.hpp"
 #include "../rules/game_state.hpp"
 
 #include <sstream>

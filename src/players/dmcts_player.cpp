@@ -1,18 +1,18 @@
 #include "dmcts_player.hpp"
+#include "../logging.hpp"
 #include "../mcts/dmcts_tree.hpp"
 #include "../rules/game_state.hpp"
 
-#include <iostream>
 #include <mutex>
+#include <sstream>
 #include <thread>
 
 namespace jester {
 
-DMCTSPlayer::DMCTSPlayer(bool verbose,
+DMCTSPlayer::DMCTSPlayer(
     size_t determinizations, size_t workers,
     const std::chrono::milliseconds& time_limit)
-    : d_verbose(verbose)
-    , d_determinizationCount(determinizations)
+    : d_determinizationCount(determinizations)
     , d_workerCount(workers)
     , d_timeLimit(time_limit)
 {
@@ -26,10 +26,9 @@ Action DMCTSPlayer::nextAction(const GameView& view)
         return actions[0];
     }
 
-    if (d_verbose) {
-        std::cerr
-            << "[P" << view.playerId()
-            << "] DMCTS has started." << std::endl;
+    const auto start_mcts = std::chrono::system_clock::now();
+    if (bots_logger != nullptr) {
+        bots_logger->info("DMCTS has been started for P{}.", view.playerId());
     }
 
     // Create separate trees for possible determinizations
@@ -87,13 +86,19 @@ Action DMCTSPlayer::nextAction(const GameView& view)
             best_action = action;
             most_visits = stats.playouts();
         }
-        if (d_verbose) {
-            std::cerr
-                << "[P" << view.playerId()
-                << "] DMCTS evaluated \"" << action
-                << "\" as " << stats
-                << "." << std::endl;
+        if (bots_logger != nullptr) {
+            std::stringstream ss;
+            ss << "\"" << action << "\" as " << stats << ".";
+            bots_logger->info("DMCTS evaluated {}.", ss.str());
         }
+    }
+
+    if (bots_logger != nullptr) {
+        const auto end_mcts = std::chrono::system_clock::now();
+        auto total_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+            end_mcts - start_mcts);
+        bots_logger->info("DMCTS finished evaluation in {} ms.",
+            total_time.count());
     }
 
     return best_action;

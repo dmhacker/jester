@@ -1,6 +1,6 @@
 #include "game_state.hpp"
 #include "../constants.hpp"
-#include "../printing.hpp"
+#include "../logging.hpp"
 #include "../observers/observer.hpp"
 #include "game_view.hpp"
 

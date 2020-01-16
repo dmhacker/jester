@@ -1,5 +1,5 @@
 #include "cfrm_table.hpp"
-#include "../printing.hpp"
+#include "../logging.hpp"
 #include "../rules/game_state.hpp"
 #include "../rules/game_view.hpp"
 

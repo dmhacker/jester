@@ -1,8 +1,19 @@
 #include "cfrm/cfrm_environment.hpp"
 #include "constants.hpp"
 #include "engine/game_engine.hpp"
+#include "logging.hpp"
 
 #include <cxxopts.hpp>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/spdlog.h>
+
+namespace jester {
+
+std::shared_ptr<spdlog::logger> bots_logger = spdlog::basic_logger_mt("bots", "logs/bots.log");
+std::shared_ptr<spdlog::logger> training_logger = spdlog::basic_logger_mt("training", "logs/training.log");
+
+}
 
 using namespace jester;
 
@@ -25,6 +36,11 @@ int main(int argc, char** argv)
         std::cout << std::endl;
         Constants::instance().MAX_RANK = 7;
     }
+
+    bots_logger->set_level(spdlog::level::info);
+    bots_logger->flush_on(spdlog::level::info); 
+    training_logger->set_level(spdlog::level::info);
+    training_logger->flush_on(spdlog::level::info); 
 
     if (result.count("train") > 0) {
         CFRMEnvironment env(true);

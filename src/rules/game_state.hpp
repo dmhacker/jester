@@ -1,9 +1,9 @@
 #ifndef JESTER_GAME_STATE_HPP
 #define JESTER_GAME_STATE_HPP
 
-#include <erased_ptr.hpp>
 #include <memory>
 #include <random>
+#include <stda/erased_ptr.hpp>
 
 #include "card.hpp"
 

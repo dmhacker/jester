@@ -1,5 +1,5 @@
 #include "cfrm_stats.hpp"
-#include "../printing.hpp"
+#include "../logging.hpp"
 
 namespace jester {
 

@@ -3,9 +3,9 @@
 
 #include "../players/player.hpp"
 
-#include <string>
 #include <random>
-#include <erased_ptr.hpp>
+#include <stda/erased_ptr.hpp>
+#include <string>
 
 namespace jester {
 

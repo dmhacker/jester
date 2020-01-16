@@ -61,18 +61,18 @@ GameEngine::GameEngine()
         return stda::make_erased<GreedyPlayer>();
     }));
     d_options.push_back(PlayerOption("Weak DMCTS", [](bool has_human) {
-        return stda::make_erased<DMCTSPlayer>(!has_human, 3, 1, std::chrono::seconds(4));
+        return stda::make_erased<DMCTSPlayer>(3, 1, std::chrono::seconds(4));
     }));
     d_options.push_back(PlayerOption("Weak ISMCTS", [](bool has_human) {
-        return stda::make_erased<ISMCTSPlayer>(!has_human, 1, std::chrono::seconds(4));
+        return stda::make_erased<ISMCTSPlayer>(1, std::chrono::seconds(4));
     }));
     d_options.push_back(PlayerOption("Strong DMCTS", [](bool has_human) {
         auto cores = std::thread::hardware_concurrency();
-        return stda::make_erased<DMCTSPlayer>(!has_human, cores + 2, cores, std::chrono::seconds(9));
+        return stda::make_erased<DMCTSPlayer>(cores + 2, cores, std::chrono::seconds(9));
     }));
     d_options.push_back(PlayerOption("Strong ISMCTS", [](bool has_human) {
         auto cores = std::thread::hardware_concurrency();
-        return stda::make_erased<ISMCTSPlayer>(!has_human, cores, std::chrono::seconds(9));
+        return stda::make_erased<ISMCTSPlayer>(cores, std::chrono::seconds(9));
     }));
     d_options.push_back(PlayerOption("Tabular CFRM", [](bool has_human) {
         return stda::make_erased<CFRMPlayer>(!has_human);
