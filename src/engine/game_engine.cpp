@@ -3,7 +3,7 @@
 #include "../constants.hpp"
 #include "../observers/omniscient_observer.hpp"
 #include "../observers/reduced_observer.hpp"
-#include "../players/cfrm_player.hpp"
+#include "../players/mccfr_player.hpp"
 #include "../players/dmcts_player.hpp"
 #include "../players/greedy_player.hpp"
 #include "../players/human_player.hpp"
@@ -17,6 +17,7 @@
 #include <thread>
 
 namespace jester {
+
 namespace {
     template <bool thin>
     void printBarrier()
@@ -86,8 +87,8 @@ GameEngine::GameEngine()
         auto cores = std::thread::hardware_concurrency();
         return stda::make_erased<ISMCTSPlayer>(cores, std::chrono::seconds(9));
     }));
-    d_options.push_back(PlayerOption("Tabular CFRM", []() {
-        return stda::make_erased<CFRMPlayer>();
+    d_options.push_back(PlayerOption("Tabular MCCFR", []() {
+        return stda::make_erased<MCCFRPlayer>();
     }));
 }
 

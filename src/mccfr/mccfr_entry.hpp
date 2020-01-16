@@ -1,5 +1,5 @@
-#ifndef JESTER_CFRM_STATS_HPP
-#define JESTER_CFRM_STATS_HPP
+#ifndef JESTER_MCCFR_ENTRY_HPP
+#define JESTER_MCCFR_ENTRY_HPP
 
 #include "../rules/card.hpp"
 
@@ -7,7 +7,7 @@
 
 namespace jester {
 
-class CFRMStats {
+class MCCFREntry {
 private:
     std::vector<float> d_cumulProfile;
     std::vector<float> d_cumulRegret;
@@ -16,9 +16,9 @@ private:
 public:
     std::vector<Action> d_actions;
 
-    CFRMStats() = default;
-    CFRMStats(size_t num_actions);
-    CFRMStats(const CFRMStats& stats);
+    MCCFREntry() = default;
+    MCCFREntry(size_t num_actions);
+    MCCFREntry(const MCCFREntry& entry);
 
     std::vector<float> currentProfile() const;
     std::vector<float> averageProfile() const;
@@ -32,25 +32,25 @@ public:
     void serialize(Archive& archive);
 };
 
-inline void CFRMStats::addProfile(const std::vector<float>& profile)
+inline void MCCFREntry::addProfile(const std::vector<float>& profile)
 {
     for (size_t i = 0; i < d_cumulProfile.size(); i++) {
         d_cumulProfile[i] += profile[i];
     }
 }
 
-inline void CFRMStats::addRegret(size_t idx, float regret)
+inline void MCCFREntry::addRegret(size_t idx, float regret)
 {
     d_cumulRegret[idx] += regret;
 }
 
 template <class Archive>
-inline void CFRMStats::serialize(Archive& archive)
+inline void MCCFREntry::serialize(Archive& archive)
 {
     archive(d_cumulProfile, d_cumulRegret);
 }
 
-inline std::mutex& CFRMStats::mutex() {
+inline std::mutex& MCCFREntry::mutex() {
     return d_mtx;
 }
 

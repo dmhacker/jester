@@ -1,7 +1,7 @@
 #include <catch.hpp>
 
 #include "../src/constants.hpp"
-#include "../src/players/cfrm_player.hpp"
+#include "../src/players/mccfr_player.hpp"
 #include "../src/players/dmcts_player.hpp"
 #include "../src/players/greedy_player.hpp"
 #include "../src/players/ismcts_player.hpp"
@@ -60,9 +60,9 @@ TEST_CASE("Greedy player works correctly")
     }
 }
 
-TEST_CASE("CFRM player works correctly")
+TEST_CASE("MCCFR player works correctly")
 {
-    CFRMPlayer player;
+    MCCFRPlayer player;
     GreedyPlayer opponent;
     for (size_t pcnt = Constants::instance().MIN_PLAYERS;
          pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {

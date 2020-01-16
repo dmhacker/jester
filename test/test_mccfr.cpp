@@ -2,9 +2,8 @@
 #include <fstream>
 #include <cstdio>
 
-#include "../src/cfrm/cfrm_environment.hpp"
-#include "../src/cfrm/cfrm_key.hpp"
-#include "../src/cfrm/cfrm_table.hpp"
+#include "../src/mccfr/mccfr_engine.hpp"
+#include "../src/mccfr/mccfr_table.hpp"
 #include "../src/constants.hpp"
 #include "../src/rules/game_state.hpp"
 #include "../src/rules/game_view.hpp"
@@ -31,11 +30,11 @@ TEST_CASE("CFRM trains correctly on reduced 2-player game")
     Constants::instance().MAX_RANK = 6;
     size_t pcnt = 2;
     GameState state(pcnt, rng);
-    CFRMTable table;
+    MCCFRTable table;
     table.train(0, state, rng);
     table.train(1, state, rng);
     {
-        auto key = CFRMKey(state.currentPlayerView());
+        auto key = MCCFRInfoSet(state.currentPlayerView());
         auto it = table.table().find(key);
         REQUIRE(it != table.table().end());
         auto& stats = it->second;
@@ -45,7 +44,7 @@ TEST_CASE("CFRM trains correctly on reduced 2-player game")
     for (auto& action : state.nextActions()) {
         GameState cpy(state);
         cpy.playAction(action);
-        auto key = CFRMKey(cpy.currentPlayerView());
+        auto key = MCCFRInfoSet(cpy.currentPlayerView());
         auto it = table.table().find(key);
         REQUIRE(it != table.table().end());
     }
@@ -63,7 +62,7 @@ TEST_CASE("CFRM can be saved and loaded from binary file")
     size_t pcnt = 2;
     size_t tbsz = 0;
     {
-        CFRMEnvironment env("test.bin");
+        MCCFREngine env("test.bin");
         GameState state(pcnt, rng);
         env.strategy().train(0, state, rng);
         tbsz = env.strategy().table().size();
@@ -72,7 +71,7 @@ TEST_CASE("CFRM can be saved and loaded from binary file")
     }
     REQUIRE(std::ifstream("test.bin"));
     {
-        CFRMEnvironment env("test.bin");
+        MCCFREngine env("test.bin");
         REQUIRE(env.strategy().table().size() == tbsz);
     }
     std::remove("test.bin");    

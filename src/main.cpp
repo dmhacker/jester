@@ -1,4 +1,4 @@
-#include "cfrm/cfrm_environment.hpp"
+#include "mccfr/mccfr_engine.hpp"
 #include "constants.hpp"
 #include "engine/game_engine.hpp"
 #include "logging.hpp"
@@ -40,8 +40,8 @@ int main(int argc, char** argv)
     training_logger->flush_on(spdlog::level::info); 
 
     if (result.count("train") > 0) {
-        CFRMEnvironment env;
-        env.train();
+        MCCFREngine engine;
+        engine.train();
     } else {
         GameEngine engine;
         engine.shell();

@@ -1,21 +1,21 @@
-#include "cfrm_stats.hpp"
+#include "mccfr_entry.hpp"
 #include "../logging.hpp"
 
 namespace jester {
 
-CFRMStats::CFRMStats(size_t num_actions)
+MCCFREntry::MCCFREntry(size_t num_actions)
     : d_cumulProfile(num_actions)
     , d_cumulRegret(num_actions)
 {
 }
 
-CFRMStats::CFRMStats(const CFRMStats& stats)
-    : d_cumulProfile(stats.d_cumulProfile)
-    , d_cumulRegret(stats.d_cumulRegret)
+MCCFREntry::MCCFREntry(const MCCFREntry& entry)
+    : d_cumulProfile(entry.d_cumulProfile)
+    , d_cumulRegret(entry.d_cumulRegret)
 {
 }
 
-std::vector<float> CFRMStats::currentProfile() const
+std::vector<float> MCCFREntry::currentProfile() const
 {
     size_t num_actions = d_cumulProfile.size();
     std::vector<float> profile(num_actions);
@@ -35,7 +35,7 @@ std::vector<float> CFRMStats::currentProfile() const
     return profile;
 }
 
-std::vector<float> CFRMStats::averageProfile() const
+std::vector<float> MCCFREntry::averageProfile() const
 {
     size_t num_actions = d_cumulProfile.size();
     std::vector<float> profile(num_actions);

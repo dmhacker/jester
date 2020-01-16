@@ -1,8 +1,8 @@
-#ifndef JESTER_CFRM_TABLE_HPP
-#define JESTER_CFRM_TABLE_HPP
+#ifndef JESTER_MCCFR_TABLE_HPP
+#define JESTER_MCCFR_TABLE_HPP
 
-#include "cfrm_key.hpp"
-#include "cfrm_stats.hpp"
+#include "mccfr_infoset.hpp"
+#include "mccfr_entry.hpp"
 
 #include <mutex>
 #include <random>
@@ -14,9 +14,9 @@ namespace jester {
 
 class GameState;
 
-class CFRMTable {
+class MCCFRTable {
 private:
-    std::unordered_map<CFRMKey, CFRMStats> d_table;
+    std::unordered_map<MCCFRInfoSet, MCCFREntry> d_table;
     std::mutex d_mtx;
 
 public:
@@ -28,20 +28,20 @@ public:
     void serialize(Archive& archive);
 
     std::mutex& mutex();
-    const std::unordered_map<CFRMKey, CFRMStats>& table() const;
+    const std::unordered_map<MCCFRInfoSet, MCCFREntry>& table() const;
 };
 
 template <class Archive>
-inline void CFRMTable::serialize(Archive& archive)
+inline void MCCFRTable::serialize(Archive& archive)
 {
     archive(d_table);
 }
 
-inline const std::unordered_map<CFRMKey, CFRMStats>& CFRMTable::table() const {
+inline const std::unordered_map<MCCFRInfoSet, MCCFREntry>& MCCFRTable::table() const {
     return d_table;
 }
      
-inline std::mutex& CFRMTable::mutex() {
+inline std::mutex& MCCFRTable::mutex() {
     return d_mtx;
 }   
 

@@ -1,21 +1,21 @@
-#ifndef JESTER_CFRM_ENVIRONMENT_HPP
-#define JESTER_CFRM_ENVIRONMENT_HPP
+#ifndef JESTER_MCCFR_ENGINE_HPP
+#define JESTER_MCCFR_ENGINE_HPP
 
-#include "cfrm_table.hpp"
+#include "mccfr_table.hpp"
 
 #include <chrono>
 
 namespace jester {
 
-class CFRMEnvironment {
+class MCCFREngine {
 private:
     std::string d_filename;
-    CFRMTable d_strategy;
+    MCCFRTable d_strategy;
 
 public:
-    CFRMEnvironment(const std::string& filename = "cfrm.bin");
+    MCCFREngine(const std::string& filename = "mccfr.bin");
 
-    CFRMTable& strategy();
+    MCCFRTable& strategy();
 
     void train();
     void save();
@@ -25,7 +25,7 @@ private:
     std::thread savingThread(const std::chrono::milliseconds&);
 };
 
-inline CFRMTable& CFRMEnvironment::strategy()
+inline MCCFRTable& MCCFREngine::strategy()
 {
     return d_strategy;
 }

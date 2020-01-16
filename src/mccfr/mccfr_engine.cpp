@@ -1,4 +1,4 @@
-#include "cfrm_environment.hpp"
+#include "mccfr_engine.hpp"
 
 #include "../logging.hpp"
 #include "../rules/game_state.hpp"
@@ -10,7 +10,7 @@
 
 namespace jester {
 
-CFRMEnvironment::CFRMEnvironment(const std::string& filename)
+MCCFREngine::MCCFREngine(const std::string& filename)
     : d_filename(filename)
 {
     std::ifstream infile(filename);
@@ -20,7 +20,7 @@ CFRMEnvironment::CFRMEnvironment(const std::string& filename)
     }
 }
 
-void CFRMEnvironment::train()
+void MCCFREngine::train()
 {
     auto threads = trainingThreads(std::thread::hardware_concurrency());
     threads.push_back(savingThread(std::chrono::seconds(120)));
@@ -29,7 +29,7 @@ void CFRMEnvironment::train()
     }
 }
 
-void CFRMEnvironment::save()
+void MCCFREngine::save()
 {
     std::lock_guard<std::mutex> lck(d_strategy.mutex());
     if (training_logger != nullptr) {
@@ -40,21 +40,21 @@ void CFRMEnvironment::save()
         cereal::PortableBinaryOutputArchive oarchive(outfile);
         oarchive(d_strategy);
     } else {
-        throw std::runtime_error("Unable to save CFRM to disk.");
+        throw std::runtime_error("Unable to save MCCFR table to disk.");
     }
     if (training_logger != nullptr) {
         training_logger->info("Save completed.");
     }
 }
 
-std::vector<std::thread> CFRMEnvironment::trainingThreads(size_t num_threads)
+std::vector<std::thread> MCCFREngine::trainingThreads(size_t num_threads)
 {
     std::vector<std::thread> threads;
     for (size_t t = 0; t < num_threads; t++) {
         threads.push_back(std::thread([this, t]() {
             std::mt19937 rng(std::random_device {}());
             if (training_logger != nullptr) {
-                training_logger->info("CFRM training thread {} started.", t);
+                training_logger->info("MCCFR training thread {} started.", t);
             }
             while (true) {
                 size_t num_players = 2;
@@ -68,11 +68,11 @@ std::vector<std::thread> CFRMEnvironment::trainingThreads(size_t num_threads)
     return threads;
 }
 
-std::thread CFRMEnvironment::savingThread(const std::chrono::milliseconds& interval)
+std::thread MCCFREngine::savingThread(const std::chrono::milliseconds& interval)
 {
     std::thread thr([interval, this]() {
         if (training_logger != nullptr) {
-            training_logger->info("CFRM save thread started.");
+            training_logger->info("MCCFR save thread started.");
         }
         auto start_timestamp = std::chrono::system_clock::now();
         while (true) {

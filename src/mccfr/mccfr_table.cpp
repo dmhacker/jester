@@ -1,4 +1,4 @@
-#include "cfrm_table.hpp"
+#include "mccfr_table.hpp"
 #include "../logging.hpp"
 #include "../rules/game_state.hpp"
 #include "../rules/game_view.hpp"
@@ -8,9 +8,9 @@
 
 namespace jester {
 
-Action CFRMTable::bestAction(const GameView& view, std::mt19937& rng)
+Action MCCFRTable::bestAction(const GameView& view, std::mt19937& rng)
 {
-    CFRMKey key(view);
+    MCCFRInfoSet key(view);
     auto it = d_table.find(key);
     if (it != d_table.end()) {
         auto actions = view.nextActions();
@@ -19,12 +19,12 @@ Action CFRMTable::bestAction(const GameView& view, std::mt19937& rng)
         if (bots_logger != nullptr) {
             std::stringstream ss;
             ss << profile << " for actions " << actions;
-            bots_logger->info("CFRM found distribution {}.", ss.str());
+            bots_logger->info("MCCFR has distribution {}.", ss.str());
         }
         return sampleAction(actions, profile, rng);
     } else {
         if (bots_logger != nullptr) {
-            bots_logger->info("CFRM could not find a matching information set.");
+            bots_logger->info("MCCFR could not find a matching information set.");
         }
         const auto& actions = view.nextActions();
         std::uniform_int_distribution<std::mt19937::result_type> dist(0, actions.size() - 1);
@@ -32,7 +32,7 @@ Action CFRMTable::bestAction(const GameView& view, std::mt19937& rng)
     }
 }
 
-Action CFRMTable::sampleAction(const std::vector<Action>& actions, const std::vector<float>& profile, std::mt19937& rng)
+Action MCCFRTable::sampleAction(const std::vector<Action>& actions, const std::vector<float>& profile, std::mt19937& rng)
 {
     std::uniform_real_distribution<> dist(0, 1);
     float randf = dist(rng);
@@ -48,7 +48,7 @@ Action CFRMTable::sampleAction(const std::vector<Action>& actions, const std::ve
     throw std::logic_error(ss.str());
 }
 
-float CFRMTable::train(size_t tpid, const GameState& state, std::mt19937& rng)
+float MCCFRTable::train(size_t tpid, const GameState& state, std::mt19937& rng)
 {
     // Return utility from terminal node; this is the evaluation function
     if (state.finished()) {
@@ -80,14 +80,14 @@ float CFRMTable::train(size_t tpid, const GameState& state, std::mt19937& rng)
     }
     std::sort(actions.begin(), actions.end());
 
-    CFRMKey key(view);
+    MCCFRInfoSet key(view);
     decltype(d_table)::iterator stats_it;
     {
         std::lock_guard<std::mutex> lck(d_mtx);
         stats_it = d_table.find(key);
         if (stats_it == d_table.end()) {
             auto new_stats = decltype(d_table)::value_type(
-                key, CFRMStats(actions.size()));
+                key, MCCFREntry(actions.size()));
             stats_it = d_table.insert(new_stats).first;
             stats_it->second.d_actions = actions;
             if (training_logger != nullptr && d_table.size() % 1000 == 0) {

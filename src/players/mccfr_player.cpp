@@ -1,4 +1,4 @@
-#include "cfrm_player.hpp"
+#include "mccfr_player.hpp"
 #include "../logging.hpp"
 
 #include <iostream>
@@ -7,12 +7,12 @@
 
 namespace jester {
 
-CFRMPlayer::CFRMPlayer()
+MCCFRPlayer::MCCFRPlayer()
     : d_rng(std::random_device {}())
 {
 }
 
-Action CFRMPlayer::nextAction(const GameView& view)
+Action MCCFRPlayer::nextAction(const GameView& view)
 {
     // If there is only one action then just take that action
     auto& actions = view.nextActions();
@@ -23,7 +23,7 @@ Action CFRMPlayer::nextAction(const GameView& view)
         bots_logger->info("CFRM lookup has been started for P{}.",
             view.playerId());
     }
-    return d_cfrm.strategy().bestAction(view, d_rng);
+    return d_engine.strategy().bestAction(view, d_rng);
 }
 
 }

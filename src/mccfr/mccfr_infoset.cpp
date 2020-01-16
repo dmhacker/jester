@@ -1,4 +1,4 @@
-#include "cfrm_key.hpp"
+#include "mccfr_infoset.hpp"
 #include "../constants.hpp"
 #include "../logging.hpp"
 #include "../rules/game_view.hpp"
@@ -10,12 +10,6 @@ namespace {
     {
         return card.index() - Constants::instance().MIN_RANK * 4;
     }
-
-    Card fromIndex(uint8_t index)
-    {
-        return Card(index / 4 + Constants::instance().MIN_RANK,
-            static_cast<Suit>(index % 4));
-    }
 }
 
 constexpr static uint8_t MAX_CARDS = 36;
@@ -25,7 +19,7 @@ constexpr static uint8_t CARD_IN_ATTACK = 8;
 constexpr static uint8_t CARD_IN_DEFENSE = 9;
 constexpr static uint8_t CARD_LAST_IN_ATTACK = 10;
 
-CFRMKey::CFRMKey(const GameView& view)
+MCCFRInfoSet::MCCFRInfoSet(const GameView& view)
     : d_cardStates(MAX_CARDS)
     , d_hiddenHands(view.playerCount())
     , d_trump(view.trumpCard().suit())
@@ -96,11 +90,11 @@ CFRMKey::CFRMKey(const GameView& view)
     }
 }
 
-bool CFRMKey::operator==(const CFRMKey& abstraction) const
+bool MCCFRInfoSet::operator==(const MCCFRInfoSet& is) const
 {
-    return d_trump == abstraction.d_trump
-        && d_cardStates == abstraction.d_cardStates
-        && d_hiddenHands == abstraction.d_hiddenHands;
+    return d_trump == is.d_trump
+        && d_cardStates == is.d_cardStates
+        && d_hiddenHands == is.d_hiddenHands;
 }
 
 }
