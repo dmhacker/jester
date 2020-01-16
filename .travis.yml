@@ -7,19 +7,19 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
-    - llvm-toolchain-trusty-5.0
+    - llvm-toolchain-precise-3.8
     packages:
-    - g++-7
-    - clang-5.0
+    - g++-6
+    - clang-3.8
     - lcov
 install:
-- "[ $CXX = g++ ] && export CXX=g++-7 || true"
-- "[ $CXX = clang++ ] && export CXX=clang++-5.0 || true"
+- "[ $CXX = g++ ] && export CXX=g++-6 || true"
+- "[ $CXX = clang++ ] && export CXX=clang++-3.8 || true"
 script:
   - export COVERALLS_SERVICE_NAME=travis-ci
   - export COVERALLS_REPO_TOKEN=Q7IRJzqV8gYttEKTjGk4gYEcN5eJCyufq
-  - "[ $CXX = g++ ] && cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON . || true"
-  - "[ $CXX = clang++ ] && cmake -DCMAKE_BUILD_TYPE=Debug . || true"
+  - "[ $CXX = g++-6 ] && cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON . || true"
+  - "[ $CXX = clang++-3.8 ] && cmake -DCMAKE_BUILD_TYPE=Debug . || true"
   - make -j4
   - ./tests
   - make coveralls
