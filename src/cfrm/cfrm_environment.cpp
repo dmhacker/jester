@@ -23,7 +23,7 @@ CFRMEnvironment::CFRMEnvironment(const std::string& filename)
 void CFRMEnvironment::train()
 {
     auto threads = trainingThreads(std::thread::hardware_concurrency());
-    threads.push_back(savingThread(std::chrono::seconds(90)));
+    threads.push_back(savingThread(std::chrono::seconds(120)));
     for (auto& thr : threads) {
         thr.join();
     }
@@ -70,11 +70,11 @@ std::vector<std::thread> CFRMEnvironment::trainingThreads(size_t num_threads)
 
 std::thread CFRMEnvironment::savingThread(const std::chrono::milliseconds& interval)
 {
-    std::thread thr([&interval, this]() {
-        auto start_timestamp = std::chrono::system_clock::now();
+    std::thread thr([interval, this]() {
         if (training_logger != nullptr) {
             training_logger->info("CFRM save thread started.");
         }
+        auto start_timestamp = std::chrono::system_clock::now();
         while (true) {
             auto end_timestamp = std::chrono::system_clock::now();
             if (end_timestamp - start_timestamp > interval) {
