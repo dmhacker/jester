@@ -69,7 +69,8 @@ hours are invested into training. For this project, that may not be feasible.
 That being said, MCCFR can quickly be trained to play optimally on an extremely 
 simple version of Durak involving only 8 cards and 2 players, requiring only 
 a few minutes of multi-threaded training. You can use this reduced form 
-of Durak by providing the `-r` flag when running the executable.
+of Durak by providing the `-r` flag when running the executable. Training
+mode can be enabled via the `-t` flag.
 
 At the moment, the results of MCCFR training are saved to a local binary file 
 `mccfr.bin` in the working directory. Eventually, the training will be able to
