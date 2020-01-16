@@ -21,15 +21,14 @@ namespace {
 constexpr static uint8_t MAX_CARDS = 36;
 constexpr static uint8_t CARD_HIDDEN = 6;
 constexpr static uint8_t CARD_DISCARDED = 7;
-constexpr static uint8_t CARD_DECK_BOTTOM = 8;
-constexpr static uint8_t CARD_IN_ATTACK = 9;
-constexpr static uint8_t CARD_IN_DEFENSE = 10;
-constexpr static uint8_t CARD_LAST_IN_ATTACK = 11;
+constexpr static uint8_t CARD_IN_ATTACK = 8;
+constexpr static uint8_t CARD_IN_DEFENSE = 9;
+constexpr static uint8_t CARD_LAST_IN_ATTACK = 10;
 
 CFRMKey::CFRMKey(const GameView& view)
     : d_cardStates(MAX_CARDS)
     , d_hiddenHands(view.playerCount())
-    , d_trump(shiftedIndex(view.trumpCard()))
+    , d_trump(view.trumpCard().suit())
 
 {
     // Remap player IDs to their attack order positions
@@ -50,10 +49,6 @@ CFRMKey::CFRMKey(const GameView& view)
     // All cards are initially treated as if they are discarded
     for (auto cidx = 0; cidx < MAX_CARDS; cidx++) {
         d_cardStates[cidx] = CARD_DISCARDED;
-    }
-    // Trump card receives a special marking if it's still in the deck
-    if (view.deckSize() > 0) {
-        d_cardStates[d_trump] = CARD_DECK_BOTTOM;
     }
     // Mark cards that are hidden
     for (auto& card : view.hiddenCards()) {
@@ -106,40 +101,6 @@ bool CFRMKey::operator==(const CFRMKey& abstraction) const
     return d_trump == abstraction.d_trump
         && d_cardStates == abstraction.d_cardStates
         && d_hiddenHands == abstraction.d_hiddenHands;
-}
-
-std::ostream& operator<<(std::ostream& os, const CFRMKey& key)
-{
-    std::vector<Hand> hands(key.d_hiddenHands.size());
-    Hand attack;
-    Hand defense;
-    for (uint8_t i = 0; i < MAX_CARDS; i++) {
-        Card card = fromIndex(i);
-        auto state = key.d_cardStates[i];
-        if (state == CARD_IN_ATTACK) {
-            attack.insert(card);
-        } else if (state == CARD_LAST_IN_ATTACK) {
-            attack.insert(card);
-        } else if (state == CARD_IN_DEFENSE) {
-            defense.insert(card);
-        } else if (state == CARD_HIDDEN) {
-            continue;
-        } else if (state == CARD_DISCARDED) {
-            continue;
-        } else if (state == CARD_DECK_BOTTOM) {
-            continue;
-        } else {
-            hands[state].insert(card);
-        }
-    }
-    for (size_t pid = 0; pid < key.d_hiddenHands.size(); pid++) {
-        os << "  P" << pid << " -- "
-           << hands[pid] << " "
-           << static_cast<size_t>(key.d_hiddenHands[pid]) << std::endl;
-    }
-    return os
-        << "  CA -- " << attack << std::endl
-        << "  CD -- " << defense << std::endl;
 }
 
 }

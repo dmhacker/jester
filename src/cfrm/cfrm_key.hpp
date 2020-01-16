@@ -37,9 +37,6 @@ public:
     void serialize(Archive& archive);
 
     friend struct std::hash<CFRMKey>;
-
-private:
-    friend std::ostream& operator<<(std::ostream&, const CFRMKey&);
 };
 
 template <class Archive>

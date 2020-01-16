@@ -4,14 +4,14 @@
 #include "logging.hpp"
 
 #include <cxxopts.hpp>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace jester {
 
 std::shared_ptr<spdlog::logger> bots_logger = spdlog::basic_logger_mt("bots", "logs/bots.log");
-std::shared_ptr<spdlog::logger> training_logger = spdlog::basic_logger_mt("training", "logs/training.log");
+std::shared_ptr<spdlog::logger> training_logger = spdlog::stdout_color_mt("training");
 
 }
 
@@ -31,8 +31,6 @@ int main(int argc, char** argv)
     }
 
     if (result.count("reduced") > 0) {
-        std::cout << "!!! WARNING !!! Using a reduced form of Durak at the moment!" << std::endl;
-        std::cout << "!!! WARNING !!! Only ranks 6-7 are being used." << std::endl;
         Constants::instance().MAX_RANK = 7;
     }
 

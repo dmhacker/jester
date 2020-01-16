@@ -30,9 +30,6 @@ public:
 
     template <class Archive>
     void serialize(Archive& archive);
-
-private:
-    friend std::ostream& operator<<(std::ostream&, const CFRMStats&);
 };
 
 inline void CFRMStats::addProfile(const std::vector<float>& profile)
