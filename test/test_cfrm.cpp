@@ -1,5 +1,8 @@
 #include <catch.hpp>
+#include <fstream>
+#include <cstdio>
 
+#include "../src/cfrm/cfrm_environment.hpp"
 #include "../src/cfrm/cfrm_key.hpp"
 #include "../src/cfrm/cfrm_table.hpp"
 #include "../src/constants.hpp"
@@ -23,7 +26,7 @@ bool validDistribution(const std::vector<float>& distribution)
 
 }
 
-TEST_CASE("2-player CFRM trains correctly on reduced game")
+TEST_CASE("CFRM trains correctly on reduced 2-player game")
 {
     Constants::instance().MAX_RANK = 6;
     size_t pcnt = 2;
@@ -51,5 +54,28 @@ TEST_CASE("2-player CFRM trains correctly on reduced game")
         REQUIRE(validDistribution(stats.averageProfile()));
         REQUIRE(validDistribution(stats.currentProfile()));
     }
+    Constants::instance().MAX_RANK = 14;
+}
+
+TEST_CASE("CFRM can be saved and loaded from binary file")
+{
+    Constants::instance().MAX_RANK = 6;
+    size_t pcnt = 2;
+    size_t tbsz = 0;
+    {
+        CFRMEnvironment env("test.bin");
+        GameState state(pcnt, rng);
+        env.strategy().train(0, state, rng);
+        tbsz = env.strategy().table().size();
+        REQUIRE(tbsz > 0);
+        env.save();
+    }
+    REQUIRE(std::ifstream("test.bin"));
+    {
+        CFRMEnvironment env("test.bin");
+        REQUIRE(env.strategy().table().size() == tbsz);
+    }
+    std::remove("test.bin");    
+    REQUIRE(!std::ifstream("test.bin"));
     Constants::instance().MAX_RANK = 14;
 }
