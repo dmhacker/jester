@@ -23,7 +23,7 @@ GameState::GameState(const GameView& view, std::mt19937& rng)
     , d_winOrder(view.winOrder())
     , d_attackOrder(view.attackOrder())
     , d_nextActions(view.nextActions())
-    , d_firstMove(view.firstMove())
+    , d_turn(view.turn())
 {
     // Cards in hidden set may be in player hands or may be in the deck
     // Convert set into vector and then shuffle the vector
@@ -66,7 +66,7 @@ GameState::GameState(const GameState& state)
     , d_winOrder(state.d_winOrder)
     , d_attackOrder(state.d_attackOrder)
     , d_nextActions(state.d_nextActions)
-    , d_firstMove(state.d_firstMove)
+    , d_turn(state.d_turn)
 {
 }
 
@@ -98,7 +98,7 @@ void GameState::reset(std::mt19937& rng)
         d_attackOrder.push_back(pid);
     }
     d_winOrder.clear();
-    d_firstMove = true;
+    d_turn = 0;
     findNextActions();
 }
 
@@ -109,12 +109,6 @@ GameView GameState::currentPlayerView() const
 
 void GameState::playAction(const Action& action)
 {
-    if (d_firstMove) {
-        if (d_observer != nullptr) {
-            d_observer->onGameStart(*this);
-        }
-        d_firstMove = false;
-    }
     auto aid = attackerId();
     auto did = defenderId();
     auto& attack_hand = d_hands[aid];
@@ -139,9 +133,9 @@ void GameState::playAction(const Action& action)
                     d_observer->onPlayerWin(*this, aid, d_winOrder.size());
                 }
                 d_winOrder.push_back(did);
+                d_turn++;
                 if (d_observer != nullptr) {
                     d_observer->onPlayerWin(*this, did, d_winOrder.size());
-                    d_observer->onGameEnd(*this);
                 }
             }
         }
@@ -199,13 +193,14 @@ void GameState::finishGoodDefense()
             d_attackOrder.clear();
             d_winOrder.push_back(lid);
             d_nextActions.clear();
+            d_turn++;
             if (d_observer != nullptr) {
                 d_observer->onPlayerWin(*this, lid, d_winOrder.size());
-                d_observer->onGameEnd(*this);
             }
             return;
         }
     }
+    d_turn++;
     if (d_observer != nullptr) {
         d_observer->onTurnEnd(*this, true);
     }
@@ -237,6 +232,7 @@ void GameState::finishBadDefense()
         d_attackOrder.push_back(aid);
     }
     d_attackOrder.push_back(did);
+    d_turn++;
     if (d_observer != nullptr) {
         d_observer->onTurnEnd(*this, false);
     }

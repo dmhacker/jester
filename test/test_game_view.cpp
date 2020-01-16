@@ -19,7 +19,7 @@ TEST_CASE("Game view reflects current game state")
             for (size_t pid = 0; pid < pcnt; pid++) {
                 GameView view(state, pid);
                 REQUIRE(view.playerId() == pid);
-                REQUIRE(view.firstMove() == state.firstMove());
+                REQUIRE(view.turn() == state.turn());
                 REQUIRE(!view.finished());
                 REQUIRE(view.attackerNext() == state.attackerNext());
                 REQUIRE(view.playerCount() == pcnt);

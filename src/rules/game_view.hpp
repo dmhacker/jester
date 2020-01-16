@@ -25,7 +25,7 @@ public:
     size_t hiddenHandSize(size_t pid) const;
 
     // Information available to all players about the game
-    bool firstMove() const;
+    size_t turn() const;
     bool finished() const;
     bool attackerNext() const;
     size_t playerCount() const;

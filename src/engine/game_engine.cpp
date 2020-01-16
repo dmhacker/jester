@@ -168,12 +168,14 @@ void GameEngine::shell()
         }
 
         // Play out the game to conclusion
+        game.observer()->onGameStart(game); 
         while (!game.finished()) {
             auto& player = players[game.currentPlayerId()];
             auto action = player->nextAction(game.currentPlayerView());
             game.validateAction(action);
             game.playAction(action);
         }
+        game.observer()->onGameEnd(game); 
 
         std::cout << std::endl;
         printBarrier<false>();

@@ -24,7 +24,7 @@ private:
     std::deque<size_t> d_attackOrder;
     std::vector<Action> d_nextActions;
     stda::erased_ptr<Observer> d_observer;
-    bool d_firstMove;
+    size_t d_turn;
 
 public:
     GameState() = default;
@@ -33,6 +33,7 @@ public:
     GameState(const GameState& state);
 
     // Observational methods
+    Observer* observer() const;
     void setObserver(stda::erased_ptr<Observer>&& observer);
 
     // Public methods used to advance gameplay
@@ -46,7 +47,7 @@ public:
     const Hand& hand(size_t pid) const;
 
     // Public information (available to all players)
-    bool firstMove() const;
+    size_t turn() const;
     bool finished() const;
     bool attackerNext() const;
     size_t playerCount() const;
@@ -72,14 +73,19 @@ private:
     friend std::ostream& operator<<(std::ostream& os, const GameState& state);
 };
 
+inline Observer* GameState::observer() const
+{
+    return d_observer.get();
+}
+
 inline void GameState::setObserver(stda::erased_ptr<Observer>&& observer)
 {
     d_observer = std::move(observer);
 }
 
-inline bool GameState::firstMove() const
+inline size_t GameState::turn() const
 {
-    return d_firstMove;
+    return d_turn;
 }
 
 inline bool GameState::finished() const

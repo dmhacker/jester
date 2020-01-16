@@ -47,9 +47,9 @@ size_t GameView::handSize(size_t pid) const
     return d_state.hand(pid).size();
 }
 
-bool GameView::firstMove() const
+size_t GameView::turn() const
 {
-    return d_state.firstMove();
+    return d_state.turn();
 }
 
 bool GameView::finished() const

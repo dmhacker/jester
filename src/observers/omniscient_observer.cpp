@@ -11,7 +11,7 @@ namespace {
     void printBarrier()
     {
         std::cout
-            << std::string(60, thin ? '-' : '=')
+            << std::string(thin ? 58 : 60, thin ? '-' : '=')
             << std::endl;
     }
 }
@@ -28,6 +28,7 @@ void OmniscientObserver::onGameStart(const GameState& state)
               << "." << std::endl;
     std::cout << "The game state is: " << std::endl;
     std::cout << state;
+    std::cout << "[T" << state.turn() << "]";
     printBarrier<true>();
 }
 
@@ -54,6 +55,7 @@ void OmniscientObserver::onTurnEnd(const GameState& state, bool defense_success)
 {
     std::cout << "The game state is now: " << std::endl;
     std::cout << state;
+    std::cout << "[T" << state.turn() << "]";
     printBarrier<true>();
 }
 
@@ -73,6 +75,7 @@ void OmniscientObserver::onPlayerWin(const GameState& state, size_t player_id, s
 
 void OmniscientObserver::onGameEnd(const GameState& state)
 {
+    std::cout << "[T" << state.turn() << "]";
     printBarrier<true>();
     std::cout
         << "The winners in order are "

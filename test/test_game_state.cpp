@@ -25,7 +25,7 @@ TEST_CASE("Game is in a reset state")
         REQUIRE(state.currentPlayerId() == 0);
         REQUIRE(state.attackerId() == 0);
         REQUIRE(state.defenderId() == 1);
-        REQUIRE(state.firstMove());
+        REQUIRE(state.turn() == 0);
         REQUIRE(state.attackerNext());
         REQUIRE(state.currentAttack().empty());
         REQUIRE(state.currentDefense().empty());
@@ -78,7 +78,6 @@ TEST_CASE("Game is in a defending state")
             state.playAction(action);
         }
         REQUIRE(state.playerCount() == pcnt);
-        REQUIRE(!state.firstMove());
         REQUIRE(state.currentPlayerId() == state.defenderId());
         REQUIRE(state.currentAttack().size() == 1);
         REQUIRE(state.currentDefense().size() == 0);
@@ -117,7 +116,6 @@ TEST_CASE("Game is in an attacking state")
             state.playAction(action);
         }
         REQUIRE(state.playerCount() == pcnt);
-        REQUIRE(!state.firstMove());
         REQUIRE(state.currentPlayerId() == state.attackerId());
         REQUIRE(state.currentAttack().size() == state.currentDefense().size());
         REQUIRE(state.attackerNext());
@@ -174,7 +172,6 @@ TEST_CASE("Game is in a finished state")
             state.playAction(action);
         }
         REQUIRE(state.playerCount() == pcnt);
-        REQUIRE(!state.firstMove());
         REQUIRE(state.attackOrder().empty());
         REQUIRE(state.nextActions().empty());
         REQUIRE(state.winOrder().size() == pcnt);
