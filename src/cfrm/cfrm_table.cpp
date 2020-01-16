@@ -4,15 +4,9 @@
 #include "../rules/game_view.hpp"
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 
 namespace jester {
-
-CFRMTable::CFRMTable(bool verbose)
-    : d_verbose(verbose)
-{
-}
 
 Action CFRMTable::bestAction(const GameView& view, std::mt19937& rng)
 {
@@ -22,20 +16,15 @@ Action CFRMTable::bestAction(const GameView& view, std::mt19937& rng)
         auto actions = view.nextActions();
         std::sort(actions.begin(), actions.end());
         auto profile = it->second.averageProfile();
-        if (d_verbose) {
-            std::cerr
-                << "[P" << view.playerId()
-                << "] CFRM found distribution " << profile
-                << " for actions " << actions
-                << "." << std::endl;
+        if (bots_logger != nullptr) {
+            std::stringstream ss;
+            ss << profile << " for actions " << actions;
+            bots_logger->info("CFRM found distribution {}.", ss.str());
         }
         return sampleAction(actions, profile, rng);
     } else {
-        if (d_verbose) {
-            std::cerr
-                << "[P" << view.playerId()
-                << "] CFRM will choose a random action."
-                << std::endl;
+        if (bots_logger != nullptr) {
+            bots_logger->info("CFRM could not find a matching information set.");
         }
         const auto& actions = view.nextActions();
         std::uniform_int_distribution<std::mt19937::result_type> dist(0, actions.size() - 1);
@@ -101,11 +90,10 @@ float CFRMTable::train(size_t tpid, const GameState& state, std::mt19937& rng)
                 key, CFRMStats(actions.size()));
             stats_it = d_table.insert(new_stats).first;
             stats_it->second.d_actions = actions;
-        }
-        if (d_verbose) {
-            std::cout << "\r"
-                      << d_table.size() << " information sets in storage."
-                      << std::flush;
+            if (training_logger != nullptr && d_table.size() % 1000 == 0) {
+                training_logger->info("{} information sets in storage.",
+                    d_table.size());
+            }
         }
     }
     auto& stats = stats_it->second;

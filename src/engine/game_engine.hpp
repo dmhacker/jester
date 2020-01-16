@@ -12,12 +12,12 @@ namespace jester {
 class PlayerOption {
 private:
     std::string d_name;
-    std::function<stda::erased_ptr<Player>(bool)> d_producer;
+    std::function<stda::erased_ptr<Player>()> d_producer;
 
 public:
-    PlayerOption(const std::string& name, std::function<stda::erased_ptr<Player>(bool)> producer);
+    PlayerOption(const std::string& name, std::function<stda::erased_ptr<Player>()> producer);
     const std::string& name() const;
-    stda::erased_ptr<Player> produce(bool has_human) const;
+    stda::erased_ptr<Player> produce() const;
 };
 
 class GameEngine {
@@ -38,9 +38,9 @@ inline const std::string& PlayerOption::name() const
     return d_name;
 }
 
-inline stda::erased_ptr<Player> PlayerOption::produce(bool has_human) const
+inline stda::erased_ptr<Player> PlayerOption::produce() const
 {
-    return d_producer(has_human);
+    return d_producer();
 }
 
 }

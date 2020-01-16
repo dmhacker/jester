@@ -39,7 +39,7 @@ namespace {
 }
 
 PlayerOption::PlayerOption(const std::string& name,
-    std::function<stda::erased_ptr<Player>(bool)> producer)
+    std::function<stda::erased_ptr<Player>()> producer)
     : d_name(name)
     , d_producer(producer)
 {
@@ -48,34 +48,34 @@ PlayerOption::PlayerOption(const std::string& name,
 GameEngine::GameEngine()
     : d_rng(std::random_device {}())
 {
-    d_options.push_back(PlayerOption("Human", [](bool has_human) {
+    d_options.push_back(PlayerOption("Human", []() {
         return stda::make_erased<HumanPlayer>();
     }));
-    d_options.push_back(PlayerOption("Minimal", [](bool has_human) {
+    d_options.push_back(PlayerOption("Minimal", []() {
         return stda::make_erased<MinimalPlayer>();
     }));
-    d_options.push_back(PlayerOption("Random", [](bool has_human) {
+    d_options.push_back(PlayerOption("Random", []() {
         return stda::make_erased<RandomPlayer>();
     }));
-    d_options.push_back(PlayerOption("Greedy", [](bool has_human) {
+    d_options.push_back(PlayerOption("Greedy", []() {
         return stda::make_erased<GreedyPlayer>();
     }));
-    d_options.push_back(PlayerOption("Weak DMCTS", [](bool has_human) {
+    d_options.push_back(PlayerOption("Weak DMCTS", []() {
         return stda::make_erased<DMCTSPlayer>(3, 1, std::chrono::seconds(4));
     }));
-    d_options.push_back(PlayerOption("Weak ISMCTS", [](bool has_human) {
+    d_options.push_back(PlayerOption("Weak ISMCTS", []() {
         return stda::make_erased<ISMCTSPlayer>(1, std::chrono::seconds(4));
     }));
-    d_options.push_back(PlayerOption("Strong DMCTS", [](bool has_human) {
+    d_options.push_back(PlayerOption("Strong DMCTS", []() {
         auto cores = std::thread::hardware_concurrency();
         return stda::make_erased<DMCTSPlayer>(cores + 2, cores, std::chrono::seconds(9));
     }));
-    d_options.push_back(PlayerOption("Strong ISMCTS", [](bool has_human) {
+    d_options.push_back(PlayerOption("Strong ISMCTS", []() {
         auto cores = std::thread::hardware_concurrency();
         return stda::make_erased<ISMCTSPlayer>(cores, std::chrono::seconds(9));
     }));
-    d_options.push_back(PlayerOption("Tabular CFRM", [](bool has_human) {
-        return stda::make_erased<CFRMPlayer>(!has_human);
+    d_options.push_back(PlayerOption("Tabular CFRM", []() {
+        return stda::make_erased<CFRMPlayer>();
     }));
 }
 
@@ -144,7 +144,7 @@ void GameEngine::shell()
         std::vector<std::string> player_types;
         for (auto& selection : selections) {
             auto& option = d_options[selection];
-            players.push_back(option.produce(has_humans));
+            players.push_back(option.produce());
             player_types.push_back(option.name());
             if (option.name() == "Human") {
                 has_humans = false;

@@ -33,7 +33,6 @@ int main(int argc, char** argv)
     if (result.count("reduced") > 0) {
         std::cout << "!!! WARNING !!! Using a reduced form of Durak at the moment!" << std::endl;
         std::cout << "!!! WARNING !!! Only ranks 6-7 are being used." << std::endl;
-        std::cout << std::endl;
         Constants::instance().MAX_RANK = 7;
     }
 
@@ -43,7 +42,7 @@ int main(int argc, char** argv)
     training_logger->flush_on(spdlog::level::info); 
 
     if (result.count("train") > 0) {
-        CFRMEnvironment env(true);
+        CFRMEnvironment env;
         env.train();
     } else {
         GameEngine engine;

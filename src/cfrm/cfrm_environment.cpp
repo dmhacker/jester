@@ -1,5 +1,6 @@
 #include "cfrm_environment.hpp"
 
+#include "../logging.hpp"
 #include "../rules/game_state.hpp"
 #include "../rules/game_view.hpp"
 
@@ -9,8 +10,8 @@
 
 namespace jester {
 
-CFRMEnvironment::CFRMEnvironment(bool verbose, const std::string& filename)
-    : d_filename(filename), d_strategy(verbose)
+CFRMEnvironment::CFRMEnvironment(const std::string& filename)
+    : d_filename(filename)
 {
     std::ifstream infile(filename);
     if (infile.good()) {
@@ -22,7 +23,7 @@ CFRMEnvironment::CFRMEnvironment(bool verbose, const std::string& filename)
 void CFRMEnvironment::train()
 {
     auto threads = trainingThreads(std::thread::hardware_concurrency());
-    threads.push_back(savingThread(std::chrono::seconds(120)));
+    threads.push_back(savingThread(std::chrono::seconds(90)));
     for (auto& thr : threads) {
         thr.join();
     }
@@ -31,7 +32,9 @@ void CFRMEnvironment::train()
 void CFRMEnvironment::save()
 {
     std::lock_guard<std::mutex> lck(d_strategy.mutex());
-    std::cout << std::endl << "Saving in progress." << std::endl;
+    if (training_logger != nullptr) {
+        training_logger->info("Saving {} information sets.", d_strategy.table().size());
+    }
     std::ofstream outfile(d_filename);
     if (outfile.good()) {
         cereal::PortableBinaryOutputArchive oarchive(outfile);
@@ -39,15 +42,20 @@ void CFRMEnvironment::save()
     } else {
         throw std::runtime_error("Unable to save CFRM to disk.");
     }
-    std::cout << "Save completed." << std::endl;
+    if (training_logger != nullptr) {
+        training_logger->info("Save completed.");
+    }
 }
 
 std::vector<std::thread> CFRMEnvironment::trainingThreads(size_t num_threads)
 {
     std::vector<std::thread> threads;
     for (size_t t = 0; t < num_threads; t++) {
-        threads.push_back(std::thread([&]() {
+        threads.push_back(std::thread([this, t]() {
             std::mt19937 rng(std::random_device {}());
+            if (training_logger != nullptr) {
+                training_logger->info("CFRM training thread {} started.", t);
+            }
             while (true) {
                 size_t num_players = 2;
                 GameState root(num_players, rng);
@@ -64,6 +72,9 @@ std::thread CFRMEnvironment::savingThread(const std::chrono::milliseconds& inter
 {
     std::thread thr([&interval, this]() {
         auto start_timestamp = std::chrono::system_clock::now();
+        if (training_logger != nullptr) {
+            training_logger->info("CFRM save thread started.");
+        }
         while (true) {
             auto end_timestamp = std::chrono::system_clock::now();
             if (end_timestamp - start_timestamp > interval) {

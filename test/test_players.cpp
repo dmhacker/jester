@@ -62,7 +62,7 @@ TEST_CASE("Greedy player works correctly")
 
 TEST_CASE("CFRM player works correctly")
 {
-    CFRMPlayer player(false);
+    CFRMPlayer player;
     GreedyPlayer opponent;
     for (size_t pcnt = Constants::instance().MIN_PLAYERS;
          pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {

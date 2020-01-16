@@ -88,7 +88,7 @@ Action DMCTSPlayer::nextAction(const GameView& view)
         }
         if (bots_logger != nullptr) {
             std::stringstream ss;
-            ss << "\"" << action << "\" as " << stats << ".";
+            ss << "\"" << action << "\" as " << stats;
             bots_logger->info("DMCTS evaluated {}.", ss.str());
         }
     }

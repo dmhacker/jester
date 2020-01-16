@@ -28,7 +28,7 @@ TEST_CASE("2-player CFRM trains correctly on reduced game")
     Constants::instance().MAX_RANK = 6;
     size_t pcnt = 2;
     GameState state(pcnt, rng);
-    CFRMTable table(false);
+    CFRMTable table;
     table.train(0, state, rng);
     table.train(1, state, rng);
     {

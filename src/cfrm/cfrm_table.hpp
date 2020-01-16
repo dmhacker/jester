@@ -18,11 +18,8 @@ class CFRMTable {
 private:
     std::unordered_map<CFRMKey, CFRMStats> d_table;
     std::mutex d_mtx;
-    bool d_verbose;
 
 public:
-    CFRMTable(bool verbose);
-
     Action bestAction(const GameView& view, std::mt19937& rng);
     Action sampleAction(const std::vector<Action>& actions, const std::vector<float>& profile, std::mt19937& rng);
     float train(size_t tpid, const GameState& state, std::mt19937& rng);

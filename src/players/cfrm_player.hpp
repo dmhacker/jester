@@ -14,7 +14,7 @@ private:
     std::mt19937 d_rng;
 
 public:
-    CFRMPlayer(bool verbose);
+    CFRMPlayer();
 
     Action nextAction(const GameView& view);
 };
