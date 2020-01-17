@@ -190,7 +190,7 @@ void GameEngine::shell()
 void GameEngine::printOptions() const
 {
     for (size_t i = 0; i < d_options.size(); i++) {
-        std::cout << i << ") " << d_options[i].name() << std::endl;
+        std::cout << "  " << i << ") " << d_options[i].name() << std::endl;
     }
 }
 

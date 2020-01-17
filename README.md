@@ -44,17 +44,16 @@ fill in incomplete game information with several potential
 determinizations and then run MCTS on each state.
 * ISMCTS — A player implementing 
 [information-set Monte Carlo tree search](http://eprints.whiterose.ac.uk/75048/1/CowlingPowleyWhitehouse2012.pdf). 
-Rather than associating a single determinization with an entire MCTS tree,
-every simulation determinizes and then follows an appropriate path down
-only one tree.
+Determinizations occur every simulation and all paths taken 
+are merged into a single MCTS tree.
+* Human — A human player interfaces with the console and is 
+controlled through stdin.
 
 Work-in-progress options are:
 
 * Tabulated MCCFR — Monte Carlo counterfactual regret minimization 
 with external sampling. The algorithm is implemented as listed on page 16
 of [Richard Gibson's PhD dissertation](http://poker.cs.ualberta.ca/publications/gibson.phd.pdf). 
-* Human — The human player will interface with the console and
-will be controlled through stdin.
 
 ## About MCCFR
 

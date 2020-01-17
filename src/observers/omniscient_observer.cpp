@@ -36,6 +36,8 @@ void OmniscientObserver::onGameStart(const GameState& state)
     std::cout << "The game state is: " << std::endl;
     std::cout << state;
     printTurnBarrier(state.turn());
+    std::cout << "[P" << state.attackerId() << "] Beginning attack." << std::endl;
+    std::cout << "[P" << state.defenderId() << "] Beginning defense." << std::endl;
 }
 
 void OmniscientObserver::onPostAction(const GameState& state, const Action& action, bool was_attack)
@@ -66,12 +68,14 @@ void OmniscientObserver::onTurnEnd(const GameState& state, bool defense_success)
     std::cout << "The game state is now: " << std::endl;
     std::cout << state;
     printTurnBarrier(state.turn());
+    std::cout << "[P" << state.attackerId() << "] Beginning attack." << std::endl;
+    std::cout << "[P" << state.defenderId() << "] Beginning defense." << std::endl;
 }
 
 void OmniscientObserver::onPlayerWin(const GameState& state, size_t player_id, size_t win_position)
 {
     std::cout << "[P" << player_id
-              << "] finished game in " << win_position;
+              << "] Finished game in " << win_position;
     if (win_position == 1) {
         std::cout << "st place.";
     } else if (win_position == 2) {

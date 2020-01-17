@@ -34,6 +34,8 @@ void ReducedObserver::onGameStart(const GameState& state)
               << state.trumpCard()
               << "." << std::endl;
     printTurnBarrier(state.turn());
+    std::cout << "[P" << state.attackerId() << "] Beginning attack." << std::endl;
+    std::cout << "[P" << state.defenderId() << "] Beginning defense." << std::endl;
 }
 
 void ReducedObserver::onPostAction(const GameState& state, const Action& action, bool was_attack)
@@ -62,12 +64,14 @@ void ReducedObserver::onHandReplenish(const GameState& state, size_t pid, const 
 void ReducedObserver::onTurnEnd(const GameState& state, bool defense_success)
 {
     printTurnBarrier(state.turn());
+    std::cout << "[P" << state.attackerId() << "] Beginning attack." << std::endl;
+    std::cout << "[P" << state.defenderId() << "] Beginning defense." << std::endl;
 }
 
 void ReducedObserver::onPlayerWin(const GameState& state, size_t player_id, size_t win_position)
 {
     std::cout << "[P" << player_id
-              << "] finished game in " << win_position;
+              << "] Finished game in " << win_position;
     if (win_position == 1) {
         std::cout << "st place.";
     } else if (win_position == 2) {

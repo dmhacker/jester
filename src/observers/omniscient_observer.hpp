@@ -11,7 +11,7 @@ public:
     void onPostAction(const GameState& state, const Action& action, bool was_attack);
     void onTurnEnd(const GameState& state, bool defense_success);
     void onHandReplenish(const GameState& state, size_t pid, const Card& card);
-    void onPlayerWin(const GameState& state, size_t player_id, size_t win_position);
+    void onPlayerWin(const GameState& state, size_t pid, size_t win_position);
     void onGameEnd(const GameState& state);
 };
 
