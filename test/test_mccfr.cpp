@@ -5,8 +5,8 @@
 #include "../src/mccfr/mccfr_engine.hpp"
 #include "../src/mccfr/mccfr_table.hpp"
 #include "../src/constants.hpp"
-#include "../src/rules/game_state.hpp"
-#include "../src/rules/game_view.hpp"
+#include "../src/game/game_state.hpp"
+#include "../src/game/game_view.hpp"
 
 using namespace jester;
 
@@ -25,7 +25,7 @@ bool validDistribution(const std::vector<float>& distribution)
 
 }
 
-TEST_CASE("CFRM trains correctly on reduced 2-player game")
+TEST_CASE("MCCFR trains correctly on reduced 2-player game")
 {
     Constants::instance().MAX_RANK = 6;
     size_t pcnt = 2;
@@ -56,7 +56,7 @@ TEST_CASE("CFRM trains correctly on reduced 2-player game")
     Constants::instance().MAX_RANK = 14;
 }
 
-TEST_CASE("CFRM can be saved and loaded from binary file")
+TEST_CASE("MCCFR can be saved and loaded from binary file")
 {
     Constants::instance().MAX_RANK = 6;
     size_t pcnt = 2;

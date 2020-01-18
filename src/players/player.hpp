@@ -3,7 +3,7 @@
 
 #include <chrono>
 
-#include "../rules/game_view.hpp"
+#include "../game/game_view.hpp"
 
 namespace jester {
 

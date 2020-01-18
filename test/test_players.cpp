@@ -7,7 +7,7 @@
 #include "../src/players/ismcts_player.hpp"
 #include "../src/players/minimal_player.hpp"
 #include "../src/players/random_player.hpp"
-#include "../src/rules/game_state.hpp"
+#include "../src/game/game_state.hpp"
 
 using namespace jester;
 

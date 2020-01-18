@@ -10,7 +10,7 @@
 #include "../players/ismcts_player.hpp"
 #include "../players/minimal_player.hpp"
 #include "../players/random_player.hpp"
-#include "../rules/game_state.hpp"
+#include "../game/game_state.hpp"
 
 #include <iostream>
 #include <sstream>

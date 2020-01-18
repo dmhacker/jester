@@ -1,7 +1,7 @@
 #ifndef JESTER_DMCTS_TREE_HPP
 #define JESTER_DMCTS_TREE_HPP
 
-#include "../rules/game_state.hpp"
+#include "../game/game_state.hpp"
 #include "mcts_node.hpp"
 
 namespace jester {

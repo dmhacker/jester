@@ -1,7 +1,7 @@
 #include "mccfr_infoset.hpp"
 #include "../constants.hpp"
 #include "../logging.hpp"
-#include "../rules/game_view.hpp"
+#include "../game/game_view.hpp"
 
 namespace jester {
 

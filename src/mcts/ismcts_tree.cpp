@@ -1,6 +1,6 @@
 #include "ismcts_tree.hpp"
 #include "../players/random_player.hpp"
-#include "../rules/game_state.hpp"
+#include "../game/game_state.hpp"
 
 #include <cmath>
 

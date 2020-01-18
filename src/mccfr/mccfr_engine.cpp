@@ -1,8 +1,8 @@
 #include "mccfr_engine.hpp"
 
 #include "../logging.hpp"
-#include "../rules/game_state.hpp"
-#include "../rules/game_view.hpp"
+#include "../game/game_state.hpp"
+#include "../game/game_view.hpp"
 
 #include <cereal/archives/portable_binary.hpp>
 

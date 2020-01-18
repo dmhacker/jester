@@ -2,7 +2,7 @@
 
 #include "../src/constants.hpp"
 #include "../src/players/greedy_player.hpp"
-#include "../src/rules/game_state.hpp"
+#include "../src/game/game_state.hpp"
 
 using namespace jester;
 

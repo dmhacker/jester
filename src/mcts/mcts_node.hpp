@@ -1,7 +1,7 @@
 #ifndef JESTER_MCTS_NODE_HPP
 #define JESTER_MCTS_NODE_HPP
 
-#include "../rules/card.hpp"
+#include "../game/card.hpp"
 #include "mcts_stats.hpp"
 
 #include <unordered_map>

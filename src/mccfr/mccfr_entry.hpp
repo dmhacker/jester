@@ -1,7 +1,7 @@
 #ifndef JESTER_MCCFR_ENTRY_HPP
 #define JESTER_MCCFR_ENTRY_HPP
 
-#include "../rules/card.hpp"
+#include "../game/card.hpp"
 
 #include <mutex>
 

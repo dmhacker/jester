@@ -1,6 +1,6 @@
 #include "mccfr/mccfr_engine.hpp"
 #include "constants.hpp"
-#include "engine/game_engine.hpp"
+#include "game/game_engine.hpp"
 #include "logging.hpp"
 
 #include <cxxopts.hpp>

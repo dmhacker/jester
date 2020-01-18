@@ -1,7 +1,7 @@
 #include "mccfr_table.hpp"
 #include "../logging.hpp"
-#include "../rules/game_state.hpp"
-#include "../rules/game_view.hpp"
+#include "../game/game_state.hpp"
+#include "../game/game_view.hpp"
 
 #include <algorithm>
 #include <sstream>

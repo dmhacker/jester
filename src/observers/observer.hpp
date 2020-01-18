@@ -1,7 +1,7 @@
 #ifndef JESTER_OBSERVER_HPP
 #define JESTER_OBSERVER_HPP
 
-#include "../rules/game_state.hpp"
+#include "../game/game_state.hpp"
 
 namespace jester {
 
