@@ -4,8 +4,7 @@
 #include "../game/game_view.hpp"
 #include "../logging.hpp"
 
-/* #include <cereal/archives/portable_binary.hpp> */
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/portable_binary.hpp>
 
 #include <fstream>
 
@@ -18,13 +17,17 @@ MCCFREngine::MCCFREngine(const std::string& filename)
 {
     std::ifstream infile(filename);
     if (infile.good()) {
-        cereal::JSONInputArchive iarchive(infile);
+        cereal::PortableBinaryInputArchive iarchive(infile);
         iarchive(d_strategy);
     }
 }
 
 void MCCFREngine::train()
 {
+    if (training_logger != nullptr) {
+        training_logger->info("{} information sets loaded from disk.", 
+                d_strategy.table().size());
+    }
     auto threads = trainingThreads(std::thread::hardware_concurrency());
     threads.push_back(savingThread(std::chrono::seconds(120)));
     for (auto& thr : threads) {
@@ -40,7 +43,7 @@ void MCCFREngine::save()
     }
     std::ofstream outfile(d_filename);
     if (outfile.good()) {
-        cereal::JSONOutputArchive oarchive(outfile);
+        cereal::PortableBinaryOutputArchive oarchive(outfile);
         oarchive(d_strategy);
     } else {
         throw std::runtime_error("Unable to save MCCFR table to disk.");
