@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     }
 
     if (result.count("reduced") > 0) {
-        Constants::instance().MAX_RANK = 7;
+        Constants::instance().MAX_RANK = 8;
     }
 
     bots_logger->set_level(spdlog::level::info);
