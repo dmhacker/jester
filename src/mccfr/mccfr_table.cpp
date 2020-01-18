@@ -90,10 +90,6 @@ float MCCFRTable::train(size_t tpid, const GameState& state, std::mt19937& rng)
                 key, MCCFREntry(actions.size()));
             stats_it = d_table.insert(new_stats).first;
             stats_it->second.d_actions = actions;
-            if (training_logger != nullptr && d_table.size() % 1000 == 0) {
-                training_logger->info("{} information sets in storage.",
-                    d_table.size());
-            }
         }
     }
     auto& stats = stats_it->second;

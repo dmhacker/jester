@@ -1,21 +1,24 @@
 #include "mccfr_engine.hpp"
 
-#include "../logging.hpp"
 #include "../game/game_state.hpp"
 #include "../game/game_view.hpp"
+#include "../logging.hpp"
 
-#include <cereal/archives/portable_binary.hpp>
+/* #include <cereal/archives/portable_binary.hpp> */
+#include <cereal/archives/json.hpp>
 
 #include <fstream>
 
 namespace jester {
+
+constexpr static size_t UPDATES_PER_INTERVAL = 24;
 
 MCCFREngine::MCCFREngine(const std::string& filename)
     : d_filename(filename)
 {
     std::ifstream infile(filename);
     if (infile.good()) {
-        cereal::PortableBinaryInputArchive iarchive(infile);
+        cereal::JSONInputArchive iarchive(infile);
         iarchive(d_strategy);
     }
 }
@@ -37,7 +40,7 @@ void MCCFREngine::save()
     }
     std::ofstream outfile(d_filename);
     if (outfile.good()) {
-        cereal::PortableBinaryOutputArchive oarchive(outfile);
+        cereal::JSONOutputArchive oarchive(outfile);
         oarchive(d_strategy);
     } else {
         throw std::runtime_error("Unable to save MCCFR table to disk.");
@@ -74,15 +77,23 @@ std::thread MCCFREngine::savingThread(const std::chrono::milliseconds& interval)
         if (training_logger != nullptr) {
             training_logger->info("MCCFR save thread started.");
         }
-        auto start_timestamp = std::chrono::system_clock::now();
         while (true) {
-            auto end_timestamp = std::chrono::system_clock::now();
-            if (end_timestamp - start_timestamp > interval) {
-                save();
-                start_timestamp = std::chrono::system_clock::now();
+            if (training_logger != nullptr) {
+                for (size_t i = 0; i < UPDATES_PER_INTERVAL; i++) {
+                    {
+                        std::lock_guard<std::mutex> lck(d_strategy.mutex());
+                        training_logger->info("{} information sets in memory.",
+                            d_strategy.table().size());
+                    }
+                    std::this_thread::sleep_for(interval / UPDATES_PER_INTERVAL);
+                }
+            } else {
+                std::this_thread::sleep_for(interval);
             }
+            save();
         }
     });
     return thr;
 }
+
 }

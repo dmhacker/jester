@@ -15,9 +15,8 @@ namespace {
 constexpr static uint8_t MAX_CARDS = 36;
 constexpr static uint8_t CARD_HIDDEN = 6;
 constexpr static uint8_t CARD_DISCARDED = 7;
-constexpr static uint8_t CARD_IN_ATTACK = 8;
-constexpr static uint8_t CARD_IN_DEFENSE = 9;
-constexpr static uint8_t CARD_LAST_IN_ATTACK = 10;
+constexpr static uint8_t CARD_IN_PLAY = 8;
+constexpr static uint8_t CARD_LAST_IN_PLAY = 9;
 
 MCCFRInfoSet::MCCFRInfoSet(const GameView& view)
     : d_cardStates(MAX_CARDS)
@@ -57,16 +56,16 @@ MCCFRInfoSet::MCCFRInfoSet(const GameView& view)
     }
     // Mark cards currently used in the attack
     for (auto& card : view.currentAttack()) {
-        d_cardStates[shiftedIndex(card)] = CARD_IN_ATTACK;
+        d_cardStates[shiftedIndex(card)] = CARD_IN_PLAY;
     }
     // If it is the defender's turn, then save the last attacking card
     if (!view.attackerNext()) {
         auto& card = view.currentAttack().back();
-        d_cardStates[shiftedIndex(card)] = CARD_LAST_IN_ATTACK;
+        d_cardStates[shiftedIndex(card)] = CARD_LAST_IN_PLAY;
     }
     // Mark cards currently used in the defense
     for (auto& card : view.currentDefense()) {
-        d_cardStates[shiftedIndex(card)] = CARD_IN_DEFENSE;
+        d_cardStates[shiftedIndex(card)] = CARD_IN_PLAY;
     }
     // OPTIMIZATION: if there are no cards in the deck and only one
     // hand with hidden cards, then that hand must possess all hidden cards
