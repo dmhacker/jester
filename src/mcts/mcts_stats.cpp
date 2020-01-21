@@ -1,4 +1,4 @@
-#include "mcts_stats.hpp"
+#include <mcts/mcts_stats.hpp>
 
 namespace jester {
 

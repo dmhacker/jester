@@ -1,5 +1,5 @@
-#include "mccfr_player.hpp"
-#include "../logging.hpp"
+#include <logs/loggers.hpp>
+#include <players/mccfr_player.hpp>
 
 #include <iostream>
 #include <memory>

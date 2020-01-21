@@ -1,7 +1,8 @@
-#include "dmcts_player.hpp"
-#include "../logging.hpp"
-#include "../mcts/dmcts_tree.hpp"
-#include "../game/game_state.hpp"
+#include <game/game_state.hpp>
+#include <logs/formatting.hpp>
+#include <logs/loggers.hpp>
+#include <mcts/dmcts_tree.hpp>
+#include <players/dmcts_player.hpp>
 
 #include <mutex>
 #include <sstream>

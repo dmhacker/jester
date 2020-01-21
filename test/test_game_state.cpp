@@ -1,8 +1,8 @@
 #include <catch.hpp>
 
-#include "../src/constants.hpp"
-#include "../src/players/greedy_player.hpp"
-#include "../src/game/game_state.hpp"
+#include <game/constants.hpp>
+#include <game/game_state.hpp>
+#include <players/greedy_player.hpp>
 
 using namespace jester;
 

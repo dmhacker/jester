@@ -1,4 +1,4 @@
-#include "card.hpp"
+#include <game/card.hpp>
 
 namespace jester {
 

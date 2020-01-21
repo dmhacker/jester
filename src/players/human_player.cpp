@@ -1,5 +1,5 @@
-#include "human_player.hpp"
-#include "../logging.hpp"
+#include <logs/formatting.hpp>
+#include <players/human_player.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -36,14 +36,15 @@ Action HumanPlayer::nextAction(const GameView& view)
     std::cout << std::string(44, '+') << std::endl;
     std::cout << "You are playing as P" << view.playerId();
     if (view.attackerNext()) {
-        std::cout 
-            << " and are attacking P" << view.defenderId() 
-            << "." << std::endl;; 
-    }
-    else {
-        std::cout 
-            << " and are defending against P" << view.attackerId() 
-            << "." << std::endl;; 
+        std::cout
+            << " and are attacking P" << view.defenderId()
+            << "." << std::endl;
+        ;
+    } else {
+        std::cout
+            << " and are defending against P" << view.attackerId()
+            << "." << std::endl;
+        ;
     }
     for (size_t pid = 0; pid < view.playerCount(); pid++) {
         if (pid == view.playerId()) {
@@ -65,8 +66,8 @@ Action HumanPlayer::nextAction(const GameView& view)
     std::cout
         << "  There are " << view.deckSize()
         << " cards left in the deck." << std::endl;
-    std::cout 
-        << "Select a valid move to make from this list." 
+    std::cout
+        << "Select a valid move to make from this list."
         << std::endl;
     for (size_t i = 0; i < view.nextActions().size(); i++) {
         std::cout << "  " << i << ") " << view.nextActions()[i] << "." << std::endl;

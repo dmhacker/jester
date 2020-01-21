@@ -1,12 +1,12 @@
 #include <catch.hpp>
-#include <fstream>
 #include <cstdio>
+#include <fstream>
 
-#include "../src/mccfr/mccfr_engine.hpp"
-#include "../src/mccfr/mccfr_table.hpp"
-#include "../src/constants.hpp"
-#include "../src/game/game_state.hpp"
-#include "../src/game/game_view.hpp"
+#include <game/constants.hpp>
+#include <game/game_state.hpp>
+#include <game/game_view.hpp>
+#include <mccfr/mccfr_engine.hpp>
+#include <mccfr/mccfr_table.hpp>
 
 using namespace jester;
 
@@ -74,7 +74,7 @@ TEST_CASE("MCCFR can be saved and loaded from binary file")
         MCCFREngine env("test.bin");
         REQUIRE(env.strategy().table().size() == tbsz);
     }
-    std::remove("test.bin");    
+    std::remove("test.bin");
     REQUIRE(!std::ifstream("test.bin"));
     Constants::instance().MAX_RANK = 14;
 }

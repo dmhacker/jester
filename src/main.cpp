@@ -1,12 +1,12 @@
-#include "mccfr/mccfr_engine.hpp"
-#include "constants.hpp"
-#include "game/game_engine.hpp"
-#include "logging.hpp"
+#include <game/constants.hpp>
+#include <game/game_engine.hpp>
+#include <logs/loggers.hpp>
+#include <mccfr/mccfr_engine.hpp>
 
 #include <cxxopts.hpp>
-#include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
 namespace jester {
 
@@ -35,9 +35,9 @@ int main(int argc, char** argv)
     }
 
     bots_logger->set_level(spdlog::level::info);
-    bots_logger->flush_on(spdlog::level::info); 
+    bots_logger->flush_on(spdlog::level::info);
     training_logger->set_level(spdlog::level::info);
-    training_logger->flush_on(spdlog::level::info); 
+    training_logger->flush_on(spdlog::level::info);
 
     if (result.count("train") > 0) {
         MCCFREngine engine;

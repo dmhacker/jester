@@ -1,5 +1,4 @@
-#include "mccfr_entry.hpp"
-#include "../logging.hpp"
+#include <mccfr/mccfr_entry.hpp>
 
 namespace jester {
 

@@ -1,16 +1,15 @@
-#include "game_engine.hpp"
-
-#include "../constants.hpp"
-#include "../observers/omniscient_observer.hpp"
-#include "../observers/reduced_observer.hpp"
-#include "../players/mccfr_player.hpp"
-#include "../players/dmcts_player.hpp"
-#include "../players/greedy_player.hpp"
-#include "../players/human_player.hpp"
-#include "../players/ismcts_player.hpp"
-#include "../players/minimal_player.hpp"
-#include "../players/random_player.hpp"
-#include "../game/game_state.hpp"
+#include <game/constants.hpp>
+#include <game/game_engine.hpp>
+#include <game/game_state.hpp>
+#include <observers/omniscient_observer.hpp>
+#include <observers/reduced_observer.hpp>
+#include <players/dmcts_player.hpp>
+#include <players/greedy_player.hpp>
+#include <players/human_player.hpp>
+#include <players/ismcts_player.hpp>
+#include <players/mccfr_player.hpp>
+#include <players/minimal_player.hpp>
+#include <players/random_player.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -33,8 +32,8 @@ namespace {
         std::getline(std::cin, line);
         if (line.empty()) {
             std::stringstream ess;
-            ess << "Please enter a number between " 
-                << minimum << " and " 
+            ess << "Please enter a number between "
+                << minimum << " and "
                 << maximum << ".";
             throw std::invalid_argument(ess.str());
         }
@@ -42,8 +41,8 @@ namespace {
         std::istringstream(line) >> num;
         if (num < minimum || num > maximum) {
             std::stringstream ess;
-            ess << "Please enter a number between " 
-                << minimum << " and " 
+            ess << "Please enter a number between "
+                << minimum << " and "
                 << maximum << ".";
             throw std::invalid_argument(ess.str());
         }
@@ -99,8 +98,8 @@ void GameEngine::shell()
         size_t num_players;
         try {
             std::cout << "Number of players: ";
-            num_players = readInteger(Constants::instance().MIN_PLAYERS, 
-                    Constants::instance().MAX_PLAYERS);
+            num_players = readInteger(Constants::instance().MIN_PLAYERS,
+                Constants::instance().MAX_PLAYERS);
         } catch (std::exception& ex) {
             if (!std::cin) {
                 break;
@@ -164,8 +163,7 @@ void GameEngine::shell()
         GameState game(players.size(), d_rng);
         if (has_humans) {
             game.setObserver(stda::make_erased<ReducedObserver>());
-        }
-        else {
+        } else {
             game.setObserver(stda::make_erased<OmniscientObserver>());
         }
 

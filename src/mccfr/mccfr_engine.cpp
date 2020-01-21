@@ -1,8 +1,7 @@
-#include "mccfr_engine.hpp"
-
-#include "../game/game_state.hpp"
-#include "../game/game_view.hpp"
-#include "../logging.hpp"
+#include <game/game_state.hpp>
+#include <game/game_view.hpp>
+#include <logs/loggers.hpp>
+#include <mccfr/mccfr_engine.hpp>
 
 #include <cereal/archives/portable_binary.hpp>
 
@@ -25,8 +24,8 @@ MCCFREngine::MCCFREngine(const std::string& filename)
 void MCCFREngine::train()
 {
     if (training_logger != nullptr) {
-        training_logger->info("{} information sets loaded from disk.", 
-                d_strategy.table().size());
+        training_logger->info("{} information sets loaded from disk.",
+            d_strategy.table().size());
     }
     auto threads = trainingThreads(std::thread::hardware_concurrency());
     threads.push_back(savingThread(std::chrono::seconds(120)));

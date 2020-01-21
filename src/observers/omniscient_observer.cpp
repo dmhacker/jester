@@ -1,6 +1,6 @@
-#include "omniscient_observer.hpp"
-#include "../logging.hpp"
-#include "../game/game_state.hpp"
+#include <game/game_state.hpp>
+#include <logs/formatting.hpp>
+#include <observers/omniscient_observer.hpp>
 
 #include <sstream>
 
@@ -59,7 +59,8 @@ void OmniscientObserver::onPostAction(const GameState& state, const Action& acti
     }
 }
 
-void OmniscientObserver::onHandReplenish(const GameState& state, size_t pid, const Card& card) {
+void OmniscientObserver::onHandReplenish(const GameState& state, size_t pid, const Card& card)
+{
     std::cout << "[P" << pid << "] Drew card " << card << "." << std::endl;
 }
 

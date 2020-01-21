@@ -1,4 +1,4 @@
-#include "minimal_player.hpp"
+#include <players/minimal_player.hpp>
 
 namespace jester {
 

@@ -1,8 +1,8 @@
 #define CATCH_CONFIG_MAIN
 
-#include "../src/logging.hpp"
-
 #include <catch.hpp>
+
+#include <logs/loggers.hpp>
 
 namespace jester {
 

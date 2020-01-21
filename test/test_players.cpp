@@ -1,13 +1,13 @@
 #include <catch.hpp>
 
-#include "../src/constants.hpp"
-#include "../src/players/mccfr_player.hpp"
-#include "../src/players/dmcts_player.hpp"
-#include "../src/players/greedy_player.hpp"
-#include "../src/players/ismcts_player.hpp"
-#include "../src/players/minimal_player.hpp"
-#include "../src/players/random_player.hpp"
-#include "../src/game/game_state.hpp"
+#include <game/constants.hpp>
+#include <game/game_state.hpp>
+#include <players/dmcts_player.hpp>
+#include <players/greedy_player.hpp>
+#include <players/ismcts_player.hpp>
+#include <players/mccfr_player.hpp>
+#include <players/minimal_player.hpp>
+#include <players/random_player.hpp>
 
 using namespace jester;
 

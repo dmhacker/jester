@@ -1,9 +1,9 @@
 #include <catch.hpp>
 
-#include "../src/constants.hpp"
-#include "../src/players/greedy_player.hpp"
-#include "../src/game/game_state.hpp"
-#include "../src/game/game_view.hpp"
+#include <game/constants.hpp>
+#include <game/game_state.hpp>
+#include <game/game_view.hpp>
+#include <players/greedy_player.hpp>
 
 using namespace jester;
 
@@ -65,12 +65,11 @@ TEST_CASE("Hands are hidden correctly")
                     if (pid != pid2) {
                         size_t hcnt = 0;
                         for (auto& card : state.hand(pid2)) {
-                            if (state.hiddenCards().find(card) 
-                                    == state.hiddenCards().end()) {
+                            if (state.hiddenCards().find(card)
+                                == state.hiddenCards().end()) {
                                 auto vhand = view.visibleHand(pid2);
                                 REQUIRE(vhand.find(card) != vhand.end());
-                            }
-                            else {
+                            } else {
                                 hcnt++;
                             }
                         }

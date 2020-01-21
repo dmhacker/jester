@@ -1,5 +1,5 @@
-#include "dmcts_tree.hpp"
-#include "../players/random_player.hpp"
+#include <mcts/dmcts_tree.hpp>
+#include <players/random_player.hpp>
 
 #include <cmath>
 
