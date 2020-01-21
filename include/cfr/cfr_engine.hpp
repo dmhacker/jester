@@ -1,50 +1,39 @@
 #ifndef JESTER_CFR_ENGINE_HPP
 #define JESTER_CFR_ENGINE_HPP
 
+#include "../game/card.hpp"
 #include "cfr_table.hpp"
 
 #include <chrono>
+#include <random>
 #include <redox.hpp>
-#include <sstream>
+#include <stda/erased_ptr.hpp>
 
 namespace jester {
 
+class GameState;
+class GameView;
+
 class CFREngine {
 private:
-    CFRTable d_strategy;
-    redox::Redox d_rdx;
+    stda::erased_ptr<CFRTable> d_table;
 
 public:
     CFREngine();
-    CFREngine(const std::string& url, int port);
-    ~CFREngine();
+    CFREngine(stda::erased_ptr<CFRTable>&& table);
 
-    CFRTable& strategy();
+    Action bestAction(const GameView& view, std::mt19937& rng);
+    size_t sampleIndex(const std::vector<float>& profile, std::mt19937& rng) const;
 
     void train();
+    int train(size_t tpid, const GameState& state, std::mt19937& rng);
 
-private:
-    void connect(const std::string& url, int port);
-
-    std::thread logThread(const std::chrono::milliseconds& delay);
-    std::vector<std::thread> trainingThreads(size_t);
+    CFRTable* table();
 };
 
-inline CFRTable& CFREngine::strategy()
+inline CFRTable* CFREngine::table()
 {
-    return d_strategy;
-}
-
-inline void CFREngine::connect(const std::string& url, int port)
-{
-    if (!d_rdx.connect(url, port)) {
-        std::stringstream ss;
-        ss << "Could not connect to Redis at "
-           << url << ":" << port
-           << ".";
-        throw std::runtime_error(ss.str());
-    }
-    d_rdx.logger_.level(redox::log::Level::Error);
+    return d_table.get();
 }
 
 }

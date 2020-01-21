@@ -3,18 +3,18 @@
 
 #include <random>
 
-#include "player.hpp"
 #include "../cfr/cfr_engine.hpp"
+#include "player.hpp"
 
 namespace jester {
 
 class CFRPlayer : public Player {
 private:
-    CFREngine d_engine;
+    CFREngine& d_cfr;
     std::mt19937 d_rng;
 
 public:
-    CFRPlayer();
+    CFRPlayer(CFREngine& cfr);
     Action nextAction(const GameView& view);
 };
 

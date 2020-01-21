@@ -1,6 +1,7 @@
 #ifndef JESTER_GAME_ENGINE_HPP
 #define JESTER_GAME_ENGINE_HPP
 
+#include "../cfr/cfr_engine.hpp"
 #include "../players/player.hpp"
 
 #include <random>
@@ -22,6 +23,7 @@ public:
 
 class GameEngine {
 private:
+    CFREngine d_cfr;
     std::vector<PlayerOption> d_options;
     std::mt19937 d_rng;
 

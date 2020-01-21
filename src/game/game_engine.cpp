@@ -86,8 +86,8 @@ GameEngine::GameEngine()
         auto cores = std::thread::hardware_concurrency();
         return stda::make_erased<ISMCTSPlayer>(cores, std::chrono::seconds(9));
     }));
-    d_options.push_back(PlayerOption("Tabular CFR", []() {
-        return stda::make_erased<CFRPlayer>();
+    d_options.push_back(PlayerOption("Tabular CFR", [this]() {
+        return stda::make_erased<CFRPlayer>(d_cfr);
     }));
 }
 

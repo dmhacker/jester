@@ -1,13 +1,14 @@
 #include <catch.hpp>
 
+#include <cfr/unordered_cfr_table.hpp>
 #include <game/constants.hpp>
 #include <game/game_state.hpp>
+#include <players/cfr_player.hpp>
 #include <players/dmcts_player.hpp>
 #include <players/greedy_player.hpp>
 #include <players/ismcts_player.hpp>
 #include <players/minimal_player.hpp>
 #include <players/random_player.hpp>
-#include <players/cfr_player.hpp>
 
 using namespace jester;
 
@@ -84,7 +85,8 @@ TEST_CASE("ISMCTS player works correctly")
 
 TEST_CASE("CFR player works correctly")
 {
-    CFRPlayer player;
+    CFREngine engine(stda::make_erased<UnorderedCFRTable>());
+    CFRPlayer player(engine);
     GreedyPlayer opponent;
     for (size_t pcnt = Constants::instance().MIN_PLAYERS;
          pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {

@@ -8,12 +8,6 @@ CFREntry::CFREntry(size_t num_actions)
 {
 }
 
-CFREntry::CFREntry(const CFREntry& entry)
-    : d_cumulProfile(entry.d_cumulProfile)
-    , d_cumulRegret(entry.d_cumulRegret)
-{
-}
-
 std::vector<float> CFREntry::currentProfile() const
 {
     size_t num_actions = d_cumulProfile.size();

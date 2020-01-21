@@ -1,5 +1,4 @@
 #include <players/cfr_player.hpp>
-#include <players/ismcts_player.hpp>
 #include <utils/logging.hpp>
 
 #include <iostream>
@@ -8,8 +7,9 @@
 
 namespace jester {
 
-CFRPlayer::CFRPlayer()
-    : d_rng(std::random_device {}())
+CFRPlayer::CFRPlayer(CFREngine& engine)
+    : d_cfr(engine)
+    , d_rng(std::random_device {}())
 {
 }
 
@@ -24,9 +24,7 @@ Action CFRPlayer::nextAction(const GameView& view)
         bots_logger->info("CFR lookup has been started for P{}.",
             view.playerId());
     }
-    ISMCTSPlayer test(1, std::chrono::milliseconds(2000));
-    test.nextAction(view);
-    return d_engine.strategy().bestAction(view, d_rng);
+    return d_cfr.bestAction(view, d_rng);
 }
 
 }

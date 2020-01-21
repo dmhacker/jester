@@ -1,4 +1,5 @@
 #include <cfr/cfr_engine.hpp>
+#include <cfr/redis_cfr_table.hpp>
 #include <game/game_state.hpp>
 #include <game/game_view.hpp>
 #include <utils/logging.hpp>
@@ -11,63 +12,19 @@
 namespace jester {
 
 CFREngine::CFREngine()
-    : d_strategy(d_rdx)
+    : d_table(stda::make_erased<RedisCFRTable>())
 {
-    std::string url;
-    if (std::getenv("REDIS_URL") != nullptr) {
-        url = std::getenv("REDIS_URL");
-    } else {
-        url = "localhost";
-    }
-    int port;
-    if (std::getenv("REDIS_PORT") != nullptr) {
-        port = std::stoi(std::getenv("REDIS_PORT"));
-    } else {
-        port = 6379;
-    }
-    connect(url, port);
 }
 
-CFREngine::CFREngine(const std::string& url, int port)
-    : d_strategy(d_rdx)
+CFREngine::CFREngine(stda::erased_ptr<CFRTable>&& table)
+    : d_table(std::move(table))
 {
-    connect(url, port);
-}
-
-CFREngine::~CFREngine()
-{
-    d_rdx.disconnect();
 }
 
 void CFREngine::train()
 {
-    auto threads = trainingThreads(std::thread::hardware_concurrency());
-    threads.push_back(logThread(std::chrono::seconds(5)));
-    for (auto& thr : threads) {
-        thr.join();
-    }
-}
-
-std::thread CFREngine::logThread(const std::chrono::milliseconds& delay)
-{
-    std::thread thr([this, delay]() {
-        while (training_logger != nullptr) {
-            auto& cmd = d_rdx.commandSync<int>({ "DBSIZE" });
-            if (cmd.ok()) {
-                training_logger->info("{} information sets in storage.",
-                    cmd.reply());
-            }
-            cmd.free();
-            std::this_thread::sleep_for(delay);
-        }
-    });
-    return thr;
-}
-
-std::vector<std::thread> CFREngine::trainingThreads(size_t num_threads)
-{
     std::vector<std::thread> threads;
-    for (size_t t = 0; t < num_threads; t++) {
+    for (size_t t = 0; t < std::thread::hardware_concurrency(); t++) {
         threads.push_back(std::thread([this, t]() {
             std::mt19937 rng(std::random_device {}());
             if (training_logger != nullptr) {
@@ -77,12 +34,129 @@ std::vector<std::thread> CFREngine::trainingThreads(size_t num_threads)
                 size_t num_players = 2;
                 GameState root(num_players, rng);
                 for (size_t tpid = 0; tpid < num_players; tpid++) {
-                    d_strategy.train(tpid, root, rng);
+                    train(tpid, root, rng);
                 }
             }
         }));
     }
-    return threads;
+    threads.push_back(std::thread([this]() {
+        while (training_logger != nullptr) {
+            training_logger->info("{} information sets in storage.",
+                d_table->size());
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+        }
+    }));
+    for (auto& thr : threads) {
+        thr.join();
+    }
+}
+
+Action CFREngine::bestAction(const GameView& view, std::mt19937& rng)
+{
+    auto entry = d_table->find(CFRInfoSet(view));
+    if (entry != nullptr) {
+        auto actions = view.nextActions();
+        std::sort(actions.begin(), actions.end());
+        auto profile = entry->averageProfile();
+        if (bots_logger != nullptr) {
+            std::stringstream ss;
+            ss << profile << " for actions " << actions;
+            bots_logger->info("CFR has distribution {}.", ss.str());
+        }
+        return actions[sampleIndex(profile, rng)];
+    } else {
+        if (bots_logger != nullptr) {
+            bots_logger->info("CFR could not find a matching information set.");
+        }
+        const auto& actions = view.nextActions();
+        std::uniform_int_distribution<std::mt19937::result_type> dist(0, actions.size() - 1);
+        return actions[dist(rng)];
+    }
+}
+
+int CFREngine::train(size_t tpid, const GameState& state, std::mt19937& rng)
+{
+    // Return utility from terminal node; this is the evaluation function
+    if (state.finished()) {
+        int reward = 0;
+        for (size_t i = 0; i < state.playerCount(); i++) {
+            auto pid = state.winOrder()[i];
+            if (pid == tpid) {
+                if (i < state.playerCount() - 1) {
+                    reward = state.playerCount() - 1 - i;
+                } else {
+                    reward = state.playerCount() * (state.playerCount() - 1) / 2;
+                    reward *= -1;
+                }
+                break;
+            }
+        }
+        return reward;
+    }
+
+    // Skip over information sets where only one action is possible
+    auto player = state.currentPlayerId();
+    auto actions = state.nextActions();
+    auto view = state.currentPlayerView();
+    if (actions.size() == 1) {
+        auto action = actions[0];
+        GameState next_state(state);
+        next_state.playAction(action);
+        return train(tpid, next_state, rng);
+    }
+    std::sort(actions.begin(), actions.end());
+
+    CFRInfoSet key(view);
+    CFREntry entry(actions.size());
+    {
+        auto entry_lookup = d_table->find(key);
+        if (entry_lookup != nullptr) {
+            entry = *entry_lookup;
+        }
+    }
+    auto profile = entry.currentProfile();
+
+    // Sample best action given the current profile
+    auto best_idx = sampleIndex(profile, rng);
+
+    // Opponents only follow the best action
+    if (player != tpid) {
+        GameState next_state(state);
+        next_state.playAction(actions[best_idx]);
+        entry.addUtility(best_idx, 1);
+        d_table->save(key, entry);
+        return train(tpid, next_state, rng);
+    }
+
+    // Walk every action for the current player
+    std::vector<int> child_util(actions.size());
+    for (size_t i = 0; i < actions.size(); i++) {
+        GameState next_state(state);
+        next_state.playAction(actions[i]);
+        child_util[i] = train(tpid, next_state, rng);
+    }
+    for (size_t i = 0; i < actions.size(); i++) {
+        entry.addRegret(i, child_util[i] - child_util[best_idx]);
+    }
+    d_table->save(key, entry);
+
+    return child_util[best_idx];
+}
+
+size_t CFREngine::sampleIndex(const std::vector<float>& profile, std::mt19937& rng) const
+{
+    std::uniform_real_distribution<> dist(0, 1);
+    float randf = dist(rng);
+    float counter = 0.0f;
+    for (size_t idx = 0; idx < profile.size(); idx++) {
+        counter += profile[idx];
+        if (randf <= counter) {
+            return idx;
+        }
+    }
+    std::stringstream ss;
+    ss << "Distribution " << profile << " does not sum to 1.";
+    throw std::logic_error(ss.str());
 }
 
 }

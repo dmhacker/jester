@@ -13,7 +13,7 @@ private:
 public:
     CFREntry() = default;
     CFREntry(size_t num_actions);
-    CFREntry(const CFREntry& entry);
+    CFREntry(const CFREntry& entry) = default;
 
     std::vector<float> currentProfile() const;
     std::vector<float> averageProfile() const;
