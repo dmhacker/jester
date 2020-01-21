@@ -10,7 +10,7 @@
 
 namespace jester {
 
-std::shared_ptr<spdlog::logger> bots_logger = spdlog::basic_logger_mt("bots", "logs/bots.log");
+std::shared_ptr<spdlog::logger> bots_logger = spdlog::basic_logger_mt("bots", "bots.log");
 std::shared_ptr<spdlog::logger> training_logger = spdlog::stdout_color_mt("training");
 
 }

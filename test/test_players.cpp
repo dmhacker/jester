@@ -7,6 +7,7 @@
 #include <players/ismcts_player.hpp>
 #include <players/minimal_player.hpp>
 #include <players/random_player.hpp>
+#include <players/mccfr_player.hpp>
 
 using namespace jester;
 
@@ -73,6 +74,17 @@ TEST_CASE("DMCTS player works correctly")
 TEST_CASE("ISMCTS player works correctly")
 {
     ISMCTSPlayer player(1, std::chrono::milliseconds(10));
+    GreedyPlayer opponent;
+    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
+         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
+        GameState state(pcnt, rng);
+        playGame(player, opponent, state);
+    }
+}
+
+TEST_CASE("MCCFR player works correctly")
+{
+    MCCFRPlayer player;
     GreedyPlayer opponent;
     for (size_t pcnt = Constants::instance().MIN_PLAYERS;
          pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
