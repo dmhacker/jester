@@ -1,11 +1,14 @@
 cmake_minimum_required (VERSION 3.7)
 project(jester)
 
+# Find dependencies on the user's system
+add_subdirectory(lib/redox)
 find_package(Threads REQUIRED)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(CTest)
 include(cmake/Catch.cmake)
 
+# Generate coverage data and send it to coveralls
 option(COVERALLS "Generate coveralls data" OFF)
 if (COVERALLS)
     include(Coveralls)
@@ -24,6 +27,7 @@ list(REMOVE_ITEM sources "src/main.cpp")
 add_library(jester ${sources})
 target_include_directories(jester PUBLIC "include")
 target_link_libraries(jester Threads::Threads)
+target_link_libraries(jester redox)
 
 # Main executable allows user to play the game/train CFRM
 add_executable(play "src/main.cpp")
