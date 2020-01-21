@@ -1,19 +1,19 @@
-#ifndef JESTER_MCCFR_INFOSET_HPP
-#define JESTER_MCCFR_INFOSET_HPP
+#ifndef JESTER_CFR_INFOSET_HPP
+#define JESTER_CFR_INFOSET_HPP
 
 #include <memory>
 #include <cereal/types/vector.hpp>
 
 namespace jester {
 
-class MCCFRInfoSet;
+class CFRInfoSet;
 
 }
 
 namespace std {
 
 template <>
-struct hash<jester::MCCFRInfoSet>;
+struct hash<jester::CFRInfoSet>;
 
 }
 
@@ -21,26 +21,26 @@ namespace jester {
 
 class GameView;
 
-class MCCFRInfoSet {
+class CFRInfoSet {
 private:
     std::vector<uint8_t> d_cardStates;
     std::vector<uint8_t> d_hiddenHands;
     uint8_t d_trump;
 
 public:
-    MCCFRInfoSet() = default;
-    MCCFRInfoSet(const GameView&);
+    CFRInfoSet() = default;
+    CFRInfoSet(const GameView&);
 
-    bool operator==(const MCCFRInfoSet&) const;
+    bool operator==(const CFRInfoSet&) const;
 
     template <class Archive>
     void serialize(Archive& archive);
 
-    friend struct std::hash<MCCFRInfoSet>;
+    friend struct std::hash<CFRInfoSet>;
 };
 
 template <class Archive>
-inline void MCCFRInfoSet::serialize(Archive& archive)
+inline void CFRInfoSet::serialize(Archive& archive)
 {
     archive(d_cardStates, d_hiddenHands, d_trump);
 }
@@ -59,8 +59,8 @@ namespace {
 }
 
 template <>
-struct hash<jester::MCCFRInfoSet> {
-    size_t operator()(const jester::MCCFRInfoSet& is) const
+struct hash<jester::CFRInfoSet> {
+    size_t operator()(const jester::CFRInfoSet& is) const
     {
         size_t seed = 1337;
         hash_combine(seed, is.d_trump);

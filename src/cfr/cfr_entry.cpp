@@ -1,26 +1,26 @@
-#include <mccfr/mccfr_entry.hpp>
+#include <cfr/cfr_entry.hpp>
 
 namespace jester {
 
-MCCFREntry::MCCFREntry(size_t num_actions)
+CFREntry::CFREntry(size_t num_actions)
     : d_cumulProfile(num_actions)
     , d_cumulRegret(num_actions)
 {
 }
 
-MCCFREntry::MCCFREntry(const MCCFREntry& entry)
+CFREntry::CFREntry(const CFREntry& entry)
     : d_cumulProfile(entry.d_cumulProfile)
     , d_cumulRegret(entry.d_cumulRegret)
 {
 }
 
-std::vector<float> MCCFREntry::currentProfile() const
+std::vector<float> CFREntry::currentProfile() const
 {
     size_t num_actions = d_cumulProfile.size();
     std::vector<float> profile(num_actions);
     float regret_sum = 0;
     for (size_t idx = 0; idx < num_actions; idx++) {
-        float positive_regret = std::max(d_cumulRegret[idx], 0.f);
+        float positive_regret = std::max(1.f * d_cumulRegret[idx], 0.f);
         profile[idx] = positive_regret;
         regret_sum += positive_regret;
     }
@@ -34,7 +34,7 @@ std::vector<float> MCCFREntry::currentProfile() const
     return profile;
 }
 
-std::vector<float> MCCFREntry::averageProfile() const
+std::vector<float> CFREntry::averageProfile() const
 {
     size_t num_actions = d_cumulProfile.size();
     std::vector<float> profile(num_actions);

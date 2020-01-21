@@ -1,6 +1,6 @@
 #include <game/constants.hpp>
 #include <game/game_view.hpp>
-#include <mccfr/mccfr_infoset.hpp>
+#include <cfr/cfr_infoset.hpp>
 
 namespace jester {
 
@@ -16,7 +16,7 @@ constexpr static uint8_t CARD_DISCARDED = 7;
 constexpr static uint8_t CARD_IN_PLAY = 8;
 constexpr static uint8_t CARD_LAST_IN_PLAY = 9;
 
-MCCFRInfoSet::MCCFRInfoSet(const GameView& view)
+CFRInfoSet::CFRInfoSet(const GameView& view)
     : d_cardStates((Constants::instance().MAX_RANK
                        - Constants::instance().MIN_RANK + 1)
         * 4)
@@ -89,7 +89,7 @@ MCCFRInfoSet::MCCFRInfoSet(const GameView& view)
     }
 }
 
-bool MCCFRInfoSet::operator==(const MCCFRInfoSet& is) const
+bool CFRInfoSet::operator==(const CFRInfoSet& is) const
 {
     return d_trump == is.d_trump
         && d_cardStates == is.d_cardStates

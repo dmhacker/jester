@@ -1,6 +1,6 @@
 #include <game/game_state.hpp>
-#include <logs/formatting.hpp>
 #include <observers/reduced_observer.hpp>
+#include <utils/logging.hpp>
 
 #include <sstream>
 

@@ -1,8 +1,7 @@
 #include <game/constants.hpp>
 #include <game/game_state.hpp>
 #include <game/game_view.hpp>
-#include <logs/formatting.hpp>
-#include <logs/loggers.hpp>
+#include <utils/logging.hpp>
 #include <observers/observer.hpp>
 
 #include <algorithm>

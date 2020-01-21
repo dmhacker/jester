@@ -1,7 +1,7 @@
+#include <cfr/cfr_engine.hpp>
 #include <game/constants.hpp>
 #include <game/game_engine.hpp>
-#include <logs/loggers.hpp>
-#include <mccfr/mccfr_engine.hpp>
+#include <utils/logging.hpp>
 
 #include <cxxopts.hpp>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     training_logger->flush_on(spdlog::level::info);
 
     if (result.count("train") > 0) {
-        MCCFREngine engine;
+        CFREngine engine;
         engine.train();
     } else {
         GameEngine engine;

@@ -1,5 +1,5 @@
 #include <game/game_state.hpp>
-#include <logs/formatting.hpp>
+#include <utils/logging.hpp>
 #include <observers/omniscient_observer.hpp>
 
 #include <sstream>

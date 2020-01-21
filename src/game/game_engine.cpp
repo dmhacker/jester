@@ -7,7 +7,7 @@
 #include <players/greedy_player.hpp>
 #include <players/human_player.hpp>
 #include <players/ismcts_player.hpp>
-#include <players/mccfr_player.hpp>
+#include <players/cfr_player.hpp>
 #include <players/minimal_player.hpp>
 #include <players/random_player.hpp>
 
@@ -86,8 +86,8 @@ GameEngine::GameEngine()
         auto cores = std::thread::hardware_concurrency();
         return stda::make_erased<ISMCTSPlayer>(cores, std::chrono::seconds(9));
     }));
-    d_options.push_back(PlayerOption("Tabular MCCFR", []() {
-        return stda::make_erased<MCCFRPlayer>();
+    d_options.push_back(PlayerOption("Tabular CFR", []() {
+        return stda::make_erased<CFRPlayer>();
     }));
 }
 

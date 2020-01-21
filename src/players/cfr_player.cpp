@@ -1,5 +1,6 @@
-#include <logs/loggers.hpp>
-#include <players/mccfr_player.hpp>
+#include <players/cfr_player.hpp>
+#include <players/ismcts_player.hpp>
+#include <utils/logging.hpp>
 
 #include <iostream>
 #include <memory>
@@ -7,12 +8,12 @@
 
 namespace jester {
 
-MCCFRPlayer::MCCFRPlayer()
+CFRPlayer::CFRPlayer()
     : d_rng(std::random_device {}())
 {
 }
 
-Action MCCFRPlayer::nextAction(const GameView& view)
+Action CFRPlayer::nextAction(const GameView& view)
 {
     // If there is only one action then just take that action
     auto& actions = view.nextActions();
@@ -20,9 +21,11 @@ Action MCCFRPlayer::nextAction(const GameView& view)
         return actions[0];
     }
     if (bots_logger != nullptr) {
-        bots_logger->info("MCCFR lookup has been started for P{}.",
+        bots_logger->info("CFR lookup has been started for P{}.",
             view.playerId());
     }
+    ISMCTSPlayer test(1, std::chrono::milliseconds(2000));
+    test.nextAction(view);
     return d_engine.strategy().bestAction(view, d_rng);
 }
 

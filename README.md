@@ -51,27 +51,27 @@ controlled through stdin.
 
 Work-in-progress options are:
 
-* Tabulated MCCFR — Monte Carlo counterfactual regret minimization 
-with external sampling. The algorithm is implemented as listed on page 16
+* Tabulated PCFR — Pure counterfactual regret minimization. 
+The algorithm is implemented as listed on page 70
 of [Richard Gibson's PhD dissertation](http://poker.cs.ualberta.ca/publications/gibson.phd.pdf). 
 
-## About MCCFR
+## About CFR
 
-MCCFR is a reinforcement learning algorithm that learns from playing 
+CFR is a reinforcement learning algorithm that learns from playing 
 repeated games against itself. However, the complexity of Durak,
-even with 36 cards and a simplified rule set, means that MCCFR needs 
+even with 36 cards and a simplified rule set, means that CFR needs 
 a large amount of computational resources in order to raise its
 playing strength to an acceptable level. For reference, NLTH poker bots
-using MCCFR are usually trained on supercomputers, where millions of CPU
+using CFR are usually trained on supercomputers, where millions of CPU
 hours are invested into training. For this project, that may not be feasible.
 
-That being said, MCCFR can quickly be trained to play optimally on an extremely 
+That being said, CFR can quickly be trained to play optimally on an extremely 
 simple version of Durak involving only 8 cards and 2 players, requiring only 
 a few minutes of multi-threaded training. You can use this reduced form 
 of Durak by providing the `-r` flag when running the executable. Training
 mode can be enabled via the `-t` flag.
 
-At the moment, the results of MCCFR training are saved to a local binary file 
-`mccfr.bin` in the working directory. Eventually, the training will be able to
-be parallelized across multiple CPUs, and tabulated information sets will be
-stored in a Redis database instance provided by the user. 
+At the moment, the results of CFR training are saved to a Redis database.
+You can specify which database CFR should connect to using the `REDIS_URL`
+and `REDIS_PORT` environment variables. Otherwise, `REDIS_URL` will default
+to localhost and `REDIS_PORT` will default to 6379.

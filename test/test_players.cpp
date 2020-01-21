@@ -7,7 +7,7 @@
 #include <players/ismcts_player.hpp>
 #include <players/minimal_player.hpp>
 #include <players/random_player.hpp>
-#include <players/mccfr_player.hpp>
+#include <players/cfr_player.hpp>
 
 using namespace jester;
 
@@ -82,9 +82,9 @@ TEST_CASE("ISMCTS player works correctly")
     }
 }
 
-TEST_CASE("MCCFR player works correctly")
+TEST_CASE("CFR player works correctly")
 {
-    MCCFRPlayer player;
+    CFRPlayer player;
     GreedyPlayer opponent;
     for (size_t pcnt = Constants::instance().MIN_PLAYERS;
          pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {

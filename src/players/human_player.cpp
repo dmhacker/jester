@@ -1,4 +1,4 @@
-#include <logs/formatting.hpp>
+#include <utils/logging.hpp>
 #include <players/human_player.hpp>
 
 #include <iostream>

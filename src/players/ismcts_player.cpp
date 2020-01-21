@@ -1,6 +1,6 @@
-#include <logs/loggers.hpp>
 #include <mcts/ismcts_tree.hpp>
 #include <players/ismcts_player.hpp>
+#include <utils/logging.hpp>
 
 #include <sstream>
 #include <thread>

@@ -1,6 +1,5 @@
 #include <game/game_state.hpp>
-#include <logs/formatting.hpp>
-#include <logs/loggers.hpp>
+#include <utils/logging.hpp>
 #include <mcts/dmcts_tree.hpp>
 #include <players/dmcts_player.hpp>
 

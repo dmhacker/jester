@@ -1,7 +1,7 @@
+#include <cfr/cfr_engine.hpp>
 #include <game/game_state.hpp>
 #include <game/game_view.hpp>
-#include <logs/loggers.hpp>
-#include <mccfr/mccfr_engine.hpp>
+#include <utils/logging.hpp>
 
 #include <cereal/archives/portable_binary.hpp>
 
@@ -10,7 +10,7 @@
 
 namespace jester {
 
-MCCFREngine::MCCFREngine()
+CFREngine::CFREngine()
     : d_strategy(d_rdx)
 {
     std::string url;
@@ -28,18 +28,18 @@ MCCFREngine::MCCFREngine()
     connect(url, port);
 }
 
-MCCFREngine::MCCFREngine(const std::string& url, int port)
+CFREngine::CFREngine(const std::string& url, int port)
     : d_strategy(d_rdx)
 {
     connect(url, port);
 }
 
-MCCFREngine::~MCCFREngine()
+CFREngine::~CFREngine()
 {
     d_rdx.disconnect();
 }
 
-void MCCFREngine::train()
+void CFREngine::train()
 {
     auto threads = trainingThreads(std::thread::hardware_concurrency());
     threads.push_back(logThread(std::chrono::seconds(5)));
@@ -48,14 +48,14 @@ void MCCFREngine::train()
     }
 }
 
-std::thread MCCFREngine::logThread(const std::chrono::milliseconds& delay)
+std::thread CFREngine::logThread(const std::chrono::milliseconds& delay)
 {
     std::thread thr([this, delay]() {
         while (training_logger != nullptr) {
             auto& cmd = d_rdx.commandSync<int>({ "DBSIZE" });
             if (cmd.ok()) {
-                training_logger->info("{} information sets in storage.", 
-                        cmd.reply());
+                training_logger->info("{} information sets in storage.",
+                    cmd.reply());
             }
             cmd.free();
             std::this_thread::sleep_for(delay);
@@ -64,7 +64,7 @@ std::thread MCCFREngine::logThread(const std::chrono::milliseconds& delay)
     return thr;
 }
 
-std::vector<std::thread> MCCFREngine::trainingThreads(size_t num_threads)
+std::vector<std::thread> CFREngine::trainingThreads(size_t num_threads)
 {
     std::vector<std::thread> threads;
     for (size_t t = 0; t < num_threads; t++) {

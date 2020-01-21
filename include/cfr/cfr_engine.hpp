@@ -1,7 +1,7 @@
-#ifndef JESTER_MCCFR_ENGINE_HPP
-#define JESTER_MCCFR_ENGINE_HPP
+#ifndef JESTER_CFR_ENGINE_HPP
+#define JESTER_CFR_ENGINE_HPP
 
-#include "mccfr_table.hpp"
+#include "cfr_table.hpp"
 
 #include <chrono>
 #include <redox.hpp>
@@ -9,17 +9,17 @@
 
 namespace jester {
 
-class MCCFREngine {
+class CFREngine {
 private:
-    MCCFRTable d_strategy;
+    CFRTable d_strategy;
     redox::Redox d_rdx;
 
 public:
-    MCCFREngine();
-    MCCFREngine(const std::string& url, int port);
-    ~MCCFREngine();
+    CFREngine();
+    CFREngine(const std::string& url, int port);
+    ~CFREngine();
 
-    MCCFRTable& strategy();
+    CFRTable& strategy();
 
     void train();
 
@@ -30,12 +30,12 @@ private:
     std::vector<std::thread> trainingThreads(size_t);
 };
 
-inline MCCFRTable& MCCFREngine::strategy()
+inline CFRTable& CFREngine::strategy()
 {
     return d_strategy;
 }
 
-inline void MCCFREngine::connect(const std::string& url, int port)
+inline void CFREngine::connect(const std::string& url, int port)
 {
     if (!d_rdx.connect(url, port)) {
         std::stringstream ss;

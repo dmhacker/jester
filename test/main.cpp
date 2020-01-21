@@ -2,7 +2,7 @@
 
 #include <catch.hpp>
 
-#include <logs/loggers.hpp>
+#include <utils/logging.hpp>
 
 namespace jester {
 
