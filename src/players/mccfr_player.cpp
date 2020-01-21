@@ -20,7 +20,7 @@ Action MCCFRPlayer::nextAction(const GameView& view)
         return actions[0];
     }
     if (bots_logger != nullptr) {
-        bots_logger->info("CFRM lookup has been started for P{}.",
+        bots_logger->info("MCCFR lookup has been started for P{}.",
             view.playerId());
     }
     return d_engine.strategy().bestAction(view, d_rng);

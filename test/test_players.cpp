@@ -5,7 +5,6 @@
 #include <players/dmcts_player.hpp>
 #include <players/greedy_player.hpp>
 #include <players/ismcts_player.hpp>
-#include <players/mccfr_player.hpp>
 #include <players/minimal_player.hpp>
 #include <players/random_player.hpp>
 
@@ -52,17 +51,6 @@ TEST_CASE("Random player works correctly")
 TEST_CASE("Greedy player works correctly")
 {
     GreedyPlayer player;
-    GreedyPlayer opponent;
-    for (size_t pcnt = Constants::instance().MIN_PLAYERS;
-         pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {
-        GameState state(pcnt, rng);
-        playGame(player, opponent, state);
-    }
-}
-
-TEST_CASE("MCCFR player works correctly")
-{
-    MCCFRPlayer player;
     GreedyPlayer opponent;
     for (size_t pcnt = Constants::instance().MIN_PLAYERS;
          pcnt <= Constants::instance().MAX_PLAYERS; pcnt++) {

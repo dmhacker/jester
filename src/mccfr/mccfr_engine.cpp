@@ -5,51 +5,63 @@
 
 #include <cereal/archives/portable_binary.hpp>
 
+#include <cstdlib>
 #include <fstream>
 
 namespace jester {
 
-constexpr static size_t UPDATES_PER_INTERVAL = 24;
-
-MCCFREngine::MCCFREngine(const std::string& filename)
-    : d_filename(filename)
+MCCFREngine::MCCFREngine()
+    : d_strategy(d_rdx)
 {
-    std::ifstream infile(filename);
-    if (infile.good()) {
-        cereal::PortableBinaryInputArchive iarchive(infile);
-        iarchive(d_strategy);
+    std::string url;
+    if (std::getenv("REDIS_URL") != nullptr) {
+        url = std::getenv("REDIS_URL");
+    } else {
+        url = "localhost";
     }
+    int port;
+    if (std::getenv("REDIS_PORT") != nullptr) {
+        port = std::stoi(std::getenv("REDIS_PORT"));
+    } else {
+        port = 6379;
+    }
+    connect(url, port);
+}
+
+MCCFREngine::MCCFREngine(const std::string& url, int port)
+    : d_strategy(d_rdx)
+{
+    connect(url, port);
+}
+
+MCCFREngine::~MCCFREngine()
+{
+    d_rdx.disconnect();
 }
 
 void MCCFREngine::train()
 {
-    if (training_logger != nullptr) {
-        training_logger->info("{} information sets loaded from disk.",
-            d_strategy.table().size());
-    }
     auto threads = trainingThreads(std::thread::hardware_concurrency());
-    threads.push_back(savingThread(std::chrono::seconds(120)));
+    threads.push_back(logThread(std::chrono::seconds(5)));
     for (auto& thr : threads) {
         thr.join();
     }
 }
 
-void MCCFREngine::save()
+std::thread MCCFREngine::logThread(const std::chrono::milliseconds& delay)
 {
-    std::lock_guard<std::mutex> lck(d_strategy.mutex());
-    if (training_logger != nullptr) {
-        training_logger->info("Saving {} information sets.", d_strategy.table().size());
-    }
-    std::ofstream outfile(d_filename);
-    if (outfile.good()) {
-        cereal::PortableBinaryOutputArchive oarchive(outfile);
-        oarchive(d_strategy);
-    } else {
-        throw std::runtime_error("Unable to save MCCFR table to disk.");
-    }
-    if (training_logger != nullptr) {
-        training_logger->info("Save completed.");
-    }
+    std::thread thr([this, delay]() {
+        while (training_logger != nullptr) {
+            auto& cmd = d_rdx.commandSync<int>({ "DBSIZE" });
+            if (cmd.ok()) {
+                training_logger->info("{} information sets in storage.", 
+                        cmd.reply());
+            }
+            cmd.free();
+            std::this_thread::sleep_for(delay);
+        }
+    });
+    return thr;
 }
 
 std::vector<std::thread> MCCFREngine::trainingThreads(size_t num_threads)
@@ -71,31 +83,6 @@ std::vector<std::thread> MCCFREngine::trainingThreads(size_t num_threads)
         }));
     }
     return threads;
-}
-
-std::thread MCCFREngine::savingThread(const std::chrono::milliseconds& interval)
-{
-    std::thread thr([interval, this]() {
-        if (training_logger != nullptr) {
-            training_logger->info("MCCFR save thread started.");
-        }
-        while (true) {
-            if (training_logger != nullptr) {
-                for (size_t i = 0; i < UPDATES_PER_INTERVAL; i++) {
-                    {
-                        std::lock_guard<std::mutex> lck(d_strategy.mutex());
-                        training_logger->info("{} information sets in memory.",
-                            d_strategy.table().size());
-                    }
-                    std::this_thread::sleep_for(interval / UPDATES_PER_INTERVAL);
-                }
-            } else {
-                std::this_thread::sleep_for(interval);
-            }
-            save();
-        }
-    });
-    return thr;
 }
 
 }

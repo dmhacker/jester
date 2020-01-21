@@ -11,7 +11,6 @@ class MCCFREntry {
 private:
     std::vector<float> d_cumulProfile;
     std::vector<float> d_cumulRegret;
-    std::mutex d_mtx;
 
 public:
     std::vector<Action> d_actions;
@@ -22,8 +21,6 @@ public:
 
     std::vector<float> currentProfile() const;
     std::vector<float> averageProfile() const;
-
-    std::mutex& mutex();
 
     void addProfile(const std::vector<float>& profile);
     void addRegret(size_t idx, float regret);
@@ -48,10 +45,6 @@ template <class Archive>
 inline void MCCFREntry::serialize(Archive& archive)
 {
     archive(d_cumulProfile, d_cumulRegret);
-}
-
-inline std::mutex& MCCFREntry::mutex() {
-    return d_mtx;
 }
 
 }

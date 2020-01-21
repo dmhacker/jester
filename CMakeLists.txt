@@ -27,6 +27,7 @@ list(REMOVE_ITEM sources "src/main.cpp")
 add_library(jester ${sources})
 target_include_directories(jester PUBLIC "include")
 target_include_directories(jester PUBLIC "lib/include")
+target_include_directories(jester PUBLIC "lib/redox/include")
 target_link_libraries(jester Threads::Threads)
 target_link_libraries(jester redox)
 
