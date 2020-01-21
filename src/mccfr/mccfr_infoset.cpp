@@ -1,7 +1,7 @@
 #include "mccfr_infoset.hpp"
 #include "../constants.hpp"
-#include "../logging.hpp"
 #include "../game/game_view.hpp"
+#include "../logging.hpp"
 
 namespace jester {
 
@@ -12,14 +12,15 @@ namespace {
     }
 }
 
-constexpr static uint8_t MAX_CARDS = 36;
 constexpr static uint8_t CARD_HIDDEN = 6;
 constexpr static uint8_t CARD_DISCARDED = 7;
 constexpr static uint8_t CARD_IN_PLAY = 8;
 constexpr static uint8_t CARD_LAST_IN_PLAY = 9;
 
 MCCFRInfoSet::MCCFRInfoSet(const GameView& view)
-    : d_cardStates(MAX_CARDS)
+    : d_cardStates((Constants::instance().MAX_RANK
+                       - Constants::instance().MIN_RANK + 1)
+        * 4)
     , d_hiddenHands(view.playerCount())
     , d_trump(view.trumpCard().suit())
 
@@ -40,7 +41,7 @@ MCCFRInfoSet::MCCFRInfoSet(const GameView& view)
     }
 
     // All cards are initially treated as if they are discarded
-    for (auto cidx = 0; cidx < MAX_CARDS; cidx++) {
+    for (size_t cidx = 0; cidx < d_cardStates.size(); cidx++) {
         d_cardStates[cidx] = CARD_DISCARDED;
     }
     // Mark cards that are hidden
@@ -80,7 +81,7 @@ MCCFRInfoSet::MCCFRInfoSet(const GameView& view)
         }
         if (nonzero_hands == 1) {
             d_hiddenHands[holder] = 0;
-            for (size_t cidx = 0; cidx < MAX_CARDS; cidx++) {
+            for (size_t cidx = 0; cidx < d_cardStates.size(); cidx++) {
                 if (d_cardStates[cidx] == CARD_HIDDEN) {
                     d_cardStates[cidx] = holder;
                 }
