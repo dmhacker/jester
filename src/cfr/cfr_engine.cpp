@@ -25,7 +25,7 @@ void CFREngine::train()
 {
     std::vector<std::thread> threads;
     auto tt_count = std::max(1u,
-        std::thread::hardware_concurrency() / 2);
+        std::thread::hardware_concurrency());
     for (size_t t = 0; t < tt_count; t++) {
         threads.push_back(std::thread([this, t]() {
             std::mt19937 rng(std::random_device {}());
