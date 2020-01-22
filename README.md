@@ -51,7 +51,7 @@ controlled through stdin.
 
 Work-in-progress options are:
 
-* Tabulated PCFR — Pure counterfactual regret minimization. 
+* Tabulated CFR — Pure counterfactual regret minimization. 
 The algorithm is implemented as listed on page 70
 of [Richard Gibson's PhD dissertation](http://poker.cs.ualberta.ca/publications/gibson.phd.pdf). 
 
