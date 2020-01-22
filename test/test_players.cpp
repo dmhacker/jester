@@ -97,7 +97,7 @@ TEST_CASE("Empty CFR player works correctly")
 
 TEST_CASE("Trained CFR player works correctly")
 {
-    Constants::instance().MAX_RANK = 6;
+    Constants::instance().MAX_RANK = 7;
     CFREngine engine(stda::make_erased<UnorderedCFRTable>());
     CFRPlayer player(engine);
     GreedyPlayer opponent;

@@ -27,7 +27,7 @@ bool validDistribution(const std::vector<float>& distribution)
 
 TEST_CASE("CFR trains correctly on reduced 2-player game")
 {
-    Constants::instance().MAX_RANK = 6;
+    Constants::instance().MAX_RANK = 7;
     size_t pcnt = 2;
     GameState state(pcnt, rng);
     CFREngine cfr(stda::make_erased<UnorderedCFRTable>());
