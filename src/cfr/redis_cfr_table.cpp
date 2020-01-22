@@ -50,8 +50,10 @@ std::unique_ptr<CFREntry> RedisCFRTable::find(const CFRInfoSet& infoset)
             cereal::PortableBinaryInputArchive iarchive(ess);
             iarchive(*entry);
         }
+        onFind(true);
         return std::unique_ptr<CFREntry>(entry);
     } else {
+        onFind(false);
         return nullptr;
     }
 }

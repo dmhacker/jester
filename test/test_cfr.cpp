@@ -54,5 +54,6 @@ TEST_CASE("CFR trains correctly on reduced 2-player game")
         REQUIRE(validDistribution(entry.averageProfile()));
         REQUIRE(validDistribution(entry.currentProfile()));
     }
+    REQUIRE(cfr.table()->hitRate() > 0);
     Constants::instance().MAX_RANK = 14;
 }

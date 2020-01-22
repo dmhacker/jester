@@ -10,9 +10,11 @@ std::unique_ptr<CFREntry> UnorderedCFRTable::find(const CFRInfoSet& infoset)
 {
     auto it = d_map.find(infoset); 
     if (it != d_map.end()) {
+        onFind(true);
         return std::unique_ptr<CFREntry>(new CFREntry(it->second));
     }
     else {
+        onFind(false);
         return nullptr;
     }
 }

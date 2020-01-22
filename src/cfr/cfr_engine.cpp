@@ -46,8 +46,10 @@ void CFREngine::train()
             training_logger->info("CFR log thread.");
         }
         while (training_logger != nullptr) {
-            training_logger->info("{} information sets in storage.",
+            training_logger->info("{} information sets in total.",
                 d_table->size());
+            training_logger->info("{} average hit rate this session.",
+                d_table->hitRate());
             std::this_thread::sleep_for(std::chrono::seconds(4));
         }
     }));
