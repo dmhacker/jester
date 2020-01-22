@@ -17,17 +17,19 @@ public:
     virtual std::unique_ptr<CFREntry> find(const CFRInfoSet&) = 0;
     virtual void save(const CFRInfoSet&, const CFREntry&) = 0;
     virtual size_t size() = 0;
-    float hitRate() const;
+    size_t hits() const;
+    size_t misses() const;
 
 protected:
     void onFind(bool hit);
 };
 
-inline float CFRTable::hitRate() const {
-    if (d_hits == 0 && d_misses == 0) {
-        return false;
-    }
-    return 1.f * d_hits / (d_hits + d_misses);
+inline size_t CFRTable::hits() const {
+    return d_hits;
+}
+
+inline size_t CFRTable::misses() const {
+    return d_misses;
 }
 
 inline void CFRTable::onFind(bool hit) {

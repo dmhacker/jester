@@ -48,8 +48,8 @@ void CFREngine::train()
         while (training_logger != nullptr) {
             training_logger->info("{} information sets in total.",
                 d_table->size());
-            training_logger->info("{} average hit rate this session.",
-                d_table->hitRate());
+            training_logger->info("{} hits, {} misses this session.",
+                d_table->hits(), d_table->misses());
             std::this_thread::sleep_for(std::chrono::seconds(4));
         }
     }));
