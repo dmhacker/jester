@@ -83,7 +83,7 @@ TEST_CASE("ISMCTS player works correctly")
     }
 }
 
-TEST_CASE("CFR player works correctly")
+TEST_CASE("Empty CFR player works correctly")
 {
     CFREngine engine(stda::make_erased<UnorderedCFRTable>());
     CFRPlayer player(engine);
@@ -93,4 +93,17 @@ TEST_CASE("CFR player works correctly")
         GameState state(pcnt, rng);
         playGame(player, opponent, state);
     }
+}
+
+TEST_CASE("Trained CFR player works correctly")
+{
+    Constants::instance().MAX_RANK = 6;
+    CFREngine engine(stda::make_erased<UnorderedCFRTable>());
+    CFRPlayer player(engine);
+    GreedyPlayer opponent;
+    GameState state(2, rng);
+    engine.train(0, state, rng);
+    engine.train(1, state, rng);
+    playGame(player, opponent, state);
+    Constants::instance().MAX_RANK = 14;
 }

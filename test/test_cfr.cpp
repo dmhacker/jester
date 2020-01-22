@@ -33,6 +33,7 @@ TEST_CASE("CFR trains correctly on reduced 2-player game")
     CFREngine cfr(stda::make_erased<UnorderedCFRTable>());
     cfr.train(0, state, rng);
     cfr.train(1, state, rng);
+    REQUIRE(cfr.table()->size() >= state.nextActions().size());
     {
         auto key = CFRInfoSet(state.currentPlayerView());
         auto it = cfr.table()->find(key);
