@@ -1,3 +1,3 @@
-[submodule "lib/cpp_redis"]
-	path = lib/cpp_redis
-	url = https://github.com/cpp-redis/cpp_redis
+[submodule "lib/redox"]
+	path = lib/redox
+	url = https://github.com/hmartiro/redox

@@ -3,6 +3,14 @@ language: cpp
 compiler:
   - gcc
   - clang
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.8
+    packages:
+    - libhiredis-dev 
+    - libev-dev
 script:
   - export COVERALLS_SERVICE_NAME=travis-ci
   - export COVERALLS_REPO_TOKEN=Q7IRJzqV8gYttEKTjGk4gYEcN5eJCyufq

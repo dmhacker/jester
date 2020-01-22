@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.7)
 project(jester)
 
 # Find dependencies on the user's system
-add_subdirectory(lib/cpp_redis)
+add_subdirectory(lib/redox)
 find_package(Threads REQUIRED)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(CTest)
@@ -27,10 +27,9 @@ list(REMOVE_ITEM sources "src/main.cpp")
 add_library(jester ${sources})
 target_include_directories(jester PUBLIC "include")
 target_include_directories(jester PUBLIC "lib/include")
-target_include_directories(jester PUBLIC "lib/cpp_redis/includes")
-target_include_directories(jester PUBLIC "lib/cpp_redis/tacopie/includes")
+target_include_directories(jester PUBLIC "lib/redox/include")
 target_link_libraries(jester Threads::Threads)
-target_link_libraries(jester cpp_redis)
+target_link_libraries(jester redox)
 
 # Main executable allows user to play the game/train CFRM
 add_executable(play "src/main.cpp")
