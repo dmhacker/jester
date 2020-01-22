@@ -28,7 +28,7 @@ void CFREngine::train()
         threads.push_back(std::thread([this, t]() {
             std::mt19937 rng(std::random_device {}());
             if (training_logger != nullptr) {
-                training_logger->info("MCCFR training thread {} started.", t);
+                training_logger->info("CFR training thread {} started.", t);
             }
             while (true) {
                 size_t num_players = 2;
@@ -40,37 +40,17 @@ void CFREngine::train()
         }));
     }
     threads.push_back(std::thread([this]() {
+        if (training_logger != nullptr) {
+            training_logger->info("CFR log thread.");
+        }
         while (training_logger != nullptr) {
             training_logger->info("{} information sets in storage.",
                 d_table->size());
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+            std::this_thread::sleep_for(std::chrono::seconds(4));
         }
     }));
     for (auto& thr : threads) {
         thr.join();
-    }
-}
-
-Action CFREngine::bestAction(const GameView& view, std::mt19937& rng)
-{
-    auto entry = d_table->find(CFRInfoSet(view));
-    if (entry != nullptr) {
-        auto actions = view.nextActions();
-        std::sort(actions.begin(), actions.end());
-        auto profile = entry->averageProfile();
-        if (bots_logger != nullptr) {
-            std::stringstream ss;
-            ss << profile << " for actions " << actions;
-            bots_logger->info("CFR has distribution {}.", ss.str());
-        }
-        return actions[sampleIndex(profile, rng)];
-    } else {
-        if (bots_logger != nullptr) {
-            bots_logger->info("CFR could not find a matching information set.");
-        }
-        const auto& actions = view.nextActions();
-        std::uniform_int_distribution<std::mt19937::result_type> dist(0, actions.size() - 1);
-        return actions[dist(rng)];
     }
 }
 
@@ -141,6 +121,29 @@ int CFREngine::train(size_t tpid, const GameState& state, std::mt19937& rng)
     d_table->save(key, entry);
 
     return child_util[best_idx];
+}
+
+Action CFREngine::bestAction(const GameView& view, std::mt19937& rng)
+{
+    auto entry = d_table->find(CFRInfoSet(view));
+    if (entry != nullptr) {
+        auto actions = view.nextActions();
+        std::sort(actions.begin(), actions.end());
+        auto profile = entry->averageProfile();
+        if (bots_logger != nullptr) {
+            std::stringstream ss;
+            ss << profile << " for actions " << actions;
+            bots_logger->info("CFR has distribution {}.", ss.str());
+        }
+        return actions[sampleIndex(profile, rng)];
+    } else {
+        if (bots_logger != nullptr) {
+            bots_logger->info("CFR could not find a matching information set.");
+        }
+        const auto& actions = view.nextActions();
+        std::uniform_int_distribution<std::mt19937::result_type> dist(0, actions.size() - 1);
+        return actions[dist(rng)];
+    }
 }
 
 size_t CFREngine::sampleIndex(const std::vector<float>& profile, std::mt19937& rng) const
