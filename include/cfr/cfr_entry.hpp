@@ -7,8 +7,8 @@ namespace jester {
 
 class CFREntry {
 private:
-    std::vector<int> d_cumulProfile;
-    std::vector<int> d_cumulRegret;
+    std::vector<int16_t> d_cumulProfile;
+    std::vector<int16_t> d_cumulRegret;
 
 public:
     CFREntry() = default;
@@ -18,19 +18,19 @@ public:
     std::vector<float> currentProfile() const;
     std::vector<float> averageProfile() const;
 
-    void addUtility(size_t idx, int utility);
-    void addRegret(size_t idx, int regret);
+    void addUtility(size_t idx, int16_t utility);
+    void addRegret(size_t idx, int16_t regret);
 
     template <class Archive>
     void serialize(Archive& archive);
 };
 
-inline void CFREntry::addUtility(size_t idx, int utility)
+inline void CFREntry::addUtility(size_t idx, int16_t utility)
 {
     d_cumulProfile[idx] += utility;
 }
 
-inline void CFREntry::addRegret(size_t idx, int regret)
+inline void CFREntry::addRegret(size_t idx, int16_t regret)
 {
     d_cumulRegret[idx] += regret;
 }
