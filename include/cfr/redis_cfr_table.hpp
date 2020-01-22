@@ -3,13 +3,13 @@
 
 #include "cfr_table.hpp"
 
-#include <redox.hpp>
+#include <cpp_redis/cpp_redis>
 
 namespace jester {
 
 class RedisCFRTable : public CFRTable {
 private:
-    redox::Redox d_rdx;
+    cpp_redis::client d_client;
 
 public:
     RedisCFRTable();
@@ -19,9 +19,6 @@ public:
     std::unique_ptr<CFREntry> find(const CFRInfoSet&);
     void save(const CFRInfoSet&, const CFREntry&);
     size_t size();
-
-private:
-    void connect(const std::string& url, int port);
 };
 
 }
