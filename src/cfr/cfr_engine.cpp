@@ -43,13 +43,19 @@ void CFREngine::train()
     }
     threads.push_back(std::thread([this]() {
         if (training_logger != nullptr) {
-            training_logger->info("CFR log thread.");
+            training_logger->info("CFR log thread started.");
         }
+        size_t last_hits = 0;
+        size_t last_misses = 0;
         while (training_logger != nullptr) {
-            training_logger->info("{} information sets in total.",
+            size_t hits = d_table->hits();
+            size_t misses = d_table->misses();
+            training_logger->info("{} information sets in storage.",
                 d_table->size());
-            training_logger->info("{} hits, {} misses this session.",
-                d_table->hits(), d_table->misses());
+            training_logger->info("{} hits, {} misses since last check.",
+                hits - last_hits, misses - last_misses);
+            last_hits = hits;
+            last_misses = misses;
             std::this_thread::sleep_for(std::chrono::seconds(4));
         }
     }));
