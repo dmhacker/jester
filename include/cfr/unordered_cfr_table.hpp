@@ -4,12 +4,14 @@
 #include "cfr_table.hpp"
 
 #include <cereal/types/unordered_map.hpp>
+#include <mutex>
 
 namespace jester {
 
 class UnorderedCFRTable : public CFRTable {
 private:
     std::unordered_map<CFRInfoSet, CFREntry> d_map;
+    std::mutex d_mtx;
 
 public:
     std::unique_ptr<CFREntry> find(const CFRInfoSet&);

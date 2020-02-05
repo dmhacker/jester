@@ -1,5 +1,6 @@
 #include <cfr/cfr_engine.hpp>
 #include <cfr/redis_cfr_table.hpp>
+#include <cfr/unordered_cfr_table.hpp>
 #include <game/game_state.hpp>
 #include <game/game_view.hpp>
 #include <utils/logging.hpp>
