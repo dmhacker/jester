@@ -1,3 +1,5 @@
+#include <cfr/cfr_distribution.hpp>
+#include <cfr/cfr_infoset.hpp>
 #include <cfr/redis_cfr_table.hpp>
 #include <game/game_state.hpp>
 #include <game/game_view.hpp>
@@ -48,9 +50,10 @@ void RedisCFRTable::connect(const std::string& url, int port)
     d_client.logger_.level(redox::log::Level::Error);
 }
 
-std::unique_ptr<CFREntry> RedisCFRTable::find(const CFRInfoSet& infoset)
+std::unique_ptr<CFRDistribution> RedisCFRTable::findRegret(const CFRInfoSet& infoset)
 {
     std::stringstream iss;
+    iss << "jester.regrets:";
     {
         cereal::PortableBinaryOutputArchive oarchive(iss);
         oarchive(infoset);
@@ -59,24 +62,55 @@ std::unique_ptr<CFREntry> RedisCFRTable::find(const CFRInfoSet& infoset)
     if (cmd.ok()) {
         std::stringstream ess;
         ess << cmd.reply();
-        CFREntry* entry = new CFREntry();
+        CFRDistribution* result = new CFRDistribution();
         {
             cereal::PortableBinaryInputArchive iarchive(ess);
-            iarchive(*entry);
+            iarchive(*result);
         }
         cmd.free();
-        onFind(true);
-        return std::unique_ptr<CFREntry>(entry);
+        d_hits++;
+        return std::unique_ptr<CFRDistribution>(result);
     } else {
         cmd.free();
-        onFind(false);
+        d_misses++;
         return nullptr;
     }
 }
 
-void RedisCFRTable::save(const CFRInfoSet& infoset, const CFREntry& entry)
+std::unique_ptr<CFRDistribution> RedisCFRTable::findProfile(const CFRInfoSet& infoset, size_t num_actions)
+{
+    CFRDistribution* result = nullptr;
+    for (size_t idx = 0; idx < num_actions; idx++) {
+        std::stringstream iss;
+        iss << "jester.profile:" << idx << ":";
+        {
+            cereal::PortableBinaryOutputArchive oarchive(iss);
+            oarchive(infoset);
+        }
+        auto& cmd = d_client.commandSync<int>({ "GET", iss.str() });
+        if (cmd.ok()) {
+            if (result == nullptr) {
+                result = new CFRDistribution();
+            }
+            int16_t amount = cmd.reply();
+            result->add(idx, amount);
+        }
+        cmd.free();
+    }
+    if (result != nullptr) {
+        d_hits++;
+        return std::unique_ptr<CFRDistribution>(result);
+    } else {
+        d_misses++;
+        return nullptr;
+    }
+}
+
+void RedisCFRTable::saveRegret(const CFRInfoSet& infoset,
+    const CFRDistribution& distribution)
 {
     std::stringstream iss;
+    iss << "jester.regrets:";
     std::stringstream ess;
     {
         cereal::PortableBinaryOutputArchive oarchive(iss);
@@ -84,11 +118,20 @@ void RedisCFRTable::save(const CFRInfoSet& infoset, const CFREntry& entry)
     }
     {
         cereal::PortableBinaryOutputArchive oarchive(ess);
-        oarchive(entry);
+        oarchive(distribution);
     }
-    d_client.command<std::string>({ "SET", iss.str(), ess.str() },
-        [](redox::Command<std::string>& c) {
-        });
+    d_client.command<std::string>({ "SET", iss.str(), ess.str() });
+}
+
+void RedisCFRTable::incrementProfile(const CFRInfoSet& infoset, size_t idx, size_t num_actions)
+{
+    std::stringstream iss;
+    iss << "jester.profile:" << idx << ":";
+    {
+        cereal::PortableBinaryOutputArchive oarchive(iss);
+        oarchive(infoset);
+    }
+    d_client.command<std::string>({ "INCR", iss.str() });
 }
 
 size_t RedisCFRTable::size()

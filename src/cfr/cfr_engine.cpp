@@ -98,14 +98,14 @@ int CFREngine::train(size_t tpid, const GameState& state, std::mt19937& rng)
     std::sort(actions.begin(), actions.end());
 
     CFRInfoSet key(view);
-    CFREntry entry(actions.size());
+    CFRDistribution regret(actions.size());
     {
-        auto entry_lookup = d_table->find(key);
-        if (entry_lookup != nullptr) {
-            entry = *entry_lookup;
+        auto lookup = d_table->findRegret(key);
+        if (lookup != nullptr) {
+            regret = *lookup;
         }
     }
-    auto profile = entry.currentProfile();
+    auto profile = regret.regretMatching();
 
     // Sample best action given the current profile
     auto best_idx = sampleIndex(profile, rng);
@@ -114,8 +114,7 @@ int CFREngine::train(size_t tpid, const GameState& state, std::mt19937& rng)
     if (player != tpid) {
         GameState next_state(state);
         next_state.playAction(actions[best_idx]);
-        entry.addUtility(best_idx, 1);
-        d_table->save(key, entry);
+        d_table->incrementProfile(key, best_idx, actions.size());
         return train(tpid, next_state, rng);
     }
 
@@ -127,26 +126,26 @@ int CFREngine::train(size_t tpid, const GameState& state, std::mt19937& rng)
         child_util[i] = train(tpid, next_state, rng);
     }
     for (size_t i = 0; i < actions.size(); i++) {
-        entry.addRegret(i, child_util[i] - child_util[best_idx]);
+        regret.add(i, child_util[i] - child_util[best_idx]);
     }
-    d_table->save(key, entry);
+    d_table->saveRegret(key, regret);
 
     return child_util[best_idx];
 }
 
 Action CFREngine::bestAction(const GameView& view, std::mt19937& rng)
 {
-    auto entry = d_table->find(CFRInfoSet(view));
-    if (entry != nullptr) {
+    auto profile = d_table->findProfile(CFRInfoSet(view), view.nextActions().size());
+    if (profile != nullptr) {
         auto actions = view.nextActions();
         std::sort(actions.begin(), actions.end());
-        auto profile = entry->averageProfile();
+        auto response = profile->bestResponse();
         if (bots_logger != nullptr) {
             std::stringstream ss;
-            ss << profile << " for actions " << actions;
+            ss << response << " for actions " << actions;
             bots_logger->info("CFR has distribution {}.", ss.str());
         }
-        return actions[sampleIndex(profile, rng)];
+        return actions[sampleIndex(response, rng)];
     } else {
         if (bots_logger != nullptr) {
             bots_logger->info("CFR could not find a matching information set.");

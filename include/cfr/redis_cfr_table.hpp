@@ -16,8 +16,10 @@ public:
     RedisCFRTable(const std::string& url, int port);
     ~RedisCFRTable();
 
-    std::unique_ptr<CFREntry> find(const CFRInfoSet&);
-    void save(const CFRInfoSet&, const CFREntry&);
+    std::unique_ptr<CFRDistribution> findRegret(const CFRInfoSet&);
+    std::unique_ptr<CFRDistribution> findProfile(const CFRInfoSet&, size_t num_actions);
+    void saveRegret(const CFRInfoSet&, const CFRDistribution&);
+    void incrementProfile(const CFRInfoSet&, size_t idx, size_t num_actions);
     size_t size();
 
 private:

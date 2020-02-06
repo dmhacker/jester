@@ -36,23 +36,29 @@ TEST_CASE("CFR trains correctly on reduced 2-player game")
     REQUIRE(cfr.table()->size() >= state.nextActions().size());
     {
         auto key = CFRInfoSet(state.currentPlayerView());
-        auto it = cfr.table()->find(key);
-        REQUIRE(it != nullptr);
-        auto& entry = *it;
-        REQUIRE(entry.averageProfile().size() == state.nextActions().size());
-        REQUIRE(entry.currentProfile().size() == state.nextActions().size());
-        REQUIRE(validDistribution(entry.averageProfile()));
-        REQUIRE(validDistribution(entry.currentProfile()));
+        auto rit = cfr.table()->findRegret(key);
+        auto pit = cfr.table()->findProfile(key, state.nextActions().size());
+        REQUIRE(rit != nullptr);
+        REQUIRE(pit != nullptr);
+        auto& regret = *rit;
+        auto& profile = *pit;
+        REQUIRE(regret.regretMatching().size() == state.nextActions().size());
+        REQUIRE(validDistribution(regret.regretMatching()));
+        REQUIRE(profile.bestResponse().size() == state.nextActions().size());
+        REQUIRE(validDistribution(profile.bestResponse()));
     }
     for (auto& action : state.nextActions()) {
         GameState cpy(state);
         cpy.playAction(action);
         auto key = CFRInfoSet(cpy.currentPlayerView());
-        auto it = cfr.table()->find(key);
-        REQUIRE(it != nullptr);
-        auto& entry = *it;
-        REQUIRE(validDistribution(entry.averageProfile()));
-        REQUIRE(validDistribution(entry.currentProfile()));
+        auto rit = cfr.table()->findRegret(key);
+        auto pit = cfr.table()->findProfile(key, state.nextActions().size());
+        REQUIRE(rit != nullptr);
+        REQUIRE(pit != nullptr);
+        auto& regret = *rit;
+        auto& profile = *pit;
+        REQUIRE(validDistribution(regret.regretMatching()));
+        REQUIRE(validDistribution(profile.bestResponse()));
     }
     REQUIRE(cfr.table()->hits() > 0);
     REQUIRE(cfr.table()->misses() > 0);
