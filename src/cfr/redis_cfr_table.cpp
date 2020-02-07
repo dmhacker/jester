@@ -131,7 +131,7 @@ void RedisCFRTable::incrementProfile(const CFRInfoSet& infoset, size_t idx, size
         cereal::PortableBinaryOutputArchive oarchive(iss);
         oarchive(infoset);
     }
-    d_client.command<std::string>({ "INCR", iss.str() });
+    d_client.command<int>({ "INCR", iss.str() });
 }
 
 size_t RedisCFRTable::size()
