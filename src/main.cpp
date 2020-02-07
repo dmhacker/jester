@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 {
     cxxopts::Options options("jester", "A suite of AI players for the card game Durak.");
     options.add_options()("r,reduced", "Use an extremely reduced form of Durak for testing purposes");
-    options.add_options()("t,train", "Train CFRM (max threads, 30 seconds save interval)");
+    options.add_options()("t,train", "Train CFRM using 4 threads");
     options.add_options()("h,help", "Print help message");
     auto result = options.parse(argc, argv);
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     }
 
     if (result.count("reduced") > 0) {
-        Constants::instance().MAX_RANK = 8;
+        Constants::instance().MAX_RANK = 7;
     }
 
     bots_logger->set_level(spdlog::level::info);
