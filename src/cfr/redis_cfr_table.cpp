@@ -88,13 +88,12 @@ std::unique_ptr<CFRDistribution> RedisCFRTable::findProfile(const CFRInfoSet& in
             oarchive(infoset);
         }
         iss << ":" << idx;
-        auto& cmd = d_client.commandSync<int>({ "GET", iss.str() });
+        auto& cmd = d_client.commandSync<std::string>({ "GET", iss.str() });
         if (cmd.ok()) {
             if (result == nullptr) {
-                result = new CFRDistribution();
+                result = new CFRDistribution(num_actions);
             }
-            int16_t amount = cmd.reply();
-            result->add(idx, amount);
+            result->add(idx, std::stoi(cmd.reply()));
         }
         cmd.free();
     }
