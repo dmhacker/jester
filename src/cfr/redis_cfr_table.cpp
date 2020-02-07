@@ -82,11 +82,12 @@ std::unique_ptr<CFRDistribution> RedisCFRTable::findProfile(const CFRInfoSet& in
     CFRDistribution* result = nullptr;
     for (size_t idx = 0; idx < num_actions; idx++) {
         std::stringstream iss;
-        iss << "jester.profile:" << idx << ":";
+        iss << "jester.profile:";
         {
             cereal::PortableBinaryOutputArchive oarchive(iss);
             oarchive(infoset);
         }
+        iss << ":" << idx;
         auto& cmd = d_client.commandSync<int>({ "GET", iss.str() });
         if (cmd.ok()) {
             if (result == nullptr) {
@@ -126,11 +127,12 @@ void RedisCFRTable::saveRegret(const CFRInfoSet& infoset,
 void RedisCFRTable::incrementProfile(const CFRInfoSet& infoset, size_t idx, size_t num_actions)
 {
     std::stringstream iss;
-    iss << "jester.profile:" << idx << ":";
+    iss << "jester.profile:";
     {
         cereal::PortableBinaryOutputArchive oarchive(iss);
         oarchive(infoset);
     }
+    iss << ":" << idx;
     d_client.command<int>({ "INCR", iss.str() });
 }
 
