@@ -37,8 +37,6 @@ void UnorderedCFRTable::saveRegret(const CFRInfoSet& infoset,
 {
     std::lock_guard<std::mutex> lck(d_rmtx);
     d_regrets[infoset] = distribution;
-    std::cerr << "R: " << d_regrets.size() << std::endl;
-    std::cerr << "S: " << d_strategy.size() << std::endl;
 }
 
 void UnorderedCFRTable::incrementProfile(const CFRInfoSet& infoset, size_t idx, size_t num_actions)
