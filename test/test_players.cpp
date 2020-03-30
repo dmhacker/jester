@@ -1,14 +1,14 @@
 #include <catch.hpp>
 
-#include <cfr/unordered_cfr_table.hpp>
-#include <game/constants.hpp>
-#include <game/game_state.hpp>
-#include <players/cfr_player.hpp>
-#include <players/dmcts_player.hpp>
-#include <players/greedy_player.hpp>
-#include <players/ismcts_player.hpp>
-#include <players/minimal_player.hpp>
-#include <players/random_player.hpp>
+#include <jester/cfr/unordered_cfr_table.hpp>
+#include <jester/game/constants.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/players/cfr_player.hpp>
+#include <jester/players/dmcts_player.hpp>
+#include <jester/players/greedy_player.hpp>
+#include <jester/players/ismcts_player.hpp>
+#include <jester/players/minimal_player.hpp>
+#include <jester/players/random_player.hpp>
 
 using namespace jester;
 

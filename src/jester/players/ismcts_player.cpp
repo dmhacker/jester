@@ -1,6 +1,6 @@
-#include <mcts/ismcts_tree.hpp>
-#include <players/ismcts_player.hpp>
-#include <utils/logging.hpp>
+#include <jester/mcts/ismcts_tree.hpp>
+#include <jester/players/ismcts_player.hpp>
+#include <jester/utils/logging.hpp>
 
 #include <sstream>
 #include <thread>

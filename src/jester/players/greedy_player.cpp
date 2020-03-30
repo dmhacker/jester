@@ -1,4 +1,4 @@
-#include <players/greedy_player.hpp>
+#include <jester/players/greedy_player.hpp>
 
 namespace jester {
 

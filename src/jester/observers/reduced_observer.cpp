@@ -1,6 +1,6 @@
-#include <game/game_state.hpp>
-#include <observers/reduced_observer.hpp>
-#include <utils/logging.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/observers/reduced_observer.hpp>
+#include <jester/utils/logging.hpp>
 
 #include <sstream>
 

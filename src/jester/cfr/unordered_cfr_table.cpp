@@ -1,6 +1,6 @@
-#include <cfr/unordered_cfr_table.hpp>
-#include <game/game_state.hpp>
-#include <game/game_view.hpp>
+#include <jester/cfr/unordered_cfr_table.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/game/game_view.hpp>
 
 #include <algorithm>
 

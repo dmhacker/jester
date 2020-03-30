@@ -1,7 +1,7 @@
 #include <catch.hpp>
 
-#include <game/constants.hpp>
-#include <game/card.hpp>
+#include <jester/game/card.hpp>
+#include <jester/game/constants.hpp>
 
 using namespace jester;
 

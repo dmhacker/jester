@@ -1,6 +1,6 @@
-#include <game/game_state.hpp>
-#include <utils/logging.hpp>
-#include <observers/omniscient_observer.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/observers/omniscient_observer.hpp>
+#include <jester/utils/logging.hpp>
 
 #include <sstream>
 

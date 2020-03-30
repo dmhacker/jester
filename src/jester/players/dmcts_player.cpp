@@ -1,7 +1,7 @@
-#include <game/game_state.hpp>
-#include <utils/logging.hpp>
-#include <mcts/dmcts_tree.hpp>
-#include <players/dmcts_player.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/utils/logging.hpp>
+#include <jester/mcts/dmcts_tree.hpp>
+#include <jester/players/dmcts_player.hpp>
 
 #include <mutex>
 #include <sstream>

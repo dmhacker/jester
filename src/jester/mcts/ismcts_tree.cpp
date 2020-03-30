@@ -1,6 +1,6 @@
-#include <game/game_state.hpp>
-#include <mcts/ismcts_tree.hpp>
-#include <players/random_player.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/mcts/ismcts_tree.hpp>
+#include <jester/players/random_player.hpp>
 
 #include <cmath>
 

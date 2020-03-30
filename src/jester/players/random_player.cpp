@@ -1,4 +1,4 @@
-#include <players/random_player.hpp>
+#include <jester/players/random_player.hpp>
 
 namespace jester {
 

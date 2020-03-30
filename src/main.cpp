@@ -1,7 +1,7 @@
-#include <cfr/cfr_engine.hpp>
-#include <game/constants.hpp>
-#include <game/game_engine.hpp>
-#include <utils/logging.hpp>
+#include <jester/cfr/cfr_engine.hpp>
+#include <jester/game/constants.hpp>
+#include <jester/game/game_engine.hpp>
+#include <jester/utils/logging.hpp>
 
 #include <cxxopts.hpp>
 #include <spdlog/sinks/basic_file_sink.h>

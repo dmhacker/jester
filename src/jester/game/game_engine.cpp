@@ -1,15 +1,15 @@
-#include <game/constants.hpp>
-#include <game/game_engine.hpp>
-#include <game/game_state.hpp>
-#include <observers/omniscient_observer.hpp>
-#include <observers/reduced_observer.hpp>
-#include <players/dmcts_player.hpp>
-#include <players/greedy_player.hpp>
-#include <players/human_player.hpp>
-#include <players/ismcts_player.hpp>
-#include <players/cfr_player.hpp>
-#include <players/minimal_player.hpp>
-#include <players/random_player.hpp>
+#include <jester/game/constants.hpp>
+#include <jester/game/game_engine.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/observers/omniscient_observer.hpp>
+#include <jester/observers/reduced_observer.hpp>
+#include <jester/players/dmcts_player.hpp>
+#include <jester/players/greedy_player.hpp>
+#include <jester/players/human_player.hpp>
+#include <jester/players/ismcts_player.hpp>
+#include <jester/players/cfr_player.hpp>
+#include <jester/players/minimal_player.hpp>
+#include <jester/players/random_player.hpp>
 
 #include <iostream>
 #include <sstream>

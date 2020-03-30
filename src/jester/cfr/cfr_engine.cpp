@@ -1,9 +1,9 @@
-#include <cfr/cfr_engine.hpp>
-#include <cfr/redis_cfr_table.hpp>
-#include <cfr/unordered_cfr_table.hpp>
-#include <game/game_state.hpp>
-#include <game/game_view.hpp>
-#include <utils/logging.hpp>
+#include <jester/cfr/cfr_engine.hpp>
+#include <jester/cfr/redis_cfr_table.hpp>
+#include <jester/cfr/unordered_cfr_table.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/game/game_view.hpp>
+#include <jester/utils/logging.hpp>
 
 #include <cereal/archives/portable_binary.hpp>
 

@@ -1,6 +1,6 @@
-#include <game/constants.hpp>
-#include <game/game_view.hpp>
-#include <cfr/cfr_infoset.hpp>
+#include <jester/game/constants.hpp>
+#include <jester/game/game_view.hpp>
+#include <jester/cfr/cfr_infoset.hpp>
 
 namespace jester {
 

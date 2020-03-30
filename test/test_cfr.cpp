@@ -1,12 +1,13 @@
 #include <catch.hpp>
+
 #include <cstdio>
 #include <fstream>
 
-#include <game/constants.hpp>
-#include <game/game_state.hpp>
-#include <game/game_view.hpp>
-#include <cfr/cfr_engine.hpp>
-#include <cfr/unordered_cfr_table.hpp>
+#include <jester/cfr/cfr_engine.hpp>
+#include <jester/cfr/unordered_cfr_table.hpp>
+#include <jester/game/constants.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/game/game_view.hpp>
 
 using namespace jester;
 

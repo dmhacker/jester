@@ -1,4 +1,4 @@
-#include <cfr/cfr_distribution.hpp>
+#include <jester/cfr/cfr_distribution.hpp>
 
 namespace jester {
 

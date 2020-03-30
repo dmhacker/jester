@@ -1,13 +1,13 @@
-#include <cfr/cfr_distribution.hpp>
-#include <cfr/cfr_infoset.hpp>
-#include <cfr/redis_cfr_table.hpp>
-#include <game/game_state.hpp>
-#include <game/game_view.hpp>
+#include <jester/cfr/cfr_distribution.hpp>
+#include <jester/cfr/cfr_infoset.hpp>
+#include <jester/cfr/redis_cfr_table.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/game/game_view.hpp>
+
+#include <cereal/archives/portable_binary.hpp>
 
 #include <algorithm>
 #include <sstream>
-
-#include <cereal/archives/portable_binary.hpp>
 
 namespace jester {
 

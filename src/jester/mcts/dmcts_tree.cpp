@@ -1,5 +1,5 @@
-#include <mcts/dmcts_tree.hpp>
-#include <players/random_player.hpp>
+#include <jester/mcts/dmcts_tree.hpp>
+#include <jester/players/random_player.hpp>
 
 #include <cmath>
 

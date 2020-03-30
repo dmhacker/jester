@@ -1,5 +1,5 @@
-#include <game/game_view.hpp>
-#include <game/game_state.hpp>
+#include <jester/game/game_view.hpp>
+#include <jester/game/game_state.hpp>
 
 namespace jester {
 

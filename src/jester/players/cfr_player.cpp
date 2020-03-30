@@ -1,5 +1,5 @@
-#include <players/cfr_player.hpp>
-#include <utils/logging.hpp>
+#include <jester/players/cfr_player.hpp>
+#include <jester/utils/logging.hpp>
 
 #include <iostream>
 #include <memory>

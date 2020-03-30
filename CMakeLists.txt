@@ -21,19 +21,18 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Main library encapsulates all game and player logic
 file(GLOB sources 
-    "src/**/*.cpp"
+    "src/jester/**/*.cpp"
 )
 list(REMOVE_ITEM sources "src/main.cpp")
 add_library(jester ${sources})
 target_include_directories(jester PUBLIC "include")
-target_include_directories(jester PUBLIC "lib/include")
 target_include_directories(jester PUBLIC "lib/redox/include")
 target_link_libraries(jester Threads::Threads)
 target_link_libraries(jester redox)
 
 # Main executable allows user to play the game/train CFRM
-add_executable(play "src/main.cpp")
-target_link_libraries(play jester)
+add_executable(run "src/main.cpp")
+target_link_libraries(run jester)
 
 # Test executable runs tests on the game logic
 file(GLOB test_sources 

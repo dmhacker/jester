@@ -1,8 +1,8 @@
-#include <game/constants.hpp>
-#include <game/game_state.hpp>
-#include <game/game_view.hpp>
-#include <utils/logging.hpp>
-#include <observers/observer.hpp>
+#include <jester/game/constants.hpp>
+#include <jester/game/game_state.hpp>
+#include <jester/game/game_view.hpp>
+#include <jester/utils/logging.hpp>
+#include <jester/observers/observer.hpp>
 
 #include <algorithm>
 

@@ -1,5 +1,5 @@
-#include <utils/logging.hpp>
-#include <players/human_player.hpp>
+#include <jester/players/human_player.hpp>
+#include <jester/utils/logging.hpp>
 
 #include <iostream>
 #include <sstream>

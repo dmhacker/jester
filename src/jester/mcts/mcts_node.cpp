@@ -1,5 +1,5 @@
-#include <mcts/mcts_node.hpp>
-#include <players/random_player.hpp>
+#include <jester/mcts/mcts_node.hpp>
+#include <jester/players/random_player.hpp>
 
 namespace jester {
 
