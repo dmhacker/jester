@@ -5,9 +5,6 @@ compiler:
   - clang
 addons:
   apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.8
     packages:
     - libhiredis-dev 
     - libev-dev
@@ -16,6 +13,6 @@ script:
   - export COVERALLS_REPO_TOKEN=Q7IRJzqV8gYttEKTjGk4gYEcN5eJCyufq
   - "[ $CXX = g++ ] && cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON . || true"
   - "[ $CXX = clang++ ] && cmake -DCMAKE_BUILD_TYPE=Debug . || true"
-  - make tests -j4
+  - make -j4
   - ./tests
   - "[ $CXX = g++ ] && make coveralls || true"
