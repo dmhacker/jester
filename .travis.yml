@@ -8,6 +8,8 @@ addons:
     packages:
     - libhiredis-dev 
     - libev-dev
+services:
+  - redis-server
 script:
   - export COVERALLS_SERVICE_NAME=travis-ci
   - export COVERALLS_REPO_TOKEN=Q7IRJzqV8gYttEKTjGk4gYEcN5eJCyufq
