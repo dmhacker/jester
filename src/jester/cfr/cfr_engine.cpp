@@ -25,7 +25,7 @@ CFREngine::CFREngine(stda::erased_ptr<CFRTable>&& table)
 void CFREngine::train()
 {
     std::vector<std::thread> threads;
-    auto tt_count = std::max(1u, std::thread::hardware_concurrency()); 
+    auto tt_count = std::max(1u, std::thread::hardware_concurrency());
     for (size_t t = 0; t < tt_count; t++) {
         threads.push_back(std::thread([this, t]() {
             std::mt19937 rng(std::random_device {}());
@@ -111,9 +111,17 @@ int CFREngine::train(size_t tpid, const GameState& state, std::mt19937& rng)
 
     // Opponents only follow the best action
     if (player != tpid) {
+        CFRDistribution overallProfile(actions.size());
+        {
+            auto lookup = d_table->findProfile(key);
+            if (lookup != nullptr) {
+                overallProfile = *lookup;
+            }
+        }
         GameState next_state(state);
         next_state.playAction(actions[best_idx]);
-        d_table->incrementProfile(key, best_idx, actions.size());
+        overallProfile.add(best_idx, 1);
+        d_table->saveProfile(key, overallProfile);
         return train(tpid, next_state, rng);
     }
 
@@ -134,7 +142,7 @@ int CFREngine::train(size_t tpid, const GameState& state, std::mt19937& rng)
 
 Action CFREngine::bestAction(const GameView& view, std::mt19937& rng)
 {
-    auto profile = d_table->findProfile(CFRInfoSet(view), view.nextActions().size());
+    auto profile = d_table->findProfile(CFRInfoSet(view));
     if (profile != nullptr) {
         auto actions = view.nextActions();
         std::sort(actions.begin(), actions.end());

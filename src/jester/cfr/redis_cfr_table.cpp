@@ -11,7 +11,11 @@
 
 namespace jester {
 
+constexpr int MAX_CACHE_SIZE = 10000;
+
 RedisCFRTable::RedisCFRTable()
+    : d_rcache(MAX_CACHE_SIZE)
+    , d_pcache(MAX_CACHE_SIZE)
 {
     std::string url;
     if (std::getenv("REDIS_URL") != nullptr) {
@@ -29,6 +33,8 @@ RedisCFRTable::RedisCFRTable()
 }
 
 RedisCFRTable::RedisCFRTable(const std::string& url, int port)
+    : d_rcache(MAX_CACHE_SIZE)
+    , d_pcache(MAX_CACHE_SIZE)
 {
     connect(url, port);
 }
@@ -52,6 +58,13 @@ void RedisCFRTable::connect(const std::string& url, int port)
 
 std::unique_ptr<CFRDistribution> RedisCFRTable::findRegret(const CFRInfoSet& infoset)
 {
+    {
+        std::lock_guard<std::mutex> lck(d_rmtx);
+        if (d_rcache.exists(infoset)) {
+            return std::unique_ptr<CFRDistribution>(
+                new CFRDistribution(d_rcache.get(infoset)));
+        }
+    }
     std::stringstream iss;
     iss << "jester.regrets:";
     {
@@ -77,30 +90,35 @@ std::unique_ptr<CFRDistribution> RedisCFRTable::findRegret(const CFRInfoSet& inf
     }
 }
 
-std::unique_ptr<CFRDistribution> RedisCFRTable::findProfile(const CFRInfoSet& infoset, size_t num_actions)
+std::unique_ptr<CFRDistribution> RedisCFRTable::findProfile(const CFRInfoSet& infoset)
 {
-    CFRDistribution* result = nullptr;
-    for (size_t idx = 0; idx < num_actions; idx++) {
-        std::stringstream iss;
-        iss << "jester.profile:";
-        {
-            cereal::PortableBinaryOutputArchive oarchive(iss);
-            oarchive(infoset);
+    {
+        std::lock_guard<std::mutex> lck(d_pmtx);
+        if (d_pcache.exists(infoset)) {
+            return std::unique_ptr<CFRDistribution>(
+                new CFRDistribution(d_pcache.get(infoset)));
         }
-        iss << ":" << idx;
-        auto& cmd = d_client.commandSync<std::string>({ "GET", iss.str() });
-        if (cmd.ok()) {
-            if (result == nullptr) {
-                result = new CFRDistribution(num_actions);
-            }
-            result->add(idx, std::stoi(cmd.reply()));
+    }
+    std::stringstream iss;
+    iss << "jester.profile:";
+    {
+        cereal::PortableBinaryOutputArchive oarchive(iss);
+        oarchive(infoset);
+    }
+    auto& cmd = d_client.commandSync<std::string>({ "GET", iss.str() });
+    if (cmd.ok()) {
+        std::stringstream ess;
+        ess << cmd.reply();
+        CFRDistribution* result = new CFRDistribution();
+        {
+            cereal::PortableBinaryInputArchive iarchive(ess);
+            iarchive(*result);
         }
         cmd.free();
-    }
-    if (result != nullptr) {
         d_hits++;
         return std::unique_ptr<CFRDistribution>(result);
     } else {
+        cmd.free();
         d_misses++;
         return nullptr;
     }
@@ -111,19 +129,24 @@ void RedisCFRTable::saveRegret(const CFRInfoSet& infoset,
 {
     std::stringstream iss;
     iss << "jester.regrets:";
-    std::stringstream ess;
     {
         cereal::PortableBinaryOutputArchive oarchive(iss);
         oarchive(infoset);
     }
+    std::stringstream ess;
     {
         cereal::PortableBinaryOutputArchive oarchive(ess);
         oarchive(distribution);
     }
     d_client.command<std::string>({ "SET", iss.str(), ess.str() });
+    {
+        std::lock_guard<std::mutex> lck(d_rmtx);
+        d_rcache.put(infoset, distribution);
+    }
 }
 
-void RedisCFRTable::incrementProfile(const CFRInfoSet& infoset, size_t idx, size_t num_actions)
+void RedisCFRTable::saveProfile(const CFRInfoSet& infoset,
+    const CFRDistribution& distribution)
 {
     std::stringstream iss;
     iss << "jester.profile:";
@@ -131,8 +154,16 @@ void RedisCFRTable::incrementProfile(const CFRInfoSet& infoset, size_t idx, size
         cereal::PortableBinaryOutputArchive oarchive(iss);
         oarchive(infoset);
     }
-    iss << ":" << idx;
-    d_client.command<int>({ "INCR", iss.str() });
+    std::stringstream ess;
+    {
+        cereal::PortableBinaryOutputArchive oarchive(ess);
+        oarchive(distribution);
+    }
+    d_client.command<std::string>({ "SET", iss.str(), ess.str() });
+    {
+        std::lock_guard<std::mutex> lck(d_pmtx);
+        d_pcache.put(infoset, distribution);
+    }
 }
 
 size_t RedisCFRTable::size()

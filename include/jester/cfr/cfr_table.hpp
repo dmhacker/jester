@@ -15,9 +15,9 @@ protected:
 
 public:
     virtual std::unique_ptr<CFRDistribution> findRegret(const CFRInfoSet&) = 0;
-    virtual std::unique_ptr<CFRDistribution> findProfile(const CFRInfoSet&, size_t num_actions) = 0;
+    virtual std::unique_ptr<CFRDistribution> findProfile(const CFRInfoSet&) = 0;
     virtual void saveRegret(const CFRInfoSet&, const CFRDistribution&) = 0;
-    virtual void incrementProfile(const CFRInfoSet&, size_t idx, size_t num_actions) = 0;
+    virtual void saveProfile(const CFRInfoSet&, const CFRDistribution&) = 0;
     virtual size_t size() = 0;
     size_t hits() const;
     size_t misses() const;

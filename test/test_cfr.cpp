@@ -36,7 +36,7 @@ void trainCFR(stda::erased_ptr<CFRTable>&& table)
     REQUIRE(cfr.table()->size() >= state.nextActions().size());
     {
         auto key = CFRInfoSet(state.currentPlayerView());
-        auto pit = cfr.table()->findProfile(key, state.nextActions().size());
+        auto pit = cfr.table()->findProfile(key);
         REQUIRE(pit != nullptr);
         auto& profile = *pit;
         REQUIRE(profile.bestResponse().size() == state.nextActions().size());
@@ -46,7 +46,7 @@ void trainCFR(stda::erased_ptr<CFRTable>&& table)
         GameState cpy(state);
         cpy.playAction(action);
         auto key = CFRInfoSet(cpy.currentPlayerView());
-        auto pit = cfr.table()->findProfile(key, state.nextActions().size());
+        auto pit = cfr.table()->findProfile(key);
         REQUIRE(pit != nullptr);
         auto& profile = *pit;
         REQUIRE(validDistribution(profile.bestResponse()));

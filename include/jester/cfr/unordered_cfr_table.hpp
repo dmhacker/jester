@@ -19,9 +19,9 @@ private:
 
 public:
     std::unique_ptr<CFRDistribution> findRegret(const CFRInfoSet&);
-    std::unique_ptr<CFRDistribution> findProfile(const CFRInfoSet&, size_t num_actions);
+    std::unique_ptr<CFRDistribution> findProfile(const CFRInfoSet&);
     void saveRegret(const CFRInfoSet&, const CFRDistribution&);
-    void incrementProfile(const CFRInfoSet&, size_t idx, size_t num_actions);
+    void saveProfile(const CFRInfoSet&, const CFRDistribution&);
     size_t size();
 };
 

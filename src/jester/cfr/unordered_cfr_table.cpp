@@ -19,7 +19,7 @@ std::unique_ptr<CFRDistribution> UnorderedCFRTable::findRegret(const CFRInfoSet&
     }
 }
 
-std::unique_ptr<CFRDistribution> UnorderedCFRTable::findProfile(const CFRInfoSet& infoset, size_t num_actions)
+std::unique_ptr<CFRDistribution> UnorderedCFRTable::findProfile(const CFRInfoSet& infoset)
 {
     std::lock_guard<std::mutex> lck(d_smtx);
     auto it = d_strategy.find(infoset);
@@ -39,18 +39,11 @@ void UnorderedCFRTable::saveRegret(const CFRInfoSet& infoset,
     d_regrets[infoset] = distribution;
 }
 
-void UnorderedCFRTable::incrementProfile(const CFRInfoSet& infoset, size_t idx, size_t num_actions)
+void UnorderedCFRTable::saveProfile(const CFRInfoSet& infoset,
+    const CFRDistribution& distribution)
 {
     std::lock_guard<std::mutex> lck(d_smtx);
-    auto it = d_strategy.find(infoset);
-    if (it == d_strategy.end()) {
-        CFRDistribution distribution(num_actions);
-        distribution.add(idx, 1);
-        d_strategy[infoset] = distribution;
-    }
-    else {
-        it->second.add(idx, 1);
-    }
+    d_strategy[infoset] = distribution;
 }
 
 size_t UnorderedCFRTable::size()
