@@ -1,8 +1,5 @@
 # jester
 
-[![Build Status](https://travis-ci.com/dmhacker/jester.svg?branch=master)](https://travis-ci.com/dmhacker/jester)
-[![Coverage Status](https://coveralls.io/repos/github/dmhacker/jester/badge.svg?branch=master)](https://coveralls.io/github/dmhacker/jester?branch=master)
-
 jester is an attempt at creating a strong but 
 potentially unconventional AI for the card game [Durak](https://en.wikipedia.org/wiki/Durak).
 
